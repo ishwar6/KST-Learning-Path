@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.shortcuts import render
 
-# Create your views here.
+from .models import State
+def myview(request):
+  return render(request, 'states/states.html', {'q': State.objects.all() })
