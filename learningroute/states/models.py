@@ -1,4 +1,9 @@
 from django.db import models
+from django.db.models.signals import pre_save,post_save
+import string
+import random
+
+
 
 
 
@@ -17,4 +22,13 @@ class State(models.Model):
 
 
 
+def id_generator(state_number, size=6, chars=string.ascii_uppercase + string.digits):
+    state_number = str(state_number)
+    return state_number + '-' + ''.join(random.choice(chars) for _ in range(size))
 
+def rl_pre_save_receiver(sender,instance, *args, **kwargs):
+        state_number = int(State.objects.filter(topic__iexact = instance.topic).count()) + 1
+        if not instance.tag:
+            instance.tag = id_generator(state_number)
+
+pre_save.connect(rl_pre_save_receiver, sender= State)
