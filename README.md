@@ -1,6 +1,6 @@
-# Learning-route
+﻿# Learning-route
 
-# Do not share 
+# Do not share.
 Learning route implementation using knowledge space theory in Python and R.
 
 First creating states, content + illustration and question app.
