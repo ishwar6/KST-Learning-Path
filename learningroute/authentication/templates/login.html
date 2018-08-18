@@ -1,0 +1,38 @@
+
+{% load static %}
+{% block content %}
+
+<body style="background : #717e86">
+
+  
+<br><br>
+
+  <div class="custom-container" style="margin-top : 20px">
+    <div class="card" style="margin : -20px 0"></div>
+    <div class="card">
+      <h1 class="title">Login</h1>
+      <form method="POST" action="/authentication/login/">
+        {% csrf_token %}
+        <div class="input-container">
+          <input type="text" id="#{label}" required="required" name="username" />
+          <label for="#{label}">Username</label>
+          <div class="bar"></div>
+        </div>
+        <div class="input-container">
+          <input type="password" id="#{label}" required="required" name="password" />
+          <label for="#{label}">Password</label>
+          <div class="bar"></div>
+        </div>
+        <div class="button-container">
+          <button class="btn btn-large waves-effect waves-light indigo" type="submit" name="action">Login
+    <i class="material-icons right">send</i>
+  </button>
+        </div>
+       
+      </form>
+    </div>
+  </div>
+  
+ 
+
+{% endblock content %}
