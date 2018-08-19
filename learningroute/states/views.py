@@ -62,6 +62,8 @@ def nodes(request):
     print(ksp)
     lp = kst.lpath(ksp)
     print(lp)
+    list = kst.lpath_is_gradation(lp)
+    print(list)
 
 
 
