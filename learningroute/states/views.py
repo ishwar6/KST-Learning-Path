@@ -2,8 +2,8 @@ from django.shortcuts import render
 import rpy2
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
-base = importr('base')
 
+base = importr('base')
 utils = importr('utils')
 kst = importr('kst')
 
