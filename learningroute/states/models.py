@@ -22,7 +22,7 @@ class Node(models.Model):
     credit      = models.IntegerField(default = 0)
 
     def __str__(self):
-        return ",".join(p.tag for p in self.state_node.all())
+        return ",".join(p.title for p in self.state_node.all())
 
 
 class Edge(models.Model):
