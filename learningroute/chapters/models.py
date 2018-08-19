@@ -20,6 +20,7 @@ CHAPTER_CHOICE = (
 
 
 def unique_slug_generator(instance, new_slug =None):
+    Dont_use = []
     if new_slug is not None:
         slug = new_slug
     else:

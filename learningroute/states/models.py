@@ -14,7 +14,7 @@ class State(models.Model):
 
 
     def __str__(self):
-        return self.title + ' - for the topic - ' + self.topic
+        return str(self.title) + ' - for the topic - ' 
 
 
 class Node(models.Model):
