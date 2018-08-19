@@ -6,7 +6,7 @@ import random
 
 class State(models.Model):
     title = models.CharField(max_length = 120, blank = False, null = False)
-    topic = models.CharField(max_length = 222)
+    topic = models.ForeignKey(Topic, on_delete = models.CASCADE)
     rate  = models.IntegerField()
     time  = models.IntegerField()
     tag   = models.CharField( max_length = 15, blank = True, null = True  )
