@@ -1,1 +1,16 @@
-{{q}}
+{{q.state_node}}
+{{q.state_node_set.all}}
+
+
+
+{% for node in q %}
+Nodes {{ forloop.counter }} : <br/>{% for s in node.state_node.all %}{{ s }}<br/>{% endfor %}
+Description: {{node.description}}<br><br>
+{%  endfor %}
+
+
+
+{% for edge in e %}
+Edge {{forloop.counter}}:<br>
+{{edge.first}} and {{edge.second}}<br>
+{%  endfor %}

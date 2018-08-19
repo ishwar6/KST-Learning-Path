@@ -18,12 +18,12 @@ def login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)
-            return HttpResponseRedirect('/authentication/main/')
+            return HttpResponseRedirect('/auth/main/')
         else:
             return HttpResponse('You havent registered')
     else:
         if request.user.is_authenticated:
-            return HttpResponseRedirect('/authentication/main/')
+            return HttpResponseRedirect('/auth/main/')
         else:
             return render(request, 'login.html', {"profile": None})
 
@@ -31,7 +31,7 @@ def login(request):
 def logout(request):
     if request.user.is_authenticated:
         auth_logout(request)
-    return redirect('/authentication/login/')
+    return redirect('/auth/login/')
 
 
 def index(request):
@@ -46,4 +46,4 @@ def index(request):
 		return render(request, 'index.html')
     #return HttpResponse("Hello, world. You're at the main_test index.")
 	else:
-		return HttpResponse('Some Probem occured')	
+		return HttpResponse('Some Probem occured')

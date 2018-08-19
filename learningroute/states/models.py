@@ -4,21 +4,35 @@ import string
 import random
 
 
-
-
-
 class State(models.Model):
     title = models.CharField(max_length = 120, blank = False, null = False)
     topic = models.CharField(max_length = 222)
-    rate = models.IntegerField()
-    time = models.IntegerField()
-    tag  = models.CharField( max_length = 15, blank = True, null = True  )
+    rate  = models.IntegerField()
+    time  = models.IntegerField()
+    tag   = models.CharField( max_length = 15, blank = True, null = True  )
 
 
     def __str__(self):
         return self.title + ' - for the topic - ' + self.topic
 
 
+class Node(models.Model):
+    state_node  = models.ManyToManyField(State)
+    description = models.TextField(blank = True)
+    credit      = models.IntegerField(default = 0)
+
+    def __str__(self):
+        return ",".join(p.tag for p in self.state_node.all())
+
+
+class Edge(models.Model):
+    first  = models.ForeignKey(Node, on_delete = models.CASCADE, related_name = 'first_node')
+    second = models.ForeignKey(Node, on_delete = models.CASCADE, related_name = 'second_node')
+    weight = models.IntegerField(default = 0)
+    time   = models.IntegerField(default = 0)
+
+    def __str__(self):
+        return str(self.first) + '  ' + str(self.second)
 
 
 
