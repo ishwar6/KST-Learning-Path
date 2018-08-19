@@ -4,7 +4,10 @@
 
 
 {% for node in q %}
-Nodes {{ forloop.counter }} : <br/>{% for s in node.state_node.all %}{{ s }}<br/>{% endfor %}
+Nodes {{ forloop.counter }} :
+ <br/>{% for s in node.state_node.all %}{{ s }}
+
+ <br/>{% endfor %}
 Description: {{node.description}}<br><br>
 {%  endfor %}
 

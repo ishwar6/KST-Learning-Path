@@ -14,7 +14,7 @@ class State(models.Model):
 
 
     def __str__(self):
-        return str(self.title) + ' - for the topic - ' 
+        return str(self.title)
 
 
 class Node(models.Model):
@@ -42,7 +42,7 @@ def id_generator(state_number, size=6, chars=string.ascii_uppercase + string.dig
     return state_number + '-' + ''.join(random.choice(chars) for _ in range(size))
 
 def rl_pre_save_receiver(sender,instance, *args, **kwargs):
-        state_number = int(State.objects.filter(topic__iexact = instance.topic).count()) + 1
+        state_number = int(State.objects.filter(topic__title__iexact = instance.topic).count()) + 1
         if not instance.tag:
             instance.tag = id_generator(state_number)
 
