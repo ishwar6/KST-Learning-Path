@@ -27,11 +27,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    ####### External  Packages###########
+    'rpy2',
+    ########### Self Added Apps #######
     'states',
     'content',
     'questions',
     'authentication',
-    'rpy2',
+    'chapters',
 ]
 
 MIDDLEWARE = [
