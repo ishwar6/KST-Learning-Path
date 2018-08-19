@@ -17,3 +17,22 @@ Description: {{node.description}}<br><br>
 Edge {{forloop.counter}}:<br>
 {{edge.first}} --AND-- {{edge.second}}<br>
 {%  endfor %}
+
+<h1>
+All Possible Learning Paths
+</h1>
+{% for a in lp %}
+{{forloop.counter}}
+<ul>
+  {% for p in a %}
+<li>{{p}}</li>
+{% endfor %}
+</ul>
+<br><br>
+{% endfor %}
+
+<h1>The Knowledge Space</h1>
+{% for a in ksp %}
+{{forloop.counter}}
+{{a}}<br><br>
+{% endfor %}
