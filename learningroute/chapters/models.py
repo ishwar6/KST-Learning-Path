@@ -118,6 +118,7 @@ class Topic(models.Model):
     image1 = models.FileField(upload_to = upload_image_path_topics, null = True, blank = True)
     content2 = models.TextField(max_length = 30000, blank = True)
     image2 = models.FileField(upload_to = upload_image_path_topics, null = True, blank = True)
+    total_test_time_in_minutes=models.IntegerField(default=0)
     slug = models.SlugField(blank = True, null = True)
 
 
@@ -137,14 +138,37 @@ pre_save.connect(topic_pre_save_receiver, sender= Topic)
 
 
 
+# class Question(models.Model):
+#     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+#     question = models.TextField(max_length = 40000, blank = False)
+#     qimage = models.FileField(upload_to = upload_image_path_questions, null = True, blank = True)
+#     answer = models.TextField(max_length = 40000, blank = True)
+#     aimage = models.FileField(upload_to = upload_image_path_questions, null = True, blank = True)
+
+
 class Question(models.Model):
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
-    question = models.TextField(max_length = 40000, blank = False)
-    qimage = models.FileField(upload_to = upload_image_path_questions, null = True, blank = True)
-    answer = models.TextField(max_length = 40000, blank = True)
-    aimage = models.FileField(upload_to = upload_image_path_questions, null = True, blank = True)
-
-
-
+    topic=models.ForeignKey(Topic, on_delete=models.CASCADE)
+    question=models.CharField(max_length=200)
+    qno=models.IntegerField(default=0)
+    level = models.IntegerField(default=0)
+    question_image=models.ImageField(blank=True, null=True, upload_to="questions")
+    text_option1=models.CharField(blank=True, max_length=200)
+    text_option2=models.CharField(blank=True, max_length=200)
+    text_option3=models.CharField(blank=True, max_length=200)
+    text_option4=models.CharField(blank=True, max_length=200)
+    op1=models.BooleanField(default=False)
+    op2=models.BooleanField(default=False)
+    op3=models.BooleanField(default=False)
+    op4=models.BooleanField(default=False)
+    time_in_minutes=models.IntegerField(default=0)
+    score=models.IntegerField(default=0)
+    integer_type=models.BooleanField(default=False)
+    single_option=models.BooleanField(default=False)
+    integer_type_answer=models.CharField(blank=True, max_length=200)
+    answer_image=models.ImageField(blank=True, null=True, upload_to="answers")
+    answer_text = models.CharField(blank=True, max_length=200)
     def __str__(self):
-       return self.question
+        return self.question
+
+
+
