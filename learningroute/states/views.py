@@ -29,9 +29,17 @@ def nodes(request):
     set = {}
     # making dictionary of individual state_nodes in set variable
     for node in n:
-        set[i] = ','.join(str(i.title) for i in node.state_node.all())
+        #set[i] = ','.join(str(j.title) for j in node.state_node.all())
+        j=0
+        for nd in node.state_node.iterator():
+            j=j+1
+            if j==1:
+                temp= r.set(nd.title)
+                continue
+            temp= r.set_union(temp, nd.title)
+        set[i]= temp
         i = i+1
-    print(set[0])
+    #print(set[0])
 
     # r_set = {}
     # #converting the dictionary in R SET's
@@ -55,7 +63,7 @@ def nodes(request):
     # print(ks)
     # print('asdf')
     ksp = kst.kspace(ks)
-    print(ksp)
+    print(ks)
     #print(kst.kdomain(ks))
     print(kst.kstructure_is_kspace(ks))
 
