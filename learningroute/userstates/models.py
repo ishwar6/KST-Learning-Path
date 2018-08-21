@@ -5,7 +5,7 @@ User = get_user_model()
 
 class UserCurrentState(models.Model):
     user        = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
-    state       = models.ForeignKey(State, on_delete= models.CASCADE, default = None)
+    state       = models.ForeignKey('states.State', on_delete= models.CASCADE, default = None)
     stage       = models.IntegerField(default = 0)
     total_time  = models.IntegerField(blank = True, null = True)
     timedate    = models.DateTimeField(auto_now_add = True)
@@ -24,13 +24,27 @@ post_save.connect(user_created_receiver, sender = User)
 
 class UserCompletedState(models.Model):
     user        = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
-    state       = models.ForeignKey(State, on_delete= models.CASCADE, default = None)
+    state       = models.ForeignKey('states.State', on_delete= models.CASCADE, default = None)
     correct     = models.IntegerField(default = 0)
     incorrect   = models.IntegerField(default = 0)
     time_taken  = models.IntegerField(blank = True, null = True)
     start_time  = models.IntegerField(blank = True, null = True)
     timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
 
+'''
+are you surely in claass 9 
+'''
+CHAPTER_PROFIENCY= (
+    ('beginer','Beginer'),
+    ('intermediate','Intermediate'),
+    ('expert','Expert')
+)
+class Initialresponse(models.Model):
+    polynomial_proficieny= models.CharField(max_length = 60, default = 'intermediate', choices = CHAPTER_PROFIENCY)
+    lineq_two_variable_proficiency_prof= models.CharField(max_length = 60, default = 'intermediate', choices = CHAPTER_PROFIENCY)
+    triangels_proficiency= models.CharField(max_length = 60, default = 'intermediate', choices = CHAPTER_PROFIENCY)
+    quadrilateral_proficiency= models.CharField(max_length = 60, default = 'intermediate', choices = CHAPTER_PROFIENCY)
+    time_willing_to_work=models.IntegerField()
 
 '''
 Functions to be created:
@@ -46,3 +60,4 @@ in where he left
 8. Estimated time left to clear a chapter for a student
 9. To make a don't know button for each question if student have no idea of it at All
 10. Feedback from the student to make more explanation next time
+'''
