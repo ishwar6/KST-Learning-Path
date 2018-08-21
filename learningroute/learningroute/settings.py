@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'authentication',
     'chapters',
     'userstates',
+    'assessment',
 ]
 
 MIDDLEWARE = [

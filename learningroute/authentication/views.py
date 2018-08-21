@@ -18,12 +18,12 @@ def login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)
-            return HttpResponseRedirect('/auth/main/')
+            return HttpResponseRedirect('/assess/main/')
         else:
-            return HttpResponse('You havent registered')
+            return HttpResponse('You havent registered or password entered is wrong')
     else:
         if request.user.is_authenticated:
-            return HttpResponseRedirect('/auth/main/')
+            return HttpResponseRedirect('/assess/main/')
         else:
             return render(request, 'login.html', {"profile": None})
 
@@ -34,16 +34,4 @@ def logout(request):
     return redirect('/auth/login/')
 
 
-def index(request):
-	global counter, score
-	if request.user.is_authenticated:
-		pr = User.objects.get(username=request.user)
-		#print(pr.first_name)
 
-	#print("counter="+str(counter))
-
-	#print(topics)
-		return render(request, 'index.html')
-    #return HttpResponse("Hello, world. You're at the main_test index.")
-	else:
-		return HttpResponse('Some Probem occured')
