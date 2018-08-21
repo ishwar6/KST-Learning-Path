@@ -1,6 +1,5 @@
 from django.conf.urls import url
-from .views import InitialresponseCreate
-
+from .views import IntroductoryResponse
 urlpatterns= [
-    url(r'^initial',InitialresponseCreate.as_view(), name='initial-assess')
+    url(r'^initial',IntroductoryResponse.as_view(), name='initial-assess')
 ]

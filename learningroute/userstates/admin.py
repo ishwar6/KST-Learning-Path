@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from .models import Initialresponse
+from .models import Proficiency
 
 # Register your models here.
-admin.site.register(Initialresponse)
+admin.site.register(Proficiency)
