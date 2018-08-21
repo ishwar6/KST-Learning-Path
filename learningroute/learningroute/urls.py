@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^states/', include('states.urls')),
     url(r'^auth/', include('authentication.urls')),
+    url(r'^userstates/', include('userstates.urls'))
     url(r'^assess/', include('assessment.urls'))
 ]
 

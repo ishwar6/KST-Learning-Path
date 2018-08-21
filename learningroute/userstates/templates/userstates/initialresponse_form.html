@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <title> initial response collection</title>
+    </head>
+    <body>
+        <form action="" method="post" role="form" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" role="button" value="Submit" id="initial-response-submit">
+        </form>
+        </body>
+</html>
