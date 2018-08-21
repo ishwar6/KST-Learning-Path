@@ -3,9 +3,20 @@
         <title> initial response collection</title>
     </head>
     <body>
+        <h5>Enter your proficiency in the following chapters so that we can assess you better</h4>
         <form action="" method="post" role="form" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ form }}
+            {% for chapter in chapters %}
+                <label for="level-of-{{ chapter.id }}">{{ chapter.title }} proficeny</label>
+                <select id="level-of-{{ chapter.id }}" name="level-of-{{ chapter.id }}">
+                    <option value="beginer">Beginer</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>&nbsp&nbsp&nbsp-----
+                <label for="imp-of-{{ chapter.id }}">significance of {{ chapter.title }} to you</label>
+                <input type="number" name="imp-of-{{ chapter.id }}"  id="imp-of-{{ chapter.id }}"><br><br>
+
+            {% endfor %}<br>
             <input type="submit" role="button" value="Submit" id="initial-response-submit">
         </form>
         </body>

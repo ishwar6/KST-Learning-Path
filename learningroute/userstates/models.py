@@ -37,14 +37,14 @@ are you surely in claass 9
 CHAPTER_PROFIENCY= (
     ('beginer','Beginer'),
     ('intermediate','Intermediate'),
-    ('expert','Expert')
+    ('advanced','Advanced')
 )
-class Initialresponse(models.Model):
-    polynomial_proficieny= models.CharField(max_length = 60, default = 'intermediate', choices = CHAPTER_PROFIENCY)
-    lineq_two_variable_proficiency_prof= models.CharField(max_length = 60, default = 'intermediate', choices = CHAPTER_PROFIENCY)
-    triangels_proficiency= models.CharField(max_length = 60, default = 'intermediate', choices = CHAPTER_PROFIENCY)
-    quadrilateral_proficiency= models.CharField(max_length = 60, default = 'intermediate', choices = CHAPTER_PROFIENCY)
-    time_willing_to_work=models.IntegerField()
+class Proficiency(models.Model):
+    user= models.ForeignKey(User, on_delete=models.CASCADE, default=None)
+    chapter= models.ForeignKey('chapters.Chapter', on_delete=models.CASCADE)
+    level= models.CharField(max_length = 60, choices = CHAPTER_PROFIENCY, blank=False)
+    significance= models.IntegerField()
+
 
 '''
 Functions to be created:
