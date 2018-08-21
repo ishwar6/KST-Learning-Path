@@ -32,7 +32,7 @@ class UserCompletedState(models.Model):
     timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
 
 '''
-are you surely in claass 9 
+are you surely in claass 9
 '''
 CHAPTER_PROFIENCY= (
     ('beginer','Beginer'),
@@ -60,4 +60,7 @@ in where he left
 8. Estimated time left to clear a chapter for a student
 9. To make a don't know button for each question if student have no idea of it at All
 10. Feedback from the student to make more explanation next time
+
+
+
 '''

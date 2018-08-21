@@ -34,6 +34,7 @@ def nodes(request):
             temp= r.set_union(temp, nd.title)
         set[i]= temp
         i = i+1
+    print(set)
     for key, value in set.items():
         if key==0:
             a = r.set(value)
@@ -47,7 +48,7 @@ def nodes(request):
     ksp = kst.kspace(ks)
     lp = kst.lpath(ks)
     list = kst.lpath_is_gradation(lp)
-    learning_path(lp)
+
 
 
     context = {     'q': n,
@@ -57,16 +58,3 @@ def nodes(request):
               }
 
     return render(request, 'states/states.html', context)
-
-
-def learning_path(lp=None):
-    if lp is not None:
-        i = 0
-        a  ={}
-        for path in lp:
-            a[i] = str(path)
-            i = i+1
-
-        for key, items in a.items():
-            items = items.replace('list','')
-            print(items)

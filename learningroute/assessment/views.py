@@ -19,7 +19,7 @@ userinput=list()
 getgotousersubmission=0
 validitycheck=2
 
-# Create your views here.
+
 def index(request):
 	global counter, score
 	if request.user.is_authenticated:
@@ -28,15 +28,9 @@ def index(request):
 		topics=Topic.objects.all()
 		counter=0
 		score=0
-		print(topics)
-
-	#print("counter="+str(counter))
-
-	#print(topics)
 		return render(request, 'index.html', {'alltopics':topics, 'profile':pr})
-    #return HttpResponse("Hello, world. You're at the main_test index.")
 	else:
-		return HttpResponse('Some Probem occured')	
+		return HttpResponse('Please login First')
 
 
 
@@ -44,34 +38,40 @@ def index(request):
 def beginquiz(request, choice, qnumber):
 	if request.user.is_authenticated:
 				pr = User.objects.get(username=request.user)
-				#global counter, questions, score, testtken
 				global questions, userinput, testtken, testtime_remaining,getgotousersubmission,score,validitycheck
-				
-				#print("counter="+str(counter))
-				
 				if qnumber=="begin":
 					validitycheck=2
 					userinput=list()
-
 					topic=Topic.objects.get(title=choice)
-					# if TestsTaken.objects.filter(user=pr, topic=topic):
-					# 	return HttpResponse('Sorry '+str(pr.first_name)+' '+ str(pr.last_name)+ ', you have already taken Test!')
-					# testtken=TestsTaken.objects.create(user=pr,topic=topic)
 					try:
-						testtken=TestsTaken.objects.get(user=pr, topic=topic)	
+						testtken=TestsTaken.objects.get(user=pr, topic=topic)
 					except:
 						testtken=TestsTaken.objects.create(user=pr,topic=topic)
 #remove above try except and un-comment the abovve 3 commented lines to let take test once only
-					questions=Question.objects.filter(topic=topic)	
+					questions=Question.objects.filter(topic=topic)
 					for i in questions:
 						try:
 							previoususerinput=User_submission.objects.get(user=pr,question=i)
 							previoususerinput.delete()
 							userinput.append(User_submission.objects.create(user=pr,question=i))
-						except:		
+						except:
 							userinput.append(User_submission.objects.create(user=pr,question=i))
 						print(userinput)
-					return render(request, 'quiz.html',{'questions':questions,'validitycheck':validitycheck, 'topic':topic, 'userinput':userinput, 'firstrun':1,'testtime':topic.total_test_time_in_minutes, 'currentquestion':questions[0]}) 
+
+
+					context = {'questions':questions,
+									'validitycheck':validitycheck,
+									'topic':topic,
+									'userinput':userinput,
+									 'firstrun':1,
+									 'testtime':topic.total_test_time_in_minutes,
+									  'currentquestion':questions[0]
+									 }
+
+
+					return render(request, 'quiz.html', context)
+
+
 				testtime_remaining=request.POST.get('timeshow', False)
 				if not testtime_remaining:
 					testtime_remaining=request.POST.get('timeshow_second', False)
@@ -79,15 +79,10 @@ def beginquiz(request, choice, qnumber):
 				#print(testtime_remaining)
 				print(request.POST.get('validity',False))
 				print(request.POST.get('validity2',False))
-				
+
 				validitycheck1=int(request.POST.get('validity2',False))
 				validitycheck2=int(request.POST.get('validity',False))
 				validitycheck=max(validitycheck1, validitycheck2)
-				#print(validitycheck1)
-				#print(validitycheck2)
-				#print(validitycheck)
-				#print("validitycheck")
-
 				if request.POST.get('validity',False)=="0" or request.POST.get('validity',False)=="-1":
 					return HttpResponse('Sorry '+str(pr.first_name)+' '+ str(pr.last_name)+ ', you have been Disqualified from the Test!')
 				if qnumber=="end":
@@ -102,10 +97,10 @@ def beginquiz(request, choice, qnumber):
 
 					return endquiz(request,score,1)
 				if request.POST.get('gotoquestion',False)=="1":
-					gotoquestionobj=Question.objects.get(id=qnumber)	
+					gotoquestionobj=Question.objects.get(id=qnumber)
 					getgotousersubmission=User_submission.objects.get(user=pr,question=gotoquestionobj)
 					topic=Topic.objects.get(title=choice)
-					return render(request, 'quiz.html',{'questions':questions,'validitycheck':validitycheck, 'topic':topic, 'userinput':userinput, 'firstrun':0,'testtime':testtime_remaining, 'currentquestion':gotoquestionobj, 'getgotousersubmission':getgotousersubmission}) 
+					return render(request, 'quiz.html',{'questions':questions,'validitycheck':validitycheck, 'topic':topic, 'userinput':userinput, 'firstrun':0,'testtime':testtime_remaining, 'currentquestion':gotoquestionobj, 'getgotousersubmission':getgotousersubmission})
 #case when user presses submit button
 				topic=Topic.objects.get(title=choice)
 				total_time_in_string=str(topic.total_test_time_in_minutes)+":00"
@@ -126,16 +121,16 @@ def beginquiz(request, choice, qnumber):
 				getgotousersubmission.time_of_sumbission=str(diff)
 				getgotousersubmission.submitted_by_user=1
 				getgotousersubmission.save()
-				
+
 
 				if request.POST.get('rad', False)=="1":
-					getgotousersubmission.op1=1 
+					getgotousersubmission.op1=1
 				if request.POST.get('rad', False)=="2":
-					getgotousersubmission.op2=1 
+					getgotousersubmission.op2=1
 				if request.POST.get('rad', False)=="3":
-					getgotousersubmission.op3=1 
+					getgotousersubmission.op3=1
 				if request.POST.get('rad', False)=="4":
-					getgotousersubmission.op4=1 
+					getgotousersubmission.op4=1
 
 				if request.POST.get('one', False)=="1":
 					getgotousersubmission.op1=1
@@ -172,9 +167,6 @@ def beginquiz(request, choice, qnumber):
 						if i == gotoquestionobj:
 							flag = 2
 							break
-
-						
-
 					if i == gotoquestionobj:
 						flag = 1
 						flag2 = 1
@@ -185,22 +177,6 @@ def beginquiz(request, choice, qnumber):
 					getgotousersubmission=User_submission.objects.get(user=pr,question=truenext)
 					return render(request, 'quiz.html',{'questions':questions,'validitycheck':validitycheck, 'topic':topic, 'userinput':userinput, 'firstrun':0,'testtime':testtime_remaining, 'currentquestion':truenext, 'getgotousersubmission':getgotousersubmission})
 
-
-
-
-
-
-
-
-
-				
-				
-				#print(testtime_remaining)
-
-				#print("hello")
-				
-
-				
 
 
 def endquiz(request,score,valid):
