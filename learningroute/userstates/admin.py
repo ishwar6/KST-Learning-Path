@@ -2,7 +2,10 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from .models import Proficiency
+from .models import Proficiency, TempActiveNode, UserCurrentState, UserCompletedState
 
 # Register your models here.
 admin.site.register(Proficiency)
+admin.site.register(TempActiveNode)
+admin.site.register(UserCurrentState)
+admin.site.register(UserCompletedState)

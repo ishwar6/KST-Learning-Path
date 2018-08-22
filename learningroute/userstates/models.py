@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 User = get_user_model()
 
+
 class UserCurrentState(models.Model):
     user        = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
     state       = models.ForeignKey('states.State', on_delete= models.CASCADE, default = None)
@@ -10,11 +11,8 @@ class UserCurrentState(models.Model):
     total_time  = models.IntegerField(blank = True, null = True)
     timedate    = models.DateTimeField(auto_now_add = True)
 
-
     def __str__(self):
         return str(self.user) + ' - ' + str(self.stage)
-
-
 
 def user_created_receiver(sender, instance, created, *args, **kwargs):
     if created:
@@ -31,9 +29,13 @@ class UserCompletedState(models.Model):
     start_time  = models.IntegerField(blank = True, null = True)
     timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
 
-'''
-are you surely in claass 9
-'''
+
+    def __str__(self):
+        return str(self.user) + ' - ' +str(self.state)
+
+
+
+
 CHAPTER_PROFIENCY= (
     ('beginer','Beginer'),
     ('intermediate','Intermediate'),
@@ -43,7 +45,32 @@ class Proficiency(models.Model):
     user= models.ForeignKey(User, on_delete=models.CASCADE, default=None)
     chapter= models.ForeignKey('chapters.Chapter', on_delete=models.CASCADE)
     level= models.CharField(max_length = 60, choices = CHAPTER_PROFIENCY, blank=False)
-    significance= models.IntegerField()
+    significance= models.IntegerField(blank = True, null = True)
+
+    def __str__(self):
+        return str(self.user) + ' have ' + str(self.level) + ' level for the chapter:- ' + str(self.chapter)
+
+
+
+
+
+
+
+class TempActiveNode(models.Model):
+    user = models.ForeignKey(User, on_delete=  models.CASCADE)
+    chapter = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE)
+    node = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None)
+
+    def __str__(self):
+        return str(self.user) + ' - ' + str(self.node) + ' - for the chapter ' + str(self.chapter)
+
+
+
+
+
+
+
+
 
 
 '''
@@ -60,7 +87,5 @@ in where he left
 8. Estimated time left to clear a chapter for a student
 9. To make a don't know button for each question if student have no idea of it at All
 10. Feedback from the student to make more explanation next time
-
-
 
 '''
