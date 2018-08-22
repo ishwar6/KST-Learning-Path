@@ -34,7 +34,7 @@ class UserCompletedState(models.Model):
 
 
     def __str__(self):
-        return str(user) + ' - ' +str(state)
+        return str(self.user) + ' - ' +str(self.state)
 
 
 
@@ -52,10 +52,10 @@ class Proficiency(models.Model):
     chapter= models.ForeignKey('chapters.Chapter', on_delete=models.CASCADE)
     level= models.CharField(max_length = 60, choices = CHAPTER_PROFIENCY, blank=False)
     significance= models.IntegerField()
-    #
-    # def __str__(self):
-    #     return str(user) + ' have ' + str(level) + ' level for the chapter:- ' + str(chapter)
-    #
+
+    def __str__(self):
+        return str(self.user) + ' have ' + str(self.level) + ' level for the chapter:- ' + str(self.chapter)
+
 
 
 
@@ -68,7 +68,7 @@ class TempActiveNode(models.Model):
     node = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None)
 
     def __str__(self):
-        return str(user) + ' - ' + str(node) + ' - for the chapter ' + str(chapter)
+        return str(self.user) + ' - ' + str(self.node) + ' - for the chapter ' + str(self.chapter)
 
 
 
