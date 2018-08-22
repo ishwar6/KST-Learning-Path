@@ -11,11 +11,8 @@ class UserCurrentState(models.Model):
     total_time  = models.IntegerField(blank = True, null = True)
     timedate    = models.DateTimeField(auto_now_add = True)
 
-
     def __str__(self):
         return str(self.user) + ' - ' + str(self.stage)
-
-
 
 def user_created_receiver(sender, instance, created, *args, **kwargs):
     if created:
@@ -39,9 +36,6 @@ class UserCompletedState(models.Model):
 
 
 
-
-
-
 CHAPTER_PROFIENCY= (
     ('beginer','Beginer'),
     ('intermediate','Intermediate'),
@@ -51,7 +45,7 @@ class Proficiency(models.Model):
     user= models.ForeignKey(User, on_delete=models.CASCADE, default=None)
     chapter= models.ForeignKey('chapters.Chapter', on_delete=models.CASCADE)
     level= models.CharField(max_length = 60, choices = CHAPTER_PROFIENCY, blank=False)
-    significance= models.IntegerField()
+    significance= models.IntegerField(blank = True, null = True)
 
     def __str__(self):
         return str(self.user) + ' have ' + str(self.level) + ' level for the chapter:- ' + str(self.chapter)
@@ -69,10 +63,6 @@ class TempActiveNode(models.Model):
 
     def __str__(self):
         return str(self.user) + ' - ' + str(self.node) + ' - for the chapter ' + str(self.chapter)
-
-
-
-
 
 
 
