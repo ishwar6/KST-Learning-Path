@@ -1,0 +1,99 @@
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Quiz</title>
+  
+  
+  
+    
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  
+</head>
+
+<body>
+ <div style="text-align: left; margin-left: 30%" >
+  <div id="quiz text-center">
+ 
+
+
+</div>
+</div>
+
+
+
+
+
+
+<form method="POST" action="/states/admin/addedge/{{chapter.id}}/">
+    {% csrf_token %}
+
+<h2 id="title" style="margin-bottom: 30px">
+  Enter weight and time
+</h2>
+
+<input id="weight" type="number" class="weight" name="weight" value="" />
+                            <label for="weight">weight</label><br>
+<input id="time" type="number" class="time" name="time" value="" />
+                            <label for="time">time</label><br>
+<br><br>
+<h2 id="title" style="margin-bottom: 30px">
+  Select the 2 Nodes which you want to add in this edge:
+</h2>
+
+    <input id="addedge" type="hidden" class="addedge" name="addedge" value="1" />
+{% if nodes %}
+  <div class="row" style="margin:5px">
+   
+{% for i in nodes %}
+
+
+ <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading">{{i.id}}</div>
+           <div class="panel-body">
+             <p> states in the node : {{i}}</p>
+           </div>
+
+
+           
+           <div class="panel-primary">
+             
+
+ select here &nbsp     
+              <input id="{{i.id}}" type="checkbox" class="{{i.id}}" name="{{i.id}}" value="1" />
+                   
+
+
+           </div>
+          
+
+         </div>
+      </div>
+
+ {% endfor %}
+    </div>
+{% endif %}
+ <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Done</button>
+</form>
+
+
+   
+
+  
+
+  
+
+
+
+
+
+</body>
+
+</html>
+{% endblock content %}

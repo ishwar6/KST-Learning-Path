@@ -1,26 +1,4 @@
-var firsttime=0;
 
-
-window.addEventListener("blur", function(event) { 
-  var valcheck=Number($('input[name="validity"]').val());
-
-  firsttime=firsttime+1;
-valcheck=valcheck-1;
-
-$('input[name="validity"]').val(valcheck);
-
-$('input[name="validity2"]').val(valcheck);
-  if(firsttime>=2 || valcheck<1)
-  {
-    
-    $('input[name="validity"]').val("0");
-     $('input[name="validity2"]').val("0");
-     $("#submitter").click();
-  }
-
-alert("[WARNING] You need to remain active only in the current test window, If you try to open a new tab or window again, you will be disqualified");}, false);
-window.addEventListener("focus", function(event) { 
-}, false);
 
 // "Main method" which will create all the objects and render the Quiz.
 $(document).ready(function() {
@@ -28,7 +6,7 @@ $(document).ready(function() {
  // var quiz = new Quiz('My Quiz');
 
 
-  $("#validity").hide();
+
    $("#timeshow").hide();
    $("#disableforpropertime").hide();
 

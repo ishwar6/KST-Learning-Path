@@ -1,0 +1,94 @@
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Quiz</title>
+  
+  
+  
+      <link rel="stylesheet" href="{% static 'assessment/css/style.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  
+</head>
+
+<body>
+
+  <div id="quiz text-center">
+ <h2 id="title" style="margin-bottom: 30px">
+  Test Series
+</h2>
+<h2 id="title" style="margin-bottom: 10px">
+Welcome {{profile.first_name}} {{profile.last_name}}!
+</h2>
+
+ <h3>Press ADD State to add a new State:</h3>
+
+<form method="POST" action="/states/admin/">
+  {% csrf_token %}
+<input id="add" type="hidden" class="add" name="add" value="1" />
+  <button class= "btn" type="submit">ADD State</button>
+</form>
+
+
+
+   </div>
+
+  
+
+  <div>
+    
+     <h3>Select a state to edit or delete from the list of all the states below:</h3>
+
+
+
+
+ {% if states %}
+  <div class="row" style="margin:5px">
+   
+{% for i in states %}
+<form class="col s12" method="POST" action="/states/admin/{{i.title}}/{{i.topic}}/" enctype="multipart/form-data">
+              {% csrf_token %}
+<input id="edit" type="hidden" class="edit" name="edit" value="1" />
+
+
+    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading">{{i.title}}</div>
+           <div class="panel-body">
+             <p>From topic : {{i.topic}}</p>
+           </div>
+
+
+           
+           <div class="panel-primary">
+              <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Edit State</button>
+           </div>
+          
+
+         </div>
+      </div>
+
+ {% endfor %}
+    </div>
+{% endif %}
+
+
+ 
+</form>
+
+  </div>
+
+
+
+
+
+
+</body>
+
+</html>
+{% endblock content %}

@@ -1,0 +1,77 @@
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Quiz</title>
+  
+  
+  
+    
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  
+</head>
+
+<body>
+ <div style="text-align: left; margin-left: 30%" >
+  <div id="quiz text-center">
+ <h2 id="title" style="margin-bottom: 30px">
+  Update State: 
+</h2>
+
+
+ <h3>Enter the details for this state:</h3>
+</div>
+</div>
+
+
+     <form method="POST" action="/states/admin/topic/{{topics.title}}/" >
+  {% csrf_token %}
+  <div style="text-align: left; margin-left: 30%" >
+<input id="add" type="hidden" class="add" name="add" value="1" />
+
+
+     <input id="title" type="text" class="title" name="title" value="" />
+                            <label for="title">title</label><br>
+
+     <input id="tag" type="text" class="tag" name="tag" value="" />
+                            <label for="tag">tag</label><br>
+
+       
+      <input id="rate" type="number" class="rate" name="rate" value="" />
+                            <label for="rate">rate</label><br>
+
+  <input id="time" type="number" class="time" name="time" value="" />
+                            <label for="time">Time (in minutes)</label><br>
+     
+     
+           <button type="submit">Add state</button>                  
+  </div>
+ 
+</form>
+
+
+
+
+
+
+
+
+   
+
+  
+
+  
+
+
+
+
+
+</body>
+
+</html>
+{% endblock content %}

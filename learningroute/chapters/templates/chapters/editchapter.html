@@ -1,0 +1,180 @@
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Quiz</title>
+  
+  
+  
+    
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  
+</head>
+
+<body>
+  <div style="text-align: left; margin-left: 30%" >
+  <div id="quiz text-center">
+ <h2 id="title" style="margin-bottom: 30px">
+  Update Chapter: 
+</h2>
+
+
+ <h3>Edit the Chapter and press update or press Delete to delete this Chapter:</h3>
+</div>
+</div>
+
+
+     <form method="POST" action="/chapters/{{chapter.id}}/" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div style="text-align: left; margin-left: 30%" >
+<input id="update" type="hidden" class="update" name="update" value="1" />
+
+
+     <input id="title" type="text" class="title" name="title" value="{{chapter.title}}" />
+                            <label for="title">title</label><br>
+
+     <input id="gaurd" type="text" class="gaurd" name="gaurd" value="{{chapter.gaurd}}" />
+                            <label for="gaurd">gaurd</label><br>
+<input type="file" name="photo" />Photo upload
+  <div class="file-path-wrapper">
+        {% if chapter.image %}
+        <input type="checkbox" id="nophoto" name="nophoto" value="1" >
+          <label for="nophoto">no photo</label> <br>
+
+<input class="file-path validate" name="photo" type="text" placeholder="Upload profile display picture" value="{{chapter.image.url }}">
+{% endif %}
+                                </div>
+       
+      <input id="standard" type="number" class="standard" name="standard" value="{{chapter.standard}}" />
+                            <label for="standard">standard</label><br>
+
+
+
+     
+     
+           <button type="submit">Update</button>                  
+  </div>
+ 
+</form>
+
+
+
+
+
+
+ <form method="POST" action="/chapters/{{chapter.id}}/" >
+  {% csrf_token %}
+  <div style="text-align: left; margin-left: 30%" >
+   
+   <input id="delete" type="hidden" class="delete" name="delete" value="1" />
+
+                           
+     
+     
+           <button type="submit">Delete</button>                  
+  </div>
+ 
+</form>
+
+   
+
+  <br><br>
+
+
+
+
+
+
+
+
+
+
+
+ <div style="text-align: left; margin-left: 30%" >
+
+<h3 id="title" style="margin-bottom: 30px">
+  Fill the details and press Add topic to add your topic to this chapter:
+</h3>
+ <form method="POST" action="/chapters/{{chapter.id}}/" enctype="multipart/form-data">
+
+{% csrf_token %}
+<input id="addtopic" type="hidden" class="add" name="addtopic" value="1" />
+
+<input id="title" type="text" class="title" name="title" value="" />
+                            <label for="title">title</label><br>
+
+
+<textarea id="content1" type="text" name="content1" value=""></textarea> content1<br>
+
+<textarea id="content2" type="text" name="content2" value=""></textarea> content2<br>
+
+
+
+     
+<input type="file" name="image1" />Photo upload1 <br><br>
+ <input type="file" name="image2" />Photo upload2 <br><br>
+       
+      <input id="total_test_time_in_minutes" type="number" class="total_test_time_in_minutes" name="total_test_time_in_minutes" value="" />
+                            <label for="standard">total_test_time_in_minutes</label><br>
+
+
+
+     
+     
+           <button type="submit">Add Topic</button>
+ </form>
+
+</div>
+<h3>Select the topics you want to update or delete present in this chapter</h3>
+<br><br>
+  {% if topics %}
+  <div class="row" style="margin:5px">
+    
+
+{% for i in topics %}
+<form class="col s12" method="POST" action="/chapters/{{i.id}}/" enctype="multipart/form-data">
+              {% csrf_token %}
+<input id="topicedit" type="hidden" class="topicedit" name="topicedit" value="1" />
+<input id="topicnumber" type="hidden" class="topicnumber" name="topicnumber" value="{{i.id}}" />
+
+    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading">{{i.title}}</div>
+           <div class="panel-body">
+             <p> {{i.content1}}</p>
+           </div>
+
+
+           
+           <div class="panel-primary">
+              <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Edit Topic</button>
+           </div>
+          
+
+         </div>
+      </div>
+</form>
+ {% endfor %}
+  
+{% endif %}
+
+
+ 
+
+  </div>
+
+  
+
+
+
+
+
+</body>
+
+</html>
+{% endblock content %}

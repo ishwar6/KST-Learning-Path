@@ -1,0 +1,112 @@
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Quiz</title>
+  
+  
+  
+      
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  
+</head>
+
+<body>
+
+  <div id="quiz text-center">
+ <h2 id="title" style="margin-bottom: 30px">
+  Test Series
+</h2>
+<h2 id="title" style="margin-bottom: 10px">
+Welcome {{profile.first_name}} {{profile.last_name}}!
+</h2>
+
+ <h3>Enter details and Press ADD Chapter to add a new Chapter:</h3>
+
+<form method="POST" action="/chapters/" enctype="multipart/form-data">
+  {% csrf_token %}
+<input id="add" type="hidden" class="add" name="add" value="1" />
+
+<input id="title" type="text" class="title" name="title" value="" />
+                            <label for="title">title</label><br>
+
+     <input id="gaurd" type="text" class="gaurd" name="gaurd" value="" />
+                            <label for="gaurd">gaurd</label><br>
+<input type="file" name="photo" />Photo upload <br><br>
+ 
+       
+      <input id="standard" type="number" class="standard" name="standard" value="" />
+                            <label for="standard">standard</label><br>
+
+
+
+     
+     
+           <button type="submit">Add chapter</button>  
+</form>
+
+
+
+   </div>
+
+  
+
+  <div>
+    
+     <h3>Create, update, delete chapters and the topics in it by selecting the chapters from below:</h3>
+
+
+
+
+ {% if chapters %}
+  <div class="row" style="margin:5px">
+   
+{% for i in chapters %}
+
+
+<form class="col s12" method="POST" action="/chapters/{{i.id}}/" enctype="multipart/form-data">
+              {% csrf_token %}
+<input id="edit" type="hidden" class="edit" name="edit" value="1" />
+
+
+    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading">{{i.gaurd}}</div>
+           <div class="panel-body">
+             <p> {{i.title}}</p>
+           </div>
+
+
+           
+           <div class="panel-primary">
+              <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Edit Chapter</button>
+           </div>
+          
+
+         </div>
+      </div>
+</form>
+ {% endfor %}
+  
+{% endif %}
+
+
+ 
+
+  </div>
+  </div>
+
+
+
+
+
+
+</body>
+
+</html>
+{% endblock content %}
