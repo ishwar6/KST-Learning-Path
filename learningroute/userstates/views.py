@@ -31,8 +31,6 @@ class IntroductoryResponse(View):
                 significance= request.POST.get(ind_number)
             else:
                 significance = None
-
-
             Proficiency.objects.create(
                 user=self.request.user,
                 chapter=the_chapter,
@@ -40,14 +38,14 @@ class IntroductoryResponse(View):
                 significance = significance
 
             )
-
-            n = Node.objects.all()
+        
+            '''n = Node.objects.all()
             for chapter in self.the_chapters:
                 ind_select= "level-of-"+ str(the_chapter.id)
                 level=request.POST.get(ind_select)
                 for node in n:
                     print(node.state_node.all().filter(topic__chapter = chapter))
-
+'''
                     #print(node.state_node.all())
 
 
