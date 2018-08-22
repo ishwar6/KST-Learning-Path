@@ -116,9 +116,9 @@
 
   <input placeholder="" id="gotoquestion" type="hidden" name="gotoquestion" value="1">
   {% if i.submitted_by_user %}
-  <button id="questionlist" type="submit" class="btn" style="margin-bottom: 2px; background-color: #4CAF50; ">Q{{i.question.qno}}</button> &nbsp
+  <button id="questionlist" type="submit" class="btn" style="margin-bottom: 2px; background-color: #4CAF50; ">Q{{i.question.id}}</button> &nbsp
  {% else %}
-<button id="questionlist" type="submit" class="btn" style="margin-bottom: 2px">Q{{i.question.qno}}</button> &nbsp
+<button id="questionlist" type="submit" class="btn" style="margin-bottom: 2px">Q{{i.question.id}}</button> &nbsp
  {% endif %}
 </form>
 {% endfor %}
@@ -131,7 +131,7 @@
     {% endif %}
 
       <h2 id="qstntitle" style="margin-bottom: 0px">
- {{currentquestion.qno}}]  {{currentquestion.question }} 
+ {{currentquestion.id}}]  {{currentquestion.question }} 
 </h2>
 
 

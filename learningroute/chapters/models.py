@@ -150,7 +150,7 @@ class Question(models.Model):
     topic=models.ForeignKey(Topic, on_delete=models.CASCADE)
     question=models.CharField(max_length=200)
     level = models.IntegerField(default=0)
-    qno = models.IntegerField(default=0)
+    #qno = models.IntegerField(default=0)
     question_image=models.ImageField(blank=True, null=True, upload_to="questions")
     text_option1=models.CharField(blank=True, max_length=200)
     text_option2=models.CharField(blank=True, max_length=200)

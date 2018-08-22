@@ -89,3 +89,9 @@ local_settings.py
 db.sqlite3
 /migrations/
 migrations
+*.msg
+/v/
+v
+/v
+v/
+tcl/
