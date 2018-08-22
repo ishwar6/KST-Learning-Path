@@ -1,0 +1,82 @@
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Quiz</title>
+  
+  
+  
+      <link rel="stylesheet" href="{% static 'assessment/css/style.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  
+</head>
+
+<body>
+
+  <div id="quiz text-center">
+
+  
+
+  <div>
+    
+     <h3>Select a chapter from the list of all the chapters below to which you want to add the state:</h3>
+
+
+
+
+ {% if chapters %}
+  <div class="row" style="margin:5px">
+   
+{% for i in chapters %}
+<form class="col s12" method="POST" action="/states/admin/chapter/{{i.title}}/" >
+              {% csrf_token %}
+<!-- <input id="edit" type="hidden" class="edit" name="edit" value="1" /> -->
+
+
+    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading">{{i.gaurd}}</div>
+           <div class="panel-body">
+             <p>{{i.title}}</p>
+           </div>
+
+
+           
+           <div class="panel-primary">
+              <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select Chapter</button>
+           </div>
+          
+
+         </div>
+      </div>
+
+ {% endfor %}
+   
+{% endif %}
+
+
+ 
+</form>
+ </div>
+
+
+ <br>
+
+ <h3>If you want to add/ update/ delete chapters click the button below and make the necessary changes and come bak here:</h3>
+  <a href="/chapters/"><button id="chapter" class="btn"  style="margin-bottom: 2px">ADD / Delete/ Modify chapter</button></a>
+  </div>
+
+
+
+
+
+
+</body>
+
+</html>
+{% endblock content %}

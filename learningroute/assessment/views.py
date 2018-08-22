@@ -15,6 +15,7 @@ counter=0
 score=0
 testtken=0
 testtime_remaining=""
+total_time_in_string=0
 userinput=list()
 getgotousersubmission=0
 validitycheck=2
@@ -38,7 +39,7 @@ def index(request):
 def beginquiz(request, choice, qnumber):
 	if request.user.is_authenticated:
 				pr = User.objects.get(username=request.user)
-				global questions, userinput, testtken, testtime_remaining,getgotousersubmission,score,validitycheck
+				global questions, userinput, testtken, testtime_remaining,getgotousersubmission,score,validitycheck,total_time_in_string
 				if qnumber=="begin":
 					validitycheck=2
 					userinput=list()
@@ -71,20 +72,16 @@ def beginquiz(request, choice, qnumber):
 
 					return render(request, 'quiz.html', context)
 
+				if request.method == 'POST':
+					testtime_remaining=request.POST.get('timeshow', False)
 
-				testtime_remaining=request.POST.get('timeshow', False)
-				if not testtime_remaining:
-					testtime_remaining=request.POST.get('timeshow_second', False)
+
+
+				
+					if not testtime_remaining:
+						testtime_remaining=request.POST.get('timeshow_second', False)
 
 				#print(testtime_remaining)
-				print(request.POST.get('validity',False))
-				print(request.POST.get('validity2',False))
-
-				validitycheck1=int(request.POST.get('validity2',False))
-				validitycheck2=int(request.POST.get('validity',False))
-				validitycheck=max(validitycheck1, validitycheck2)
-				if request.POST.get('validity',False)=="0" or request.POST.get('validity',False)=="-1":
-					return HttpResponse('Sorry '+str(pr.first_name)+' '+ str(pr.last_name)+ ', you have been Disqualified from the Test!')
 				if qnumber=="end":
 					for i in questions:
 						u=User_submission.objects.get(user=pr,question=i)
@@ -94,8 +91,8 @@ def beginquiz(request, choice, qnumber):
 							score=score+i.score
 					testtken.score=score
 					testtken.save()
-
 					return endquiz(request,score,1)
+
 				if request.POST.get('gotoquestion',False)=="1":
 					gotoquestionobj=Question.objects.get(id=qnumber)
 					getgotousersubmission=User_submission.objects.get(user=pr,question=gotoquestionobj)

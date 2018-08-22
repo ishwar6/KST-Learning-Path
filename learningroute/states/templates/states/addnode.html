@@ -1,0 +1,99 @@
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Quiz</title>
+  
+  
+  
+    
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  
+</head>
+
+<body>
+ <div style="text-align: left; margin-left: 30%" >
+  <div id="quiz text-center">
+ 
+
+
+</div>
+</div>
+
+
+
+
+
+
+<form method="POST" action="/states/admin/addnode/{{chapter.id}}/">
+    {% csrf_token %}
+
+<h2 id="title" style="margin-bottom: 30px">
+  Enter description and credits
+</h2>
+<textarea id="textarea" type="text" name="description" value=""></textarea>
+                            <label for="textarea">description</label>  <br>
+
+<input id="credit" type="number" class="credit" name="credit" value="" />
+                            <label for="credit">credit</label><br>
+<br><br>
+<h2 id="title" style="margin-bottom: 30px">
+  Select the States which you want to add in this node:
+</h2>
+
+    <input id="addnode" type="hidden" class="addnode" name="addnode" value="1" />
+{% if states %}
+  <div class="row" style="margin:5px">
+   
+{% for i in states %}
+
+
+ <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading">{{i.title}}</div>
+           <div class="panel-body">
+             <p> {{i.tag}}</p>
+           </div>
+
+
+           
+           <div class="panel-primary">
+             
+
+ select here &nbsp     
+              <input id="{{i.id}}" type="checkbox" class="{{i.id}}" name="{{i.id}}" value="1" />
+                   
+
+
+           </div>
+          
+
+         </div>
+      </div>
+
+ {% endfor %}
+    </div>
+{% endif %}
+ <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Done</button>
+</form>
+
+
+   
+
+  
+
+  
+
+
+
+
+
+</body>
+
+</html>
+{% endblock content %}

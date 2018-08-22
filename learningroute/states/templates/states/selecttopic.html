@@ -1,0 +1,81 @@
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Quiz</title>
+  
+  
+  
+      <link rel="stylesheet" href="{% static 'assessment/css/style.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  
+</head>
+
+<body>
+
+  <div id="quiz text-center">
+
+  
+
+  <div>
+    
+     <h3>Select a topic from the list of all the topics below to which you want to add the state:</h3>
+
+
+
+
+ {% if topics %}
+  <div class="row" style="margin:5px">
+   
+{% for i in topics %}
+<form class="col s12" method="POST" action="/states/admin/topic/{{i.title}}/" >
+              {% csrf_token %}
+<!-- <input id="edit" type="hidden" class="edit" name="edit" value="1" /> -->
+
+
+    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading">{{i.title}}</div>
+           <div class="panel-body">
+             <p>{{i.content1}}</p>
+           </div>
+
+
+           
+           <div class="panel-primary">
+              <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select Topic</button>
+           </div>
+          
+
+         </div>
+      </div>
+
+ {% endfor %}
+   
+{% endif %}
+
+
+ 
+</form>
+ </div>
+
+
+ <br>
+  <h3>If you want to add/ update/ delete Topics click the button below and make the necessary changes and come bak here:</h3>
+   <a href="/chapters/"><button id="topic" class="btn"  style="margin-bottom: 2px">ADD / Delete/ Modify topic</button>
+  </div>
+
+
+
+
+
+
+</body>
+
+</html>
+{% endblock content %}

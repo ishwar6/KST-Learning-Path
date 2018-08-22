@@ -1,0 +1,117 @@
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Quiz</title>
+  
+  
+  
+      <link rel="stylesheet" href="{% static 'assessment/css/style.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  
+</head>
+
+<body>
+
+  <div id="quiz text-center">
+ <h2 id="title" style="margin-bottom: 30px">
+ 
+</h2>
+<h2 id="title" style="margin-bottom: 10px">
+Welcome {{profile.first_name}} {{profile.last_name}}!
+</h2>
+
+ <h3>To ADD  a node select the chapter in which you want to add the node:</h3>
+
+
+ {% if chapters %}
+  <div class="row" style="margin:5px">
+   
+{% for i in chapters %}
+<form method="POST" action="/states/admin/addnode/{{i.id}}/">
+  {% csrf_token %}
+ <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading">{{i.gaurd}}</div>
+           <div class="panel-body">
+             <p>From topic : {{i.title}}</p>
+           </div>
+
+
+           
+           <div class="panel-primary">
+              <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select Chapter</button>
+           </div>
+          
+
+         </div>
+      </div>
+</form>
+ {% endfor %}
+    </div>
+{% endif %}
+
+
+
+
+   </div>
+
+  
+
+  <div>
+    
+     <h3>Select a Node to edit or delete from the list of all the Nodes below:</h3>
+
+
+
+
+ {% if nodes %}
+  <div class="row" style="margin:5px">
+   
+{% for i in nodes %}
+<form class="col s12" method="POST" action="/states/admin/node/{{i.id}}/" enctype="multipart/form-data">
+              {% csrf_token %}
+<input id="edit" type="hidden" class="edit" name="edit" value="1" />
+
+
+    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading">{{i.id}}</div>
+           <div class="panel-body">
+             <p>From topic : {{i.description}}</p>
+           </div>
+
+
+           
+           <div class="panel-primary">
+              <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Edit Node</button>
+           </div>
+          
+
+         </div>
+      </div>
+</form>
+ {% endfor %}
+    </div>
+{% endif %}
+
+
+ 
+
+
+  </div>
+
+
+
+
+
+
+</body>
+
+</html>
+{% endblock content %}

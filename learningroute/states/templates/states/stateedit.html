@@ -1,0 +1,86 @@
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Quiz</title>
+  
+  
+  
+    
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  
+</head>
+
+<body>
+ <div style="text-align: left; margin-left: 30%" >
+  <div id="quiz text-center">
+ <h2 id="title" style="margin-bottom: 30px">
+  Update State: 
+</h2>
+
+
+ <h3>Edit the state and press update or press Delete to delete this state:</h3>
+</div>
+</div>
+
+
+     <form method="POST" action="/states/admin/{{state.title}}/{{state.topic}}/" >
+  {% csrf_token %}
+  <div style="text-align: left; margin-left: 30%" >
+<input id="update" type="hidden" class="update" name="update" value="1" />
+     <input id="title" type="text" class="title" name="title" value="{{state.title}}" />
+                            <label for="title">title</label><br>
+
+     <input id="tag" type="text" class="tag" name="tag" value="{{state.tag}}" />
+                            <label for="tag">tag</label><br>
+
+       
+      <input id="rate" type="number" class="rate" name="rate" value="{{state.rate}}" />
+                            <label for="rate">rate</label><br>
+
+  <input id="time" type="number" class="time" name="time" value="{{state.time}}" />
+                            <label for="time">Time (in minutes)</label><br>
+     
+     
+           <button type="submit">Update</button>                  
+  </div>
+ 
+</form>
+
+
+
+
+ <form method="POST" action="/states/admin/{{state.title}}/{{state.topic}}/" >
+  {% csrf_token %}
+  <div style="text-align: left; margin-left: 30%" >
+   
+   <input id="delete" type="hidden" class="delete" name="delete" value="1" />
+
+     
+     
+           <button type="submit">Delete</button>                  
+  </div>
+ 
+</form>
+
+
+
+   </div>
+
+  
+
+  
+
+
+
+
+
+</body>
+
+</html>
+{% endblock content %}

@@ -113,7 +113,7 @@
  <form class="col s12" method="POST" action="/assess/beginquiz/{{topic}}/{{i.question.id}}/" enctype="multipart/form-data">
   {% csrf_token %}
   <input placeholder="" id="timeshow_second" type="hidden" name="timeshow_second" value="1">
-  <input placeholder="" id="validity2" type="hidden" name="validity2" value="{{validitycheck}}">
+
   <input placeholder="" id="gotoquestion" type="hidden" name="gotoquestion" value="1">
   {% if i.submitted_by_user %}
   <button id="questionlist" type="submit" class="btn" style="margin-bottom: 2px; background-color: #4CAF50; ">Q{{i.question.qno}}</button> &nbsp
@@ -131,7 +131,7 @@
     {% endif %}
 
       <h2 id="qstntitle" style="margin-bottom: 0px">
- {{currentquestion.qno}}]  {{currentquestion.question_text }} 
+ {{currentquestion.qno}}]  {{currentquestion.question }} 
 </h2>
 
 
@@ -152,7 +152,7 @@
   <input placeholder="" id="timeshow" type="text" name="timeshow" value="1">
   {% endif %}
 </h4> 
-              <input placeholder="" id="validity" type="text" name="validity" value="{{validitycheck}}">
+             
             
 
 
