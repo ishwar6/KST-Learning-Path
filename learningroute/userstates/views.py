@@ -8,14 +8,14 @@ from django.views.generic import View
 from .models import Proficiency
 
 
-# Create your views here.
 class IntroductoryResponse(View):
-    
+
     the_chapters= Chapter.objects.filter(standard=9)
-    
+    print(the_chapters)
+
     def get(self, request):
         return render(request, 'userstates/initialresponse_form.html', {'chapters': self.the_chapters})
-    
+
     def post(self, request):
         for the_chapter in self.the_chapters:
             ind_number= "imp-of-"+ str(the_chapter.id)

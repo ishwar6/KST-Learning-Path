@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 User = get_user_model()
 
+
 class UserCurrentState(models.Model):
     user        = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
     state       = models.ForeignKey('states.State', on_delete= models.CASCADE, default = None)
@@ -31,9 +32,16 @@ class UserCompletedState(models.Model):
     start_time  = models.IntegerField(blank = True, null = True)
     timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
 
-'''
-are you surely in claass 9
-'''
+
+    def __str__(self):
+        return str(user) + ' - ' +str(state)
+
+
+
+
+
+
+
 CHAPTER_PROFIENCY= (
     ('beginer','Beginer'),
     ('intermediate','Intermediate'),
@@ -44,6 +52,35 @@ class Proficiency(models.Model):
     chapter= models.ForeignKey('chapters.Chapter', on_delete=models.CASCADE)
     level= models.CharField(max_length = 60, choices = CHAPTER_PROFIENCY, blank=False)
     significance= models.IntegerField()
+    #
+    # def __str__(self):
+    #     return str(user) + ' have ' + str(level) + ' level for the chapter:- ' + str(chapter)
+    #
+
+
+
+
+
+
+class TempActiveNode(models.Model):
+    user = models.ForeignKey(User, on_delete=  models.CASCADE)
+    chapter = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE)
+    node = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None)
+
+    def __str__(self):
+        return str(user) + ' - ' + str(node) + ' - for the chapter ' + str(chapter)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 '''
@@ -60,7 +97,5 @@ in where he left
 8. Estimated time left to clear a chapter for a student
 9. To make a don't know button for each question if student have no idea of it at All
 10. Feedback from the student to make more explanation next time
-
-
 
 '''
