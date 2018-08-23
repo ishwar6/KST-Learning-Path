@@ -5,7 +5,7 @@ from rpy2.robjects.packages import importr
 from django.contrib.auth.models import User
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-
+import utility_kst
 
 kst = importr('kst')
 
@@ -19,38 +19,13 @@ def myview(request):
 
 
 def nodes(request):
-    r = robjects.r
-    kst = importr('kst')
-    r.sets_options('quote', False)
-    edges =  Edge.objects.all()
+    edges= Edge.objects.all()
     n = Node.objects.all()
-    i = 0
-    set = {}
-    # making dictionary of individual state_nodes in set variable
-    for node in n:
-        #set[i] = ','.join(str(j.title) for j in node.state_node.all())
-        j=0
-        for nd in node.state_node.iterator():
-            j=j+1
-            if j==1:
-                temp= r.set(nd.title)
-                continue
-            temp= r.set_union(temp, nd.title)
-        set[i]= temp
-        i = i+1
-    print(set)
-    for key, value in set.items():
-        if key==0:
-            a = r.set(value)
-            continue
-        b = r.set(value)
-        a = r.set_union(a, b)
-    # making the knowledge space from above set of strings
-    print(a)
-    print(n)
-    ks = kst.kstructure(a)
-    ksp = kst.kspace(ks)
-    lp = kst.lpath(ks)
+    
+    kstr= utility_kst.nodes2kstructure(n) #modification to test the new utility_kst package
+
+    ksp = kst.kspace(kstr)
+    lp = kst.lpath(kstr)
     list = kst.lpath_is_gradation(lp)
 
 

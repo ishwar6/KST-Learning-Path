@@ -60,6 +60,8 @@ class IntroductoryResponse(View):
             if TempActiveNode.objects.filter(user = self.request.user).exists():
                 TempActiveNode.objects.filter(user = self.request.user).delete()
             
+            print("length of list is "+str(len(list_of_nodes)))
+
             TempActiveNode.objects.create(
                 user= self.request.user,
                 chapter= the_chapter,
