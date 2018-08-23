@@ -4,38 +4,6 @@ from django.db.models.signals import post_save
 User = get_user_model()
 
 
-class UserCurrentState(models.Model):
-    user        = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
-    state       = models.ForeignKey('states.State', on_delete= models.CASCADE, default = None)
-    stage       = models.IntegerField(default = 0)
-    total_time  = models.IntegerField(blank = True, null = True)
-    timedate    = models.DateTimeField(auto_now_add = True)
-
-    def __str__(self):
-        return str(self.user) + ' - ' + str(self.stage)
-
-def user_created_receiver(sender, instance, created, *args, **kwargs):
-    if created:
-        CurrentUserState.objects.get_or_create(user = instance)
-post_save.connect(user_created_receiver, sender = User)
-
-
-class UserCompletedState(models.Model):
-    user        = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
-    state       = models.ForeignKey('states.State', on_delete= models.CASCADE, default = None)
-    correct     = models.IntegerField(default = 0)
-    incorrect   = models.IntegerField(default = 0)
-    time_taken  = models.IntegerField(blank = True, null = True)
-    start_time  = models.IntegerField(blank = True, null = True)
-    timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
-
-
-    def __str__(self):
-        return str(self.user) + ' - ' +str(self.state)
-
-
-
-
 CHAPTER_PROFIENCY= (
     ('beginer','Beginer'),
     ('intermediate','Intermediate'),
@@ -68,7 +36,15 @@ class TempActiveNode(models.Model):
 
 
 
+class UserCurrentNode(models.Model):
+    user        = models.ForeignKey(User, on_delete=models.CASCADE)
+    node = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None)
+    chapter = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE, default=None)
+    incorrect   = models.IntegerField(default = 0)
+    timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
 
+    def __str__(self):
+        return str(self.user) + ' - ' +str(self.node)
 
 
 
