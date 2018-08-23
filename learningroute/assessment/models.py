@@ -1,16 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
-from chapters.models import Topic, Question
-
+from questions.models import Question
+from states.models import State
 # Create your models here.
 
 
 class TestsTaken(models.Model):
 	user=models.ForeignKey(User, on_delete=models.CASCADE)
-	topic=models.ForeignKey(Topic, on_delete=models.CASCADE)
+	state=models.ForeignKey(State, on_delete=models.CASCADE)
 	score=models.IntegerField(default=0)
 	def __str__(self):
-		return str(self.user)+str(self.topic)
+		return str(self.user)+str(self.state)
 
 
 

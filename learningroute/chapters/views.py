@@ -8,100 +8,111 @@ from .models import Topic
 
 def mainpage(request):
 	if request.user.is_authenticated:
+		user_obj = User.objects.get(username=request.user)
+		chapters=Chapter.objects.all() 
+
 		if request.POST.get('add',False):
 			title=request.POST.get('title',False)
 			gaurd=request.POST.get('gaurd',False)
 			standard=request.POST.get('standard',False)
 			image=request.FILES.get('photo',None)
 			Chapter.objects.create(title=title, gaurd=gaurd, standard=standard, image=image) 
-			return HttpResponse('Chapter added!')
-
-
-		pr = User.objects.get(username=request.user)
-		chapters=Chapter.objects.all() 
-		return render(request, 'chapters/mainpage.html', {'chapters':chapters, 'profile':pr})
+			return render(request, 'chapters/mainpage.html', {'chapter_added':1,'chapters':chapters, 'profile':user_obj})
+		
+		return render(request, 'chapters/mainpage.html', {'chapters':chapters, 'profile':user_obj})
 
 
 def editchapter(request,chapternumber):
 	if request.user.is_authenticated:
+		user_obj = User.objects.get(username=request.user)
+		current_chapter=Chapter.objects.get(id=chapternumber)
+		topics=Topic.objects.filter(chapter=current_chapter)
 
-
-
-
-		pr = User.objects.get(username=request.user)
+		if request.POST.get('delete',False):
+			chapters=Chapter.objects.all() 
+			current_chapter.delete()
+			return render(request, 'chapters/mainpage.html', {'chapter_deleted':1,'chapters':chapters, 'profile':user_obj})
 		
 		if request.POST.get('addtopic',False):
-			c=Chapter.objects.get(id=chapternumber)
+			current_chapter=Chapter.objects.get(id=chapternumber)
 			title=request.POST.get('title',False)
 			content1=request.POST.get('content1',False)
 			content2=request.POST.get('content2',False)
 			total_test_time_in_minutes=request.POST.get('total_test_time_in_minutes',False)
 			image1=request.FILES.get('image1',None)
 			image2=request.FILES.get('image2',None)
-			Topic.objects.create(chapter=c, title=title, content1=content1,content2=content2, total_test_time_in_minutes=total_test_time_in_minutes, image1=image1 , image2=image2) 
-			return HttpResponse('Topic added!')
+			Topic.objects.create(chapter=current_chapter,
+			 					 title=title,
+			  					 content1=content1,
+			  					 content2=content2, 
+			  					 total_test_time_in_minutes=total_test_time_in_minutes, 
+			  					 image1=image1 , 
+			  					 image2=image2) 
 
+			context = {'topic_added':1,
+			'chapter':current_chapter, 
+			'profile':user_obj, 
+			'topics':topics}
 
+			return render(request, 'chapters/editchapter.html', context)
 
 		if request.POST.get('topicedit',False):
 			topicnumber=request.POST.get('topicnumber',False)
 			return redirect('/chapters/topic/'+str(topicnumber)+'/')
-		c=Chapter.objects.get(id=chapternumber)
-		topics=Topic.objects.filter(chapter=c)
 		
 		if request.POST.get('update',False):
 			if request.FILES.get('photo',False) and (not request.POST.get('nophoto',False)):
-				c.image = request.FILES.get('photo',False)
+				current_chapter.image = request.FILES.get('photo',False)
 			elif request.POST.get('nophoto',False):
-				c.image=None
-			c.title=request.POST.get('title',False)
-			c.gaurd=request.POST.get('gaurd',False)
-			c.standard=request.POST.get('standard',False)
-			c.save()
-			print(c)
-			return redirect('/chapters/'+str(c.id)+'/')
+				current_chapter.image=None
+			current_chapter.title=request.POST.get('title',False)
+			current_chapter.gaurd=request.POST.get('gaurd',False)
+			current_chapter.standard=request.POST.get('standard',False)
+			current_chapter.save()
+			return redirect('/chapters/'+str(current_chapter.id)+'/')
 		
-		print(c)
-		return render(request, 'chapters/editchapter.html', {'chapter':c, 'profile':pr, 'topics':topics})
+		return render(request, 'chapters/editchapter.html', {'chapter':current_chapter, 'profile':user_obj, 'topics':topics})
 
 
 
 
 def edittopic(request,topicnumber):
 	if request.user.is_authenticated:
-		pr = User.objects.get(username=request.user)
-		t=Topic.objects.get(id=topicnumber)
+		user_obj = User.objects.get(username=request.user)
+		current_topic=Topic.objects.get(id=topicnumber)
+		chapter=current_topic.chapter
+		topics=Topic.objects.filter(chapter=chapter)
+
 		if request.POST.get('delete',False):
-			t.delete()
-			return HttpResponse('Topic deleted!')
+			current_topic.delete()
 
+			context = {'topic_deleted':1,
+			'chapter':chapter, 
+			'profile':user_obj, 
+			'topics':topics}
 
+			return render(request, 'chapters/editchapter.html', context)
 
 		if request.POST.get('update',False):
-			t.title=request.POST.get('title',False)
-			t.content1=request.POST.get('content1',False)
-			t.content2=request.POST.get('content2',False)
-			t.total_test_time_in_minutes=request.POST.get('total_test_time_in_minutes',False)
+			current_topic.title=request.POST.get('title',False)
+			current_topic.content1=request.POST.get('content1',False)
+			current_topic.content2=request.POST.get('content2',False)
+			current_topic.total_test_time_in_minutes=request.POST.get('total_test_time_in_minutes',False)
 
 			if request.FILES.get('image1',False) and (not request.POST.get('nophoto',False)):
-				t.image1 = request.FILES.get('image1',False)
+				current_topic.image1 = request.FILES.get('image1',False)
 			elif request.POST.get('nophoto',False):
-				t.image1=None
+				current_topic.image1=None
 
 			if request.FILES.get('image2',False) and (not request.POST.get('noansphoto',False)):
-				t.image2 = request.FILES.get('image2',False)
+				current_topic.image2 = request.FILES.get('image2',False)
 			elif request.POST.get('noansphoto',False):
-				t.image2=None
-
+				current_topic.image2=None
 			
-			t.save()
-			return redirect('/chapters/topic/'+str(t.id)+'/')
-
-
-
+			current_topic.save()
+			return redirect('/chapters/topic/'+str(current_topic.id)+'/')
 		
-		
-		return render(request, 'chapters/edittopic.html', {'profile':pr, 'topic':t})
+		return render(request, 'chapters/edittopic.html', {'profile':user_obj, 'topic':current_topic})
 
 
 	

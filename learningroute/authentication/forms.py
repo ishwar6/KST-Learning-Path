@@ -6,7 +6,6 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from django.urls import reverse
 import hashlib
 import datetime
 import smtplib
@@ -21,19 +20,11 @@ def login(request):
             auth_login(request, user)
             return HttpResponseRedirect('/assess/main/')
         else:
-            try:
-                if User.objects.get(username=username):
-                    return render(request, 'login.html', {"profile": None, "wrong_password":1})
-            except:
-                return render(request, 'login.html', {"profile": None, "user_not_exists":1})
-
-
-            
+            return HttpResponse('You havent registered or password entered is wrong')
     else:
         if request.user.is_authenticated:
             return HttpResponseRedirect('/assess/main/')
         else:
-
             return render(request, 'login.html', {"profile": None})
 
 

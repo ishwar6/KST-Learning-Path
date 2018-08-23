@@ -27,14 +27,14 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
 </h2>
 
    <div class="row" style="margin:5px">
-    {% if alltopics %}
-{% for i in alltopics %}
+    {% if allstates %}
+{% for i in allstates %}
 
     <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
       <div class="panel panel-primary">
          <div class="panel-heading">{{i.title}}</div>
            <div class="panel-body">
-             <p>{{i.content1}}</p>
+             <p>Time duration : {{i.time}}</p>
            </div>
 
 

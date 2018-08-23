@@ -12,7 +12,10 @@
   
   
       
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   
 </head>
 
@@ -26,7 +29,24 @@
 Welcome {{profile.first_name}} {{profile.last_name}}!
 </h2>
 
+
+{% if chapter_added %}
+<div class="alert alert-success alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Success!</strong> Chapter has been added!
+</div>
+{% endif %}
+
+
+    {% if chapter_deleted %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  Chapter has been deleted!
+</div>
+{% endif %}
+
  <h3>Enter details and Press ADD Chapter to add a new Chapter:</h3>
+
 
 <form method="POST" action="/chapters/" enctype="multipart/form-data">
   {% csrf_token %}

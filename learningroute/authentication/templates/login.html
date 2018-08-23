@@ -25,12 +25,21 @@
         </div>
         <div class="button-container">
           <button class="btn btn-large waves-effect waves-light indigo" type="submit" name="action">Login
-    <i class="material-icons right">send</i>
+   
   </button>
         </div>
        
       </form>
     </div>
+
+    {% if wrong_password %}
+      <h4 style="color: red">Wrong password</h4>
+    {% endif %}
+
+
+    {% if user_not_exists %}
+      <h4 style="color: red">No such user exists</h4>
+    {% endif %}
   </div>
   
  

@@ -12,7 +12,9 @@
   
   
       <link rel="stylesheet" href="{% static 'assessment/css/style.css' %}">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   
 </head>
 
@@ -25,6 +27,25 @@
 <h2 id="title" style="margin-bottom: 10px">
 Welcome {{profile.first_name}} {{profile.last_name}}!
 </h2>
+
+
+ {% if edge_deleted %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  Edge has been deleted!
+</div>
+{% endif %}
+
+
+{% if edge_added %}
+<div class="alert alert-success alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Success!</strong> Edge has been added!
+</div>
+{% endif %}
+
+
+
 
  <h3>To ADD  an EDGE select the chapter in which you want to add the EDGE:</h3>
 

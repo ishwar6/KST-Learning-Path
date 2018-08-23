@@ -67,33 +67,44 @@ def nodes(request):
 
 def stateadmin(request):
     if request.user.is_authenticated:
-        pr = User.objects.get(username=request.user)
+        user_obj = User.objects.get(username=request.user)
         chapters=Chapter.objects.all() 
         topics=Topic.objects.all()
-        states=State.objects.all()
-        #print(pr.first_name)
-        
+        states=State.objects.all()        
 
         if request.POST.get('add',False):
-            return render(request, 'states/selectchapter.html', {'chapters':chapters, 'profile':pr})
+            return render(request, 'states/selectchapter.html', {'chapters':chapters, 'profile':user_obj})
+      
+        context = {'topics':topics, 
+        'chapters':chapters, 
+        'states':states, 
+        'profile':user_obj}
 
-
-        return render(request, 'states/stateadmin.html', {'topics':topics, 'chapters':chapters, 'states':states, 'profile':pr})
+        return render(request, 'states/stateadmin.html', context)
     else:
-        return HttpResponse('Some Probem occured')
+        return redirect('/auth/login/')
 
 
 
 def stateedit(request, title, topic):
-
     if request.user.is_authenticated:
-        pr = User.objects.get(username=request.user)
+        user_obj = User.objects.get(username=request.user)
         
         if request.POST.get('delete',False):
                 t=Topic.objects.get(title=topic)
                 s=State.objects.get(title=title, topic=t)
                 s.delete()
-                return HttpResponse('Deleted State Successfully!')
+                chapters=Chapter.objects.all() 
+                topics=Topic.objects.all()
+                states=State.objects.all()
+
+                context = {'state_deleted':1,
+                'topics':topics, 
+                'chapters':chapters, 
+                'states':states, 
+                'profile':user_obj}
+
+                return render(request, 'states/stateadmin.html', context)
 
         elif request.POST.get('update',False):
             t=Topic.objects.get(title=topic)
@@ -105,144 +116,162 @@ def stateedit(request, title, topic):
             state.save()
             return redirect('/states/admin/'+str(state.title)+'/'+str(state.topic)+'/')
 
-
-
-        else:
-
-            
-            #print(pr.first_name)
-        
+        else:       
             topics=Topic.objects.all()
             t=Topic.objects.get(title=topic)
             state=State.objects.get(title=title, topic=t)
             
-
-            return render(request, 'states/stateedit.html', {'topics':topics, 'state':state, 'profile':pr})
+            return render(request, 'states/stateedit.html', {'topics':topics, 'state':state, 'profile':user_obj})
     else:
-        return HttpResponse('Some Probem occured')
+        return redirect('/auth/login/')
 
 
 def selectchapter(request,title):
      if request.user.is_authenticated:
-        pr = User.objects.get(username=request.user)
+        user_obj = User.objects.get(username=request.user)
         chapter=Chapter.objects.get(title=title)
         topics=Topic.objects.filter(chapter=chapter)
         print(topics)
-        return render(request, 'states/selecttopic.html', {'topics':topics, 'profile':pr})
+        return render(request, 'states/selecttopic.html', {'topics':topics, 'profile':user_obj})
+     else:
+        return redirect('/auth/login/')
 
 
 def selecttopic(request,title):
      if request.user.is_authenticated:
+        user_obj = User.objects.get(username=request.user)
         topic=Topic.objects.get(title=title)
 
         if request.POST.get('add',False):
-            pr = User.objects.get(username=request.user)
             title=request.POST.get('title')
             rate=request.POST.get('rate')
             time=request.POST.get('time')
             tag=request.POST.get('tag')
             State.objects.create(topic=topic, title=title,rate=rate,time=time,tag=tag)
-            return HttpResponse('State added!')
+            chapters=Chapter.objects.all() 
+            topics=Topic.objects.all()
+            states=State.objects.all()
 
-        pr = User.objects.get(username=request.user)
-        
-        
-        return render(request, 'states/addstate.html', {'topics':topic, 'profile':pr})
+            context = {'state_added':1,
+            'topics':topics, 
+            'chapters':chapters, 
+            'states':states, 
+            'profile':user_obj}
+
+            return render(request, 'states/stateadmin.html', context)              
+              
+        return render(request, 'states/addstate.html', {'topics':topic, 'profile':user_obj})
+     else:
+        return redirect('/auth/login/')
 
 
 def nodeadmin(request):
         if request.user.is_authenticated:
-            pr = User.objects.get(username=request.user)
+            user_obj = User.objects.get(username=request.user)
             nodes=Node.objects.all()
             chapters= Chapter.objects.all()
 
-            return render(request, 'states/nodeadmin.html', {'chapters':chapters,'nodes':nodes, 'profile':pr})
+            return render(request, 'states/nodeadmin.html', {'chapters':chapters,'nodes':nodes, 'profile':user_obj})
+        else:
+            return redirect('/auth/login/')
+
 
 def nodeedit(request, nodeid):
     if request.user.is_authenticated:
-        pr = User.objects.get(username=request.user)
+        user_obj = User.objects.get(username=request.user)
         node=Node.objects.get(id=nodeid)
 
         if request.POST.get('delete',False):
             node.delete()
-            return HttpResponse('Node deleted Successfully!')
+            nodes=Node.objects.all()
+            chapters= Chapter.objects.all()
 
+            context = {'node_deleted':1,
+            'chapters':chapters,
+            'nodes':nodes, 
+            'profile':user_obj}
+
+            return render(request, 'states/nodeadmin.html', context)
 
         if request.POST.get('update',False):
             node.description=request.POST.get('description')
             node.credit=request.POST.get('credit')
             node.save()
             return redirect('/states/admin/node/'+str(node.id)+'/')
-   
 
-        return render(request, 'states/nodeedit.html', {'node':node, 'profile':pr})
+        return render(request, 'states/nodeedit.html', {'node':node, 'profile':user_obj})
+    else:
+        return redirect('/auth/login/')
 
-
-
-
-        
 
 
 def addnode(request,chapid):
     if request.user.is_authenticated:
         if request.POST.get('addnode',False):
+            user_obj = User.objects.get(username=request.user)
 
             description=request.POST.get('description',False)
             credit=request.POST.get('credit',False)
-            addstates=list()
+            selected_states=list()
             states=State.objects.all()
-            # print(request.POST.get('9',False))
+        
             for i in states:
-                print(request.POST.get(str(i.id)))
                 if request.POST.get(str(i.id)):
-                    addstates.append(i)
+                    selected_states.append(i)
             newnode= Node()
             newnode.description=description
             newnode.credit=credit
             newnode.save()
 
-            for i in addstates:
+            for i in selected_states:
                 newnode.state_node.add(i)
 
-            print(newnode)
-                    
-            return HttpResponse('Nofully!')      
+            nodes=Node.objects.all()
+            chapters= Chapter.objects.all()
+            
+            context = {'node_added':1,
+            'chapters':chapters,
+            'nodes':nodes, 
+            'profile':user_obj}
 
-        states=list()
-        pr = User.objects.get(username=request.user)
+            return render(request, 'states/nodeadmin.html', context)     
+
+        states=list() 
         c=Chapter.objects.get(id=chapid)
-        topics=Topic.objects.filter(chapter=c)
-        for i in topics:
-            if i.chapter == c:
-                s=State.objects.filter(topic=i)
-                for j in s:
-                    states.append(j)
-                
-        print(states)
-        return render(request, 'states/addnode.html', {'chapter':c,'states':states, 'profile':pr})
+        states= State.objects.filter(topic__chapter=c)
+        user_obj = User.objects.get(username=request.user)
+        return render(request, 'states/addnode.html', {'chapter':c,'states':states, 'profile':user_obj})
+    else:
+        return redirect('/auth/login/')
 
 
  
 def edgeadmin(request):
     if request.user.is_authenticated:
-            pr = User.objects.get(username=request.user)
+            user_obj = User.objects.get(username=request.user)
             edges=Edge.objects.all()
             chapters= Chapter.objects.all()
-
-
-
-            return render(request, 'states/edgeadmin.html', {'chapters':chapters,'edges':edges, 'profile':pr})
+            return render(request, 'states/edgeadmin.html', {'chapters':chapters,'edges':edges, 'profile':user_obj})
+    else:
+        return redirect('/auth/login/')
 
 
 def edgeedit(request, edgeid):
     if request.user.is_authenticated:
-        pr = User.objects.get(username=request.user)
+        user_obj = User.objects.get(username=request.user)
         edge=Edge.objects.get(id=edgeid)
 
         if request.POST.get('delete',False):
             edge.delete()
-            return HttpResponse('Edge deleted Successfully!')
+            edges=Edge.objects.all()
+            chapters= Chapter.objects.all()
 
+            context = {'edge_deleted':1,
+            'chapters':chapters,
+            'edges':edges, 
+            'profile':user_obj}
+
+            return render(request, 'states/edgeadmin.html', context)
 
         if request.POST.get('update',False):
             edge.weight=request.POST.get('weight')
@@ -250,16 +279,15 @@ def edgeedit(request, edgeid):
             edge.save()
             return redirect('/states/admin/edge/'+str(edge.id)+'/')
    
-
-        return render(request, 'states/edgeedit.html', {'edge':edge, 'profile':pr})
-
-
-
+        return render(request, 'states/edgeedit.html', {'edge':edge, 'profile':user_obj})
+    else:
+        return redirect('/auth/login/')
 
 
 
 def addedge(request,chapid):
     if request.user.is_authenticated:
+        user_obj = User.objects.get(username=request.user)
         if request.POST.get('addedge',False):
 
             weight=request.POST.get('weight',False)
@@ -267,9 +295,7 @@ def addedge(request,chapid):
 
             addnodes=list()
             nodes=Node.objects.all()
-            # print(request.POST.get('9',False))
             for i in nodes:
-                #print(request.POST.get(str(i.id)))
                 if request.POST.get(str(i.id)):
                     addnodes.append(i)
 
@@ -278,40 +304,22 @@ def addedge(request,chapid):
 
             print(n1,n2)
             Edge.objects.create(first=n1,second=n2,weight=weight, time=time)
+       
+            edges=Edge.objects.all()
+            chapters= Chapter.objects.all()
 
+            context = {'edge_added':1,
+            'chapters':chapters,
+            'edges':edges, 
+            'profile':user_obj}
 
-            
-
-            
-                    
-            return HttpResponse('Edge created!')
-
-
-            
-        pr = User.objects.get(username=request.user)
+            return render(request, 'states/edgeadmin.html', context)     
+        
         c=Chapter.objects.get(id=chapid)
-        topics=Topic.objects.filter(chapter=c)
-
-        nodes=Node.objects.all()
-        states=list()
         chapter_nodes=list()
+        chapter_nodes = nodes= Node.objects.filter(state_node__topic__chapter=c)
 
-        for i in nodes:
-            print(i.state_node.all())
+        return render(request, 'states/addedge.html', {'chapter':c,'nodes':chapter_nodes, 'profile':user_obj})
 
-        for i in topics:
-            if i.chapter == c:
-                s=State.objects.filter(topic=i)
-                for j in s:
-                    states.append(j)
-
-        for i in nodes:
-            for j in i.state_node.all():
-                if  j in states:
-                    chapter_nodes.append(i)
-                    break
-            # if  (i.state_node.all() in states):
-            #     print(i)
-                
-        print(nodes)
-        return render(request, 'states/addedge.html', {'chapter':c,'nodes':chapter_nodes, 'profile':pr})
+    else:
+        return redirect('/auth/login/')

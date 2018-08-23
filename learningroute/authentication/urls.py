@@ -3,7 +3,7 @@ from .views import login, logout
 
 
 urlpatterns = [
-    url(r'^login/', login),
+    url(r'^login/', login, name='login'),
     url(r'^logout/', logout),
 
 ]

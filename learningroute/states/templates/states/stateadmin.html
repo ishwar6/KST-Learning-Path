@@ -12,7 +12,9 @@
   
   
       <link rel="stylesheet" href="{% static 'assessment/css/style.css' %}">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   
 </head>
 
@@ -25,6 +27,23 @@
 <h2 id="title" style="margin-bottom: 10px">
 Welcome {{profile.first_name}} {{profile.last_name}}!
 </h2>
+
+
+{% if state_added %}
+<div class="alert alert-success alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Success!</strong> State has been added!
+</div>
+{% endif %}
+
+
+ {% if state_deleted %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  State has been deleted!
+</div>
+{% endif %}
+
 
  <h3>Press ADD State to add a new State:</h3>
 
@@ -72,14 +91,14 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
 
          </div>
       </div>
-
+</form>
  {% endfor %}
     </div>
 {% endif %}
 
 
  
-</form>
+
 
   </div>
 

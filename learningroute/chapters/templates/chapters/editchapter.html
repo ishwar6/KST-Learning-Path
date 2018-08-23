@@ -11,13 +11,26 @@
   
   
   
-    
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   
 </head>
 
 <body>
   <div style="text-align: left; margin-left: 30%" >
+
+
+
+ {% if topic_deleted %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Success!</strong> Topic has been deleted!
+</div>
+{% endif %}
+
+
   <div id="quiz text-center">
  <h2 id="title" style="margin-bottom: 30px">
   Update Chapter: 
@@ -96,7 +109,12 @@
 
 
  <div style="text-align: left; margin-left: 30%" >
-
+{% if topic_added %}
+<div class="alert alert-success alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Success!</strong> Topic has been added!
+</div>
+{% endif %}
 <h3 id="title" style="margin-bottom: 30px">
   Fill the details and press Add topic to add your topic to this chapter:
 </h3>
@@ -137,7 +155,7 @@
     
 
 {% for i in topics %}
-<form class="col s12" method="POST" action="/chapters/{{i.id}}/" enctype="multipart/form-data">
+<form class="col s12" method="POST" action="/chapters/topic/{{i.id}}/" enctype="multipart/form-data">
               {% csrf_token %}
 <input id="topicedit" type="hidden" class="topicedit" name="topicedit" value="1" />
 <input id="topicnumber" type="hidden" class="topicnumber" name="topicnumber" value="{{i.id}}" />
