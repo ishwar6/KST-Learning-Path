@@ -22,11 +22,23 @@
   <div style="text-align: left; margin-left: 30%" >
 
 
-
+ {% if chapter_update_error %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Error!</strong> Enter the fields correctly
+</div>
+{% endif %}
  {% if topic_deleted %}
 <div class="alert alert-danger alert-dismissible">
   <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
   <strong>Success!</strong> Topic has been deleted!
+</div>
+{% endif %}
+
+ {% if topic_added_error %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Error!</strong> Enter the fields correctly
 </div>
 {% endif %}
 
@@ -48,25 +60,9 @@
 <input id="update" type="hidden" class="update" name="update" value="1" />
 
 
-     <input id="title" type="text" class="title" name="title" value="{{chapter.title}}" />
-                            <label for="title">title</label><br>
-
-     <input id="gaurd" type="text" class="gaurd" name="gaurd" value="{{chapter.gaurd}}" />
-                            <label for="gaurd">gaurd</label><br>
-<input type="file" name="photo" />Photo upload
-  <div class="file-path-wrapper">
-        {% if chapter.image %}
-        <input type="checkbox" id="nophoto" name="nophoto" value="1" >
-          <label for="nophoto">no photo</label> <br>
-
-<input class="file-path validate" name="photo" type="text" placeholder="Upload profile display picture" value="{{chapter.image.url }}">
-{% endif %}
-                                </div>
-       
-      <input id="standard" type="number" class="standard" name="standard" value="{{chapter.standard}}" />
-                            <label for="standard">standard</label><br>
 
 
+ {{chapter_form.as_p}}
 
      
      
@@ -123,22 +119,7 @@
 {% csrf_token %}
 <input id="addtopic" type="hidden" class="add" name="addtopic" value="1" />
 
-<input id="title" type="text" class="title" name="title" value="" />
-                            <label for="title">title</label><br>
-
-
-<textarea id="content1" type="text" name="content1" value=""></textarea> content1<br>
-
-<textarea id="content2" type="text" name="content2" value=""></textarea> content2<br>
-
-
-
-     
-<input type="file" name="image1" />Photo upload1 <br><br>
- <input type="file" name="image2" />Photo upload2 <br><br>
-       
-      <input id="total_test_time_in_minutes" type="number" class="total_test_time_in_minutes" name="total_test_time_in_minutes" value="" />
-                            <label for="standard">total_test_time_in_minutes</label><br>
+{{topic_form.as_p}}
 
 
 

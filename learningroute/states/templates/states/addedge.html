@@ -12,7 +12,9 @@
   
   
     
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>  
   
 </head>
 
@@ -25,10 +27,23 @@
 </div>
 </div>
 
+ {% if edge_exists_error %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Error!</strong> This edge already exists
+</div>
+{% endif %}
 
 
 
 
+
+ {% if two_nodes_needed_error %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Error!</strong> Exactly two nodes are required to be selected to make an edge
+</div>
+{% endif %}
 
 <form method="POST" action="/states/admin/addedge/{{chapter.id}}/">
     {% csrf_token %}
@@ -37,11 +52,7 @@
   Enter weight and time
 </h2>
 
-<input id="weight" type="number" class="weight" name="weight" value="" />
-                            <label for="weight">weight</label><br>
-<input id="time" type="number" class="time" name="time" value="" />
-                            <label for="time">time</label><br>
-<br><br>
+{{edge_form.as_p}}
 <h2 id="title" style="margin-bottom: 30px">
   Select the 2 Nodes which you want to add in this edge:
 </h2>

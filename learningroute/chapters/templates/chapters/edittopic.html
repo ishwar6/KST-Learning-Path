@@ -24,6 +24,14 @@
 </h2>
 
 
+
+
+{% if topic_update_error %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Error!</strong> Enter the fields correctly
+</div>
+{% endif %}
  <h3>Edit the Topic and press update or press Delete to delete this Topic:</h3>
 </div>
 </div>
@@ -35,40 +43,9 @@
 <input id="update" type="hidden" class="update" name="update" value="1" />
 
 
-     <input id="title" type="text" class="title" name="title" value="{{topic.title}}" />
-                            <label for="title">title</label><br>
-
-<textarea id="content1" type="text" name="content1" value="">{{topic.content1}}</textarea> content1<br>
-<textarea id="content2" type="text" name="content2" value="">{{topic.content2}}</textarea> content2<br>
-
-    
-<input type="file" name="image1" />
-<label for="image1">photo1</label><br> 
-  <div class="file-path-wrapper">
-        {% if topic.image1 %}
-        <input type="checkbox" id="nophoto" name="nophoto" value="1" >
-          <label for="nophoto">no photo</label> <br>
-
-<input class="file-path validate" name="image1" type="text" placeholder="Upload profile display picture" value="{{topic.image1.url }}">
-{% endif %}
-                                </div>
-       
-      <input id="total_test_time_in_minutes" type="number" class="total_test_time_in_minutes" name="total_test_time_in_minutes" value="{{topic.total_test_time_in_minutes}}" />
-                            <label for="total_test_time_in_minutes">Test Time (minutes)</label><br>
-
-
-
-
- <input type="file"  name="image2"  />
-      <label for="image2">photo2</label><br> 
-     {% if topic.image2 %}
-      <input type="checkbox" id="noansphoto" name="noansphoto" value="1" >
-          <label for="noansphoto">no photo</label> <br>
-
-
-  <input class="file-path validate" name="image2" type="text" placeholder="Upload profile display picture" value="{{ topic.image2.url }}"> <br><br>
+     {{topic_form.as_p}}
         
- {% endif %}  
+
 
 
 

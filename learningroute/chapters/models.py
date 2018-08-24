@@ -85,7 +85,7 @@ def get_filename_ext(filepath):
 
 
 class Chapter(models.Model):
-    title = models.CharField(max_length = 80, blank = False,)
+    title = models.CharField(max_length = 80, blank = False)
     gaurd = models.CharField(max_length = 120, default = 'others', choices = CHAPTER_CHOICE)
     standard = models.IntegerField( default = '10', blank = False)
     slug = models.SlugField(blank = True, null = True)
@@ -113,7 +113,7 @@ pre_save.connect(rl_pre_save_receiver, sender= Chapter)
 
 class Topic(models.Model):
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
-    title = models.CharField(max_length = 80, blank = True, null = True)
+    title = models.CharField(max_length = 80, blank = False, null = False)
     content1 = models.TextField(max_length = 30000, blank = False)
     image1 = models.FileField(upload_to = upload_image_path_topics, null = True, blank = True)
     content2 = models.TextField(max_length = 30000, blank = True)

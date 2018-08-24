@@ -37,7 +37,12 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
 </div>
 {% endif %}
 
-
+{% if chapter_added_error %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Error!</strong> Enter the fields correctly
+</div>
+{% endif %}
     {% if chapter_deleted %}
 <div class="alert alert-danger alert-dismissible">
   <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
@@ -52,7 +57,7 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
   {% csrf_token %}
 <input id="add" type="hidden" class="add" name="add" value="1" />
 
-<input id="title" type="text" class="title" name="title" value="" />
+<!-- <input id="title" type="text" class="title" name="title" value="" />
                             <label for="title">title</label><br>
 
      <input id="gaurd" type="text" class="gaurd" name="gaurd" value="" />
@@ -61,10 +66,10 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
  
        
       <input id="standard" type="number" class="standard" name="standard" value="" />
-                            <label for="standard">standard</label><br>
+                            <label for="standard">standard</label><br> -->
 
 
-
+  {{chapter_form.as_p}}
      
      
            <button type="submit">Add chapter</button>  

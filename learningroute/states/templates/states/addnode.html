@@ -12,7 +12,10 @@
   
   
     
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>  
   
 </head>
 
@@ -33,14 +36,23 @@
 <form method="POST" action="/states/admin/addnode/{{chapter.id}}/">
     {% csrf_token %}
 
+
+
+
+
+ {% if node_exists_error %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Error!</strong> Node already exists
+</div>
+{% endif %}
+
+
+
 <h2 id="title" style="margin-bottom: 30px">
   Enter description and credits
 </h2>
-<textarea id="textarea" type="text" name="description" value=""></textarea>
-                            <label for="textarea">description</label>  <br>
-
-<input id="credit" type="number" class="credit" name="credit" value="" />
-                            <label for="credit">credit</label><br>
+{{node_form.as_p}}
 <br><br>
 <h2 id="title" style="margin-bottom: 30px">
   Select the States which you want to add in this node:

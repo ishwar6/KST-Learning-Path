@@ -12,7 +12,10 @@
   
   
     
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>  
   
 </head>
 
@@ -23,7 +26,12 @@
   Update Node: 
 </h2>
 
-
+ {% if node_update_error %}
+<div class="alert alert-danger alert-dismissible">
+  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  <strong>Error!</strong> Enter the details properly
+</div>
+{% endif %}
  <h3>Edit the Node and press update or press Delete to delete this Node:</h3>
 </div>
 </div>
@@ -36,11 +44,7 @@
 
 <input id="update" type="hidden" class="update" name="update" value="1" />
 
-  <textarea id="description" type="text" name="description" value="">{{node.description}}</textarea> description<br>
-
-       
-      <input id="credit" type="number" class="credit" name="credit" value="{{node.credit}}" />
-                            <label for="credit">credit</label><br>
+  {{node_form.as_p}}
 
 
      
