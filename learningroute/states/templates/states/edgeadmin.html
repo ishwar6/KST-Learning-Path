@@ -46,7 +46,7 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
 
 
 
-
+{% if chapter_select %}
  <h3>To ADD  an EDGE select the chapter in which you want to add the EDGE:</h3>
 
 
@@ -77,8 +77,81 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
     </div>
 {% endif %}
 
+{% else %}
+
+<h3>Select a standard from the list of all the standards below to which you want to add the Edge:</h3>
+
+      <div class="row" style="margin:5px">
 
 
+<form class="col s12" method="POST" action="/states/admin/edge/" >
+   {% csrf_token %}
+   <input id="standard" type="hidden" class="standard" name="standard" value="7" />
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading"></div>
+           <div class="panel-body">
+             <p>standard 7</p>
+           </div>   
+           <div class="panel-primary">
+            <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select standard</button>
+           </div>
+         </div>
+      </div>
+</form>
+
+
+
+<form class="col s12" method="POST" action="/states/admin/edge/" >
+   {% csrf_token %}
+   <input id="standard" type="hidden" class="standard" name="standard" value="8" />
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading"></div>
+           <div class="panel-body">
+             <p>standard 8</p>
+           </div>   
+           <div class="panel-primary">
+            <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select standard</button>
+           </div>
+         </div>
+      </div>
+</form>
+
+<form class="col s12" method="POST" action="/states/admin/edge/" >
+   {% csrf_token %}
+   <input id="standard" type="hidden" class="standard" name="standard" value="9" />
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading"></div>
+           <div class="panel-body">
+             <p>standard 9</p>
+           </div>   
+           <div class="panel-primary">
+            <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select standard</button>
+           </div>
+         </div>
+      </div>
+</form>
+
+<form class="col s12" method="POST" action="/states/admin/edge/" >
+   {% csrf_token %}
+   <input id="standard" type="hidden" class="standard" name="standard" value="10" />
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading"></div>
+           <div class="panel-body">
+             <p>standard 10</p>
+           </div>   
+           <div class="panel-primary">
+            <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select standard</button>
+           </div>
+         </div>
+      </div>
+</form>
+
+      </div>
+{% endif %}
 
    </div>
 

@@ -48,8 +48,15 @@ def stateadmin(request):
         states=State.objects.all()        
 
         if request.POST.get('add',False):
-            return render(request, 'states/selectchapter.html', {'chapters':chapters, 'profile':user_obj})
+            return render(request, 'states/selectchapter.html', {'select_standard':1,'chapters':chapters, 'profile':user_obj})
       
+      
+        if request.POST.get('standard',False):
+            standard=request.POST.get('standard',False)
+            chapters=Chapter.objects.filter(standard=standard)
+            return render(request, 'states/selectchapter.html', {'chapters':chapters, 'profile':user_obj})
+
+
         context = {'topics':topics, 
         'chapters':chapters, 
         'states':states, 
@@ -146,6 +153,14 @@ def nodeadmin(request):
             nodes=Node.objects.all()
             chapters= Chapter.objects.all()
 
+
+            if request.POST.get('standard',False):
+                standard=request.POST.get('standard',False)
+                chapters=Chapter.objects.filter(standard=standard)
+                return render(request, 'states/nodeadmin.html', {'chapter_select':1,'chapters':chapters,'nodes':nodes, 'profile':user_obj})
+
+
+
             return render(request, 'states/nodeadmin.html', {'chapters':chapters,'nodes':nodes, 'profile':user_obj})
         else:
             return redirect('/auth/login/')
@@ -226,6 +241,13 @@ def edgeadmin(request):
             user_obj = User.objects.get(username=request.user)
             edges=Edge.objects.all()
             chapters= Chapter.objects.all()
+
+            if request.POST.get('standard',False):
+                standard=request.POST.get('standard',False)
+                chapters=Chapter.objects.filter(standard=standard)
+                return render(request, 'states/edgeadmin.html', {'chapter_select':1,'chapters':chapters,'edges':edges, 'profile':user_obj})
+
+
             return render(request, 'states/edgeadmin.html', {'chapters':chapters,'edges':edges, 'profile':user_obj})
     else:
         return redirect('/auth/login/')

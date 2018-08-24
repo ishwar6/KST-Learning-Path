@@ -20,7 +20,81 @@
 
   <div id="quiz text-center">
 
-  
+  {% if select_standard %}
+<h3>Select a standard from the list of all the standards below to which you want to add the state:</h3>
+
+      <div class="row" style="margin:5px">
+
+
+<form class="col s12" method="POST" action="/states/admin/" >
+   {% csrf_token %}
+   <input id="standard" type="hidden" class="standard" name="standard" value="7" />
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading"></div>
+           <div class="panel-body">
+             <p>standard 7</p>
+           </div>   
+           <div class="panel-primary">
+            <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select standard</button>
+           </div>
+         </div>
+      </div>
+</form>
+
+
+
+<form class="col s12" method="POST" action="/states/admin/" >
+   {% csrf_token %}
+   <input id="standard" type="hidden" class="standard" name="standard" value="8" />
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading"></div>
+           <div class="panel-body">
+             <p>standard 8</p>
+           </div>   
+           <div class="panel-primary">
+            <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select standard</button>
+           </div>
+         </div>
+      </div>
+</form>
+
+<form class="col s12" method="POST" action="/states/admin/" >
+   {% csrf_token %}
+   <input id="standard" type="hidden" class="standard" name="standard" value="9" />
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading"></div>
+           <div class="panel-body">
+             <p>standard 9</p>
+           </div>   
+           <div class="panel-primary">
+            <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select standard</button>
+           </div>
+         </div>
+      </div>
+</form>
+
+<form class="col s12" method="POST" action="/states/admin/" >
+   {% csrf_token %}
+   <input id="standard" type="hidden" class="standard" name="standard" value="10" />
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+      <div class="panel panel-primary">
+         <div class="panel-heading"></div>
+           <div class="panel-body">
+             <p>standard 10</p>
+           </div>   
+           <div class="panel-primary">
+            <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Select standard</button>
+           </div>
+         </div>
+      </div>
+</form>
+
+      </div>
+ 
+ {% else %}
 
   <div>
     
@@ -71,7 +145,7 @@
   <a href="/chapters/"><button id="chapter" class="btn"  style="margin-bottom: 2px">ADD / Delete/ Modify chapter</button></a>
   </div>
 
-
+ {% endif %}
 
 
 
