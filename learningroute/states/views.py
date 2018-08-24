@@ -102,7 +102,14 @@ def stateedit(request, title, topic):
             else:
                 state_form = forms.state_form(instance=state)
                 topics=Topic.objects.all()
-                return render(request, 'states/stateedit.html', {'topics':topics, 'state':state,'state_update_error':1,'state_form':state_form, 'profile':user_obj})
+
+                context = {'topics':topics, 
+                'state':state,
+                'state_update_error':1,
+                'state_form':state_form, 
+                'profile':user_obj}
+
+                return render(request, 'states/stateedit.html', context)
 
 
             
@@ -156,7 +163,13 @@ def selecttopic(request,title):
 
             else:
                 state_form = forms.state_form()
-                return render(request, 'states/addstate.html', {'state_add_error':1,'state_form':state_form,'topics':topic, 'profile':user_obj})
+
+                context = {'state_add_error':1,
+                'state_form':state_form,
+                'topics':topic, 
+                'profile':user_obj}
+
+                return render(request, 'states/addstate.html', context)
 
 
 
@@ -177,7 +190,13 @@ def nodeadmin(request):
             if request.POST.get('standard',False):
                 standard=request.POST.get('standard',False)
                 chapters=Chapter.objects.filter(standard=standard)
-                return render(request, 'states/nodeadmin.html', {'chapter_select':1,'chapters':chapters,'nodes':nodes, 'profile':user_obj})
+
+                context= {'chapter_select':1,
+                'chapters':chapters,
+                'nodes':nodes, 
+                'profile':user_obj}
+
+                return render(request, 'states/nodeadmin.html', context)
 
 
 
@@ -211,7 +230,13 @@ def nodeedit(request, nodeid):
 
             else:
                 node_form = forms.node_form(instance=node)
-                return render(request, 'states/nodeedit.html', {'node_update_error':1,'node_form':node_form,'node':node, 'profile':user_obj})
+
+                context = {'node_update_error':1,
+                'node_form':node_form,
+                'node':node, 
+                'profile':user_obj}
+
+                return render(request, 'states/nodeedit.html', context)
 
 
         node_form = forms.node_form(instance=node)
@@ -245,7 +270,14 @@ def addnode(request,chapid):
                         user_obj = User.objects.get(username=request.user)
 
                         node_form = forms.node_form()
-                        return render(request, 'states/addnode.html', {'node_exists_error':1,'node_form':node_form,'chapter':c,'states':states, 'profile':user_obj})
+
+                        context = {'node_exists_error':1,
+                        'node_form':node_form,
+                        'chapter':c,
+                        'states':states, 
+                        'profile':user_obj}
+
+                        return render(request, 'states/addnode.html', context)
 
 
                 newnode= Node()
@@ -288,7 +320,13 @@ def edgeadmin(request):
             if request.POST.get('standard',False):
                 standard=request.POST.get('standard',False)
                 chapters=Chapter.objects.filter(standard=standard)
-                return render(request, 'states/edgeadmin.html', {'chapter_select':1,'chapters':chapters,'edges':edges, 'profile':user_obj})
+
+                context = {'chapter_select':1,
+                'chapters':chapters,
+                'edges':edges, 
+                'profile':user_obj}
+
+                return render(request, 'states/edgeadmin.html', context)
 
 
             return render(request, 'states/edgeadmin.html', {'chapters':chapters,'edges':edges, 'profile':user_obj})
@@ -346,7 +384,14 @@ def addedge(request,chapid):
                     chapter_nodes=list()
                     chapter_nodes = nodes= Node.objects.filter(state_node__topic__chapter=c).distinct()
                     edge_form = forms.edge_form()
-                    return render(request, 'states/addedge.html', {'two_nodes_needed_error':1,'edge_form':edge_form,'chapter':c,'nodes':chapter_nodes, 'profile':user_obj})
+
+                    context = {'two_nodes_needed_error':1,
+                    'edge_form':edge_form,
+                    'chapter':c,
+                    'nodes':chapter_nodes, 
+                    'profile':user_obj}
+
+                    return render(request, 'states/addedge.html', context)
 
 
 
@@ -360,7 +405,14 @@ def addedge(request,chapid):
                         chapter_nodes=list()
                         chapter_nodes = nodes= Node.objects.filter(state_node__topic__chapter=c).distinct()
                         edge_form = forms.edge_form()
-                        return render(request, 'states/addedge.html', {'edge_exists_error':1,'edge_form':edge_form,'chapter':c,'nodes':chapter_nodes, 'profile':user_obj})
+
+                        context = {'edge_exists_error':1,
+                        'edge_form':edge_form,
+                        'chapter':c,
+                        'nodes':chapter_nodes, 
+                        'profile':user_obj}
+
+                        return render(request, 'states/addedge.html', context)
 
 
 

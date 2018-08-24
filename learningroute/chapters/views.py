@@ -17,10 +17,22 @@ def mainpage(request):
 			if chapter_form.is_valid():
 				chapter_form.save()
 				chapter_form = forms.chapter_form()
-				return render(request, 'chapters/mainpage.html', {'chapter_form':chapter_form,'chapter_added':1,'chapters':chapters, 'profile':user_obj})
+
+				context = {'chapter_form':chapter_form,
+				'chapter_added':1,
+				'chapters':chapters, 
+				'profile':user_obj}
+
+				return render(request, 'chapters/mainpage.html', context)
 			else:
 				chapter_form = forms.chapter_form()
-				return render(request, 'chapters/mainpage.html', {'chapter_form':chapter_form,'chapter_added_error':1,'chapters':chapters, 'profile':user_obj})
+
+				context = {'chapter_form':chapter_form,
+				'chapter_added_error':1,
+				'chapters':chapters, 
+				'profile':user_obj}
+
+				return render(request, 'chapters/mainpage.html', context)
 
 		chapter_form = forms.chapter_form()
 		return render(request, 'chapters/mainpage.html', {'chapter_form':chapter_form,'chapters':chapters, 'profile':user_obj})
@@ -37,7 +49,13 @@ def editchapter(request,chapternumber):
 		if request.POST.get('delete',False):
 			chapters=Chapter.objects.all() 
 			current_chapter.delete()
-			return render(request, 'chapters/mainpage.html', {'chapter_form':chapter_form,'chapter_deleted':1,'chapters':chapters, 'profile':user_obj})
+
+			context = {'chapter_form':chapter_form,
+			'chapter_deleted':1,
+			'chapters':chapters, 
+			'profile':user_obj}
+
+			return render(request, 'chapters/mainpage.html', context)
 		
 		if request.POST.get('addtopic',False):
 			current_chapter=Chapter.objects.get(id=chapternumber)
@@ -77,17 +95,39 @@ def editchapter(request,chapternumber):
 			if chapter_form.is_valid():
 				chapter_form.save()
 				topic_form = forms.topic_form()
-				return render(request, 'chapters/editchapter.html', {'topic_form':topic_form,'chapter':current_chapter,'chapter_form':chapter_form, 'profile':user_obj, 'topics':topics})
+
+				context = {'topic_form':topic_form,
+				'chapter':current_chapter,
+				'chapter_form':chapter_form, 
+				'profile':user_obj, 
+				'topics':topics}
+
+				return render(request, 'chapters/editchapter.html', context)
 			
 			else:
 				chapter_form = forms.chapter_form(instance=current_chapter)
 				topic_form = forms.topic_form()
-				return render(request, 'chapters/editchapter.html', {'chapter_update_error':1,'topic_form':topic_form,'chapter':current_chapter,'chapter_form':chapter_form, 'profile':user_obj, 'topics':topics})
+
+				context = {'chapter_update_error':1,
+				'topic_form':topic_form,
+				'chapter':current_chapter,
+				'chapter_form':chapter_form, 
+				'profile':user_obj, 
+				'topics':topics}
+
+				return render(request, 'chapters/editchapter.html', context)
 
 
 			
 		topic_form = forms.topic_form()
-		return render(request, 'chapters/editchapter.html', {'chapter_form':chapter_form,'topic_form':topic_form, 'chapter':current_chapter,'profile':user_obj, 'topics':topics})
+
+		context = {'chapter_form':chapter_form,
+		'topic_form':topic_form, 
+		'chapter':current_chapter,
+		'profile':user_obj, 
+		'topics':topics}
+
+		return render(request, 'chapters/editchapter.html', context)
 
 
 
@@ -125,7 +165,13 @@ def edittopic(request,topicnumber):
 
 			else:
 				topic_form = forms.topic_form(instance=current_topic)
-				return render(request, 'chapters/edittopic.html', {'topic_update_error':1,'topic_form':topic_form,'profile':user_obj, 'topic':current_topic})
+
+				context = {'topic_update_error':1,
+				'topic_form':topic_form,
+				'profile':user_obj, 
+				'topic':current_topic}
+
+				return render(request, 'chapters/edittopic.html', context)
 
 		topic_form = forms.topic_form(instance=current_topic)
 		return render(request, 'chapters/edittopic.html', {'topic_form':topic_form,'profile':user_obj, 'topic':current_topic})

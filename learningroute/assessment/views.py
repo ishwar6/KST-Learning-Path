@@ -186,10 +186,28 @@ def beginquiz(request, state_title, qnumber):
 						flag2 = 1
 				if flag == 2:
 					question_submission=User_submission.objects.get(user=user_obj,question=nextirrespective)
-					return render(request, 'quiz.html',{'questions':questions, 'state':state, 'store_users_submission':store_users_submission, 'firstrun':0,'testtime':testtime_remaining, 'currentquestion':nextirrespective, 'question_submission':question_submission})
+
+					context = {'questions':questions, 
+					'state':state, 
+					'store_users_submission':store_users_submission, 
+					'firstrun':0,
+					'testtime':testtime_remaining, 
+					'currentquestion':nextirrespective, 
+					'question_submission':question_submission}
+
+					return render(request, 'quiz.html',context)
 				else:
 					question_submission=User_submission.objects.get(user=user_obj,question=truenext)
-					return render(request, 'quiz.html',{'questions':questions, 'state':state, 'store_users_submission':store_users_submission, 'firstrun':0,'testtime':testtime_remaining, 'currentquestion':truenext, 'question_submission':question_submission})
+
+					context = {'questions':questions, 
+					'state':state, 
+					'store_users_submission':store_users_submission, 
+					'firstrun':0,
+					'testtime':testtime_remaining, 
+					'currentquestion':truenext, 
+					'question_submission':question_submission}
+
+					return render(request, 'quiz.html',context)
 	else:
 		return redirect('/auth/login/')
 
