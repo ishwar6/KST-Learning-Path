@@ -113,8 +113,16 @@ def beginquiz(request, state_title, qnumber):
 #case when user presses submit button for the current quiz question
 #question_submission is used to store the response of the user's submission for the currently submitted question
 				state=State.objects.get(title=state_title)
-				total_time_in_string=str(state.time)+":00"
-				format = '%M:%S'
+				if int(state.time)>60:
+					hours = int(int(state.time)/60)
+					minutes = int(int(state.time)%60)
+					total_time_in_string=str(str(hours)+':'+str(minutes))+":00"
+				else:
+					total_time_in_string=str(state.time)+":00"
+
+
+				
+				format = '%H:%M:%S'
 				#print(ggg)
 				current_question=Question.objects.get(id=qnumber)
 				question_submission=User_submission.objects.get(user=user_obj,question=current_question)

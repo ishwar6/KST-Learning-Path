@@ -144,12 +144,11 @@
 <h4>Score :  {{currentquestion.score }}    &nbsp &nbsp &nbsp  Level :   {{currentquestion.level }}  &nbsp &nbsp &nbsp 
  
   {% if firstrun %}
-
-
-
-  <span  id="time" name="time">{{testtime }}:00</span>
+  <span  id="time" name="time">0:{{testtime }}:00</span>
   <input placeholder="" id="timeshow" type="text" name="timeshow" value="1">
   {% endif %}
+
+  
   {% if not firstrun %}
   <span  id="time" name="time">{{testtime }}</span>
   <input placeholder="" id="timeshow" type="text" name="timeshow" value="1">
