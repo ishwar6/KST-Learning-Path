@@ -19,44 +19,44 @@
 <body>
 
   <div id="quiz text-center">
- <h2 id="title" style="margin-bottom: 30px">
-  Test Series
-</h2>
-<h2 id="title" style="margin-bottom: 10px">
-Welcome {{profile.first_name}} {{profile.last_name}}!
-</h2>
+    <h2 id="title" style="margin-bottom: 30px">
+      Test Series
+    </h2>
+    <h2 id="title" style="margin-bottom: 10px">
+      Welcome {{profile.first_name}} {{profile.last_name}}!
+    </h2>
 
-   <div class="row" style="margin:5px">
-    {% if allstates %}
-{% for i in allstates %}
+    <div class="row" style="margin:5px">
+      {% if allstates %}
+        {% for i in allstates %}
 
-    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
-      <div class="panel panel-primary">
-         <div class="panel-heading">{{i.title}}</div>
-           <div class="panel-body">
-             <p>Time duration : {{i.time}}</p>
-           </div>
+          <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+            <div class="panel panel-primary">
+              <div class="panel-heading">{{i.title}}</div>
+              <div class="panel-body">
+                <p>Time duration : {{i.time}}</p>
+              </div>
 
 
-           <form class="col s12" method="POST" action="/assess/beginquiz/{{i.title}}/begin/" enctype="multipart/form-data">
-              {% csrf_token %}
-           <div class="panel-primary">
-              <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Enter Test</button>
-           </div>
-          </form>
+              <form class="col s12" method="POST" action="/assess/beginquiz/{{i.title}}/begin/" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="panel-primary">
+                  <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Enter Test</button>
+                </div>
+              </form>
 
-         </div>
-      </div>
-
- {% endfor %}
-    </div>
-   </div>
+            </div>
+          </div>    
+        {% endfor %}
+      {% endif %}
+    </div>  
+  </div>
 
  
  
 <br>
 
- {% endif %}
+ 
      
  
      

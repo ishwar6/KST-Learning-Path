@@ -1,22 +1,23 @@
 from django.db import models
 from django.contrib.auth.models import User
-from questions.models import Question
+from chapters.models import Chapter
 from states.models import State
+from userstates.models import UserCurrentNode 
 # Create your models here.
 
 
 class TestsTaken(models.Model):
-	user=models.ForeignKey(User, on_delete=models.CASCADE)
-	state=models.ForeignKey(State, on_delete=models.CASCADE)
-	score=models.IntegerField(default=0)
+	user= models.ForeignKey(User, on_delete=models.CASCADE)
+	chapter= models.ForeignKey(Chapter, on_delete=models.CASCADE)
+	resultant_node= models.ForeignKey(UserCurrentNode, on_delete=models.CASCADE, null=True)
 	def __str__(self):
-		return str(self.user)+str(self.state)
+		return str(self.user)+str(self.chapter)
 
 
 
 class User_submission(models.Model):
 	user=models.ForeignKey(User, on_delete=models.CASCADE)
-	question = models.ForeignKey(Question, on_delete=models.CASCADE)
+	state=models.ForeignKey(State, on_delete=models.	CASCADE)
 	op1=models.BooleanField(default=False)
 	op2=models.BooleanField(default=False)
 	op3=models.BooleanField(default=False)

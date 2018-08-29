@@ -10,8 +10,8 @@ from states.models import Node, State
 
 class IntroductoryResponse(View):
 
-    the_chapters= Chapter.objects.filter(standard=9)
-    print(the_chapters)
+    #the_chapters= Chapter.objects.filter(standard=9)
+    #print(the_chapters)
 
     def get(self, request):
         return render(request, 'userstates/initialresponse_form.html', {'chapters': self.the_chapters})
