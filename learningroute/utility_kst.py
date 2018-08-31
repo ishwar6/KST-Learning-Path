@@ -37,17 +37,6 @@ def nodes2kstructure(nodes): # queryset(db node) -> kstructure(which is set(set(
 def num_items_in_domain(kstr): # gives number of states in the domain node
     return kst.domain(kstr)
 
-def number_optimum(num):
-    if num<=20:
-        return num//3
-    elif num in range(20,30):
-        return num//4
-    elif num in range(30,50):
-        return num//6
-    elif num>50 & num<100:
-        return num//10
-    elif num>100:
-        return min(num//15, 30)
 
 def outer_fringe(kstr, node):  # gives outer fringe in consumable format
     r.sets_options('quote', False)
@@ -88,3 +77,9 @@ def surplus_state(smaller_node, larger_node):  # db_node1, db_node2 -> db_state(
     lg= node2kstate(larger_node)
     for kitem in r.set_symdiff(r.set(sm), r.set(lg)):
         return kitem
+
+def domain_kstate(kstr): # takes a knowledge structure as i/p and returns its domain kstate(final node)
+    return kstate_to_node(kst.domain(kstr))
+
+def atom(kstr, st):     #takes a k struct and an item(state) and gives its atom
+    return kstate_to_node(kst.katoms(kstr, st))
