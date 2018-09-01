@@ -106,22 +106,7 @@
 
                  <div id="nexter"><button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Submit</button></div>
            </form> -->
-    <div id="disableforpropertime">
-      <br>
-      List of Questions:<br>
-      {% for i in store_users_submission %}
-        <form class="col s12" method="POST" action="/assess/beginquiz/{{state}}/{{i.question.id}}/" enctype="multipart/form-data">
-          {% csrf_token %}
-          <input placeholder="" id="timeshow_second" type="hidden" name="timeshow_second" value="1">
-          <input placeholder="" id="gotoquestion" type="hidden" name="gotoquestion" value="1">
-            {% if i.submitted_by_user %}
-              <button id="questionlist" type="submit" class="btn" style="margin-bottom: 2px; background-color: #4CAF50; ">Q{{i.question.id}}</button> &nbsp
-            {% else %}
-              <button id="questionlist" type="submit" class="btn" style="margin-bottom: 2px">Q{{i.question.id}}</button> &nbsp
-            {% endif %}
-        </form>
-      {% endfor %}
-    </div>
+
 
 
     {% if currentquestion.question_image  %}
@@ -133,20 +118,12 @@
     </h2>
 
 
-    <form class="col s12" method="POST" action="/assess/beginquiz/{{currentquestion.state}}/{{currentquestion.id}}/" enctype="multipart/form-data">
+    <form class="col s12" method="POST" action="/assess/beginquiz/{{chapter_title}}/{{state_id}}/" enctype="multipart/form-data">
       {% csrf_token %}
       <h4>
-        Score :  {{currentquestion.score }}    &nbsp &nbsp &nbsp  Level :   {{currentquestion.level }}  &nbsp &nbsp &nbsp 
+        Score :  {{currentquestion.score }}   
     
-        {% if firstrun %}
-          <span  id="time" name="time">0:{{testtime }}:00</span>
-          <input placeholder="" id="timeshow" type="text" name="timeshow" value="1">
-        {% endif %}
       
-        {% if not firstrun %}
-        <span  id="time" name="time">{{testtime }}</span>
-        <input placeholder="" id="timeshow" type="text" name="timeshow" value="1">
-        {% endif %}
       </h4> 
                 
               
@@ -271,10 +248,7 @@
 
     <br>
 
-    <form class="col s12" method="POST" action="/assess/beginquiz/{{state}}/end/" enctype="multipart/form-data">
-      {% csrf_token %}
-      <button id="endgame" type="submit" class="btn" style="margin-bottom: 2px">End Quiz</button> 
-    </form>
+   
 
 
 

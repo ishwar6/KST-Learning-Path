@@ -1,5 +1,6 @@
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
+from states.models import Node
 
 r= robjects.r
 kst= importr('kst')
@@ -13,9 +14,9 @@ def node2kstate(node):  # db node -> set(db state)
     for st in node.state_node.all():
         j=j+1
         if j==1:
-            temp= r.set(st)
+            temp= r.set(st.id)
             continue
-        temp= r.set_union(temp, r.set(st))
+        temp= r.set_union(temp, r.set(st.id))
     
     return temp
 
@@ -28,27 +29,47 @@ def nodes2kstructure(nodes): # queryset(db node) -> kstructure(which is set(set(
         i= i+1
         if i==1:
             temp_set= r.set(node2kstate(nd))
-            print(temp_set)
+            
             continue
         temp_set= r.set_union(temp_set, r.set(node2kstate(nd)))
-        print(temp_set)
+        
     return kst.kstructure(temp_set)
 
 def num_items_in_domain(kstr): # gives number of states in the domain node
-    return kst.domain(kstr)
+    return r.length(kst.kdomain(kstr))[0]
 
 
-def outer_fringe(kstr, node):  # gives outer fringe in consumable format
-    r.sets_options('quote', False)
+def outer_fringe(chap, node):  # gives outer fringe in consumable format
     size= node.state_node.all().count()
-    kstate= node2kstate(node)
+    print("################") ####################################
+    print("size of node "+str(node)+ " is "+str(size)) ##########################################33
     fringe_outer= list()
-    for padosi in kst.kneighbourhood(kstr, r.set(kstate)):
+    ch_nodes= Node.objects.filter(state_node__topic__chapter=chap).distinct()  # take all nodes E chapter
+    for nd in ch_nodes:
+        if nd.state_node.all().count()== size+1:  # select ony those whos state count is one more than curr nodes state count
+            print(nd.state_node.all().count()) #####################
+            a_match=1
+            for st_curr in node.state_node.all():     # check whether every state E curr_node in potential next_node
+                st_matches=0
+                for st_next in nd.state_node.all():
+                    if st_curr.id == st_next.id:
+                        st_matches=1
+                if st_matches== 0:
+                    a_match=0
+            if a_match ==1:
+                fringe_outer.append(nd)
+                print(fringe_outer)  ##########################################
+    '''neigh= kst.kneighbourhood(kstr, r.set(kstate))
+    print("inside of funcn")
+    print(str(neigh))
+    for padosi in neigh:
+    
         num_sett=0
         for sett in padosi:
             num_sett= num_sett+ 1
         if num_sett > size:
             fringe_outer.append(kstate_to_node(padosi))
+    '''
     return fringe_outer
 
 
@@ -66,20 +87,26 @@ def inner_fringe(kstr, node):  #gives the inner fringe in a consumable format
     return fringe_inner
 
 def kstate_to_node(kstate): # set(db state) -> db node
-    list_of_states=list()
-    for st in kstate:
-        list_of_states.append(st)
-    nd= Node.objects.get(state_node=list_of_states)
-    return nd
+    nodes_of_chapter= Node.objects.all()
+    size_of_set= r.length(kstate)[0]
+    match=1
+    for nd in nodes_of_chapter:
+        if nd.state_node.all().count()== size_of_set:
+            for state in nd.state_node.all():
+                if state.id not in kstate:
+                    match=0
+        if match == 1:
+            return nd
 
 def surplus_state(smaller_node, larger_node):  # db_node1, db_node2 -> db_state(in larger_node which is not present in smaller_node)
     sm= node2kstate(smaller_node)
     lg= node2kstate(larger_node)
+    print("ln:"+str(larger_node.id)+" sn:"+str(smaller_node.id))
     for kitem in r.set_symdiff(r.set(sm), r.set(lg)):
-        return kitem
+        return int(kitem[0][0])
 
 def domain_kstate(kstr): # takes a knowledge structure as i/p and returns its domain kstate(final node)
-    return kstate_to_node(kst.domain(kstr))
+    return kstate_to_node(kst.kdomain(kstr))
 
 def atom(kstr, st):     #takes a k struct and an item(state) and gives its atom
-    return kstate_to_node(kst.katoms(kstr, st))
+    return kstate_to_node(kst.katoms(kstr, r.set(st.id)))
