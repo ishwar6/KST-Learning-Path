@@ -1,6 +1,6 @@
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
-from states.models import Node
+from states.models import Node, State
 
 r= robjects.r
 kst= importr('kst')
@@ -41,13 +41,11 @@ def num_items_in_domain(kstr): # gives number of states in the domain node
 
 def outer_fringe(chap, node):  # gives outer fringe in consumable format
     size= node.state_node.all().count()
-    print("################") ####################################
-    print("size of node "+str(node)+ " is "+str(size)) ##########################################33
+    
     fringe_outer= list()
     ch_nodes= Node.objects.filter(state_node__topic__chapter=chap).distinct()  # take all nodes E chapter
     for nd in ch_nodes:
         if nd.state_node.all().count()== size+1:  # select ony those whos state count is one more than curr nodes state count
-            print(nd.state_node.all().count()) #####################
             a_match=1
             for st_curr in node.state_node.all():     # check whether every state E curr_node in potential next_node
                 st_matches=0
@@ -58,7 +56,6 @@ def outer_fringe(chap, node):  # gives outer fringe in consumable format
                     a_match=0
             if a_match ==1:
                 fringe_outer.append(nd)
-                print(fringe_outer)  ##########################################
     '''neigh= kst.kneighbourhood(kstr, r.set(kstate))
     print("inside of funcn")
     print(str(neigh))
@@ -73,17 +70,33 @@ def outer_fringe(chap, node):  # gives outer fringe in consumable format
     return fringe_outer
 
 
-def inner_fringe(kstr, node):  #gives the inner fringe in a consumable format
+def inner_fringe(chap, node):  #gives the inner fringe in a consumable format
     r.sets_options('quote', False)
+    print("node is "+str(node)) #################################################
     size= node.state_node.all().count()
-    kstate= node2kstate(node)
     fringe_inner= list()
+    ch_nodes= Node.objects.filter(state_node__topic__chapter=chap).distinct()  # take all nodes E chapter
+    for nd in ch_nodes:
+        if nd.state_node.all().count()== size-1:  # select ony those whos state count is one more than curr nodes state count
+            a_match=1
+            for st_next in nd.state_node.all():     # check whether every state E curr_node in potential next_node
+                st_matches=0
+                for st_curr in node.state_node.all():
+                    if st_curr.id == st_next.id:
+                        st_matches=1
+                if st_matches== 0:
+                    a_match=0
+            if a_match ==1:
+                fringe_inner.append(nd)
+    print(fringe_inner) ###############################################################
+    '''kstate= node2kstate(node)
     for padosi in kst.kneighbourhood(kstr, r.set(kstate)):
         num_sett=0
         for sett in padosi:
             num_sett= num_sett+ 1
         if num_sett < size:
             fringe_inner.append(kstate_to_node(padosi))
+    '''
     return fringe_inner
 
 def kstate_to_node(kstate): # set(db state) -> db node
@@ -101,9 +114,9 @@ def kstate_to_node(kstate): # set(db state) -> db node
 def surplus_state(smaller_node, larger_node):  # db_node1, db_node2 -> db_state(in larger_node which is not present in smaller_node)
     sm= node2kstate(smaller_node)
     lg= node2kstate(larger_node)
-    print("ln:"+str(larger_node.id)+" sn:"+str(smaller_node.id))
-    for kitem in r.set_symdiff(r.set(sm), r.set(lg)):
-        return int(kitem[0][0])
+    print("am in %s.. going to %s"%(str(smaller_node), str(larger_node))) #####################################
+    for kitem in r.set_symdiff(sm,lg):
+        return int(kitem[0])
 
 def domain_kstate(kstr): # takes a knowledge structure as i/p and returns its domain kstate(final node)
     return kstate_to_node(kst.kdomain(kstr))

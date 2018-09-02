@@ -71,13 +71,14 @@ def beginquiz(request, chapter_title, node_id):
 		
 		if node_id == "begin":
 			previous_submissions_status=1
-			iteration = 1
+			iteration = 0
 			chapter= Chapter.objects.get(title= chapter_title)
 			nodes= Node.objects.all().filter(state_node__topic__chapter= chapter) #querying out all nodes of chapter in which assessment to be taken
 			kstr= utility_kst.nodes2kstructure(nodes) # storing the knowledge structure
 			domain_count= utility_kst.num_items_in_domain(kstr) # no of states in domain node(gives us a count of no of steps from {} to Q)
 			num_quiz_questions= number_optimum(domain_count) # stores the number of questions of assessment test
-			
+			print("the total number of questions is "+str(num_quiz_questions))
+			#num_quiz_questions=4
 			try:
 				temp= TempActiveNode.objects.get(user=user_obj, chapter=chapter)
 			except:
@@ -95,14 +96,14 @@ def beginquiz(request, chapter_title, node_id):
 			context = {
 			'firstrun':1,
 			'chapter_title':chapter_title,
-			'state_id':successor_state.id,
+			'node_id':next_node.id,
 			'currentquestion':current_question
 			}
 
 			return render(request, 'quiz.html',context) 
 
 		# from hereon the code runs when usersubmission is made.
-		crawler_node= Node.objects.get(pk=node_id)  # this is the node from which state from which question has just been answered. Quiz is now formally at this node
+		crawler_node= Node.objects.get(id=node_id)  # this is the node from which state from which question has just been answered. Quiz is now formally at this node
 
 		op1=0
 		op2=0
@@ -134,21 +135,23 @@ def beginquiz(request, chapter_title, node_id):
 		correct_answer_submission=0
 		if op1==current_question.op1 and op2==current_question.op2 and op3==current_question.op3 and op4==current_question.op4 and integer_type_submission==current_question.integeral_answer:
 			correct_answer_submission = 1
+
 		
 
 		if correct_answer_submission==1:
+			print("KARRACT!!")
 			if previous_submissions_status<=0:
 				previous_submissions_status=1
 			else:
 				previous_submissions_status= min(previous_submissions_status+1, 3)
-		elif correct_answer_submission>=0:
+		elif correct_answer_submission==0:
+			print("WORNG!!")
 			if previous_submissions_status>=0:
 				previous_submissions_status=-1
 			else:
 				previous_submissions_status= max(previous_submissions_status-1, -3)
 
 		iteration = iteration + 1   # iteration holds the number of question already evaluated corresponding to user answer
-		print(iteration)
 		
 		if(iteration==num_quiz_questions):
 			try:
@@ -156,8 +159,10 @@ def beginquiz(request, chapter_title, node_id):
 				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=crawler_node)
 			except:
 				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=crawler_node)
+			print("NORMAL") ###############################
 
-			#return 
+			return render(request, 'end.html')
+
 		
 
 
@@ -165,19 +170,28 @@ def beginquiz(request, chapter_title, node_id):
 		
 		
 		if next_node == "nothing":
-			pass
+			nl= Node.objects.get_or_create(description='empty')
+			try:
+				UserCurrentNode.objects.get(user=user_obj, chapter=chapter).delete()
+				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=nl)
+			except:
+				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=nl)
+			print("NOTHING") ###############################
+			return render(request, 'end.html')
+
 		
 		elif next_node == "everything":
 			domain_node= utility_kst.domain_kstate(kstr)
 			print("domain node is "+str(domain_node)) ############################################################
 			try:
 				UserCurrentNode.objects.get(user=user_obj, chapter=chapter).delete()
-				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=domain_count)
+				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=crawler_node)
 			except:
-				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=domain_count)
+				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=crawler_node)
+			print("EVERYTHING") ###############################
 
-			#return
-		
+			return render(request, 'end.html')
+			
 		
 		ssid= utility_kst.surplus_state(crawler_node, next_node)
 		
@@ -188,7 +202,7 @@ def beginquiz(request, chapter_title, node_id):
 		
 		context = {
 		'chapter_title':chapter_title,
-		'state_id':successor_state.id,
+		'node_id':next_node.id,
 		'currentquestion':current_question
 		}
 
@@ -236,6 +250,8 @@ def crawl_node(qlevel, lc, node, kstruct,chapter):
 		if curr_level - stride > 0:
 			for i in range(stride):
 				kfringe_inner= utility_kst.inner_fringe(chapter, node)
+				print("inside crawl node function") #############################
+				print(kfringe_inner)
 				node_crawler= random.choice(kfringe_inner)
 		else:
 			return "nothing"

@@ -38,7 +38,7 @@ class TempActiveNode(models.Model):
 
 class UserCurrentNode(models.Model):
     user        = models.ForeignKey(User, on_delete=models.CASCADE)
-    node = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None)
+    node = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None, blank=True)
     chapter = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE, default=None)
     incorrect   = models.IntegerField(default = 0)
     timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)

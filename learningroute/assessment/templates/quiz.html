@@ -118,7 +118,7 @@
     </h2>
 
 
-    <form class="col s12" method="POST" action="/assess/beginquiz/{{chapter_title}}/{{state_id}}/" enctype="multipart/form-data">
+    <form class="col s12" method="POST" action="/assess/beginquiz/{{chapter_title}}/{{node_id}}/" enctype="multipart/form-data">
       {% csrf_token %}
       <h4>
         Score :  {{currentquestion.score }}   
