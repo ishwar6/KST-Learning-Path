@@ -6,225 +6,265 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 import hashlib
 import datetime
 import smtplib
+import utility_kst
+import random
+from random import randint
 
 from assessment.models import TestsTaken, User_submission
-from states.models import State
+from states.models import State, Node
 from questions.models import Question
+from chapters.models import Topic, Chapter
+from userstates.models import TempActiveNode, UserCurrentNode
 from itertools import *
 import datetime
-counter=0
-score=0
-test_result=0
-testtime_remaining=""
-total_time_in_string=0
-store_users_submission=list()
-question_submission=0
+
+previous_submissions_status = 0 
+#previous_two_submissions_status : if last two user submissions are correct value is 2, 
+# value is 1 if only last submission is correct, "-1" if ONLY last one was wrong and "-2" if both last two submissions are wrong
+# and value 0 if no information present yet
+
+kstr= 0
+num_quiz_questions=0
+domain_count=0
+chapter=0	
 
 
+def number_optimum(num):
+    if num<=20:
+        return num//3
+    elif num in range(20,30):
+        return num//4
+    elif num in range(30,50):
+        return num//6
+    elif num>50 & num<100:
+        return num//10
+    elif num>100:
+        return min(num//15, 30)
+
+curr_knowledge=0
+current_question=0
+successor_state=0
+iteration=0
+end_quiz=0
 
 def index(request):
 	global counter, score
 	if request.user.is_authenticated:
 		user_obj = User.objects.get(username=request.user)
-		#print(pr.first_name)
-		states=State.objects.all()
-		counter=0
-		score=0
-		return render(request, 'index.html', {'allstates':states, 'profile':user_obj})
+		all_chapters=Chapter.objects.all()
+		return render(request, 'index.html', {'all_chapters':all_chapters, 'profile':user_obj})
 	else:
 		return redirect('/auth/login/')
 
 
 
 
-def beginquiz(request, state_title, qnumber):
+def beginquiz(request, chapter_title, node_id):
 	if request.user.is_authenticated:
-				user_obj = User.objects.get(username=request.user)
-				global questions, store_users_submission, test_result, testtime_remaining,question_submission,score,total_time_in_string
+		
+		user_obj = User.objects.get(username=request.user)
+
+		global previous_submissions_status,  end_quiz, curr_knowledge
+		global domain_count, kstr, num_quiz_questions, current_question, successor_state ,iteration
+		global chapter
+		
+		
+		if node_id == "begin":
+			previous_submissions_status=1
+			iteration = 0
+			chapter= Chapter.objects.get(title= chapter_title)
+			nodes= Node.objects.all().filter(state_node__topic__chapter= chapter) #querying out all nodes of chapter in which assessment to be taken
+			kstr= utility_kst.nodes2kstructure(nodes) # storing the knowledge structure
+			domain_count= utility_kst.num_items_in_domain(kstr) # no of states in domain node(gives us a count of no of steps from {} to Q)
+			num_quiz_questions= number_optimum(domain_count) # stores the number of questions of assessment test
+			print("the total number of questions is "+str(num_quiz_questions))
+			#num_quiz_questions=4
+			try:
+				temp= TempActiveNode.objects.get(user=user_obj, chapter=chapter)
+			except:
+				print("except TempActiveNode")
+			
+			curr_knowledge= UserCurrentNode.objects.get_or_create(user=user_obj, chapter=chapter, node= temp.node)
+			next_node= crawl_node(domain_count, previous_submissions_status, temp.node, kstr, chapter)
+			
 
 
-				if qnumber=="begin": #When the quiz starts for the first time	
-					store_users_submission=list()
-					state=State.objects.get(title=state_title) #select state chosen by user
-					try:
-						test_result=TestsTaken.objects.get(user=user_obj, state=state)   #To store user's test results
-					except:
-						test_result=TestsTaken.objects.create(user=user_obj,state=state)
+			successor_state = State.objects.get(id= utility_kst.surplus_state(temp.node, next_node)) 
+			all_questions = Question.objects.filter(state=successor_state)
+			current_question = all_questions[randint(0, all_questions.count() - 1)] #selecting a random question from selected state
+			
+			context = {
+			'firstrun':1,
+			'chapter_title':chapter_title,
+			'node_id':next_node.id,
+			'currentquestion':current_question
+			}
 
-					questions=Question.objects.filter(state=state) 
-					for i in questions:
-						try:       #User_submission stores user's submission and time for each question in a state, if the user
-								   # had already given the test, we need to delete them and create new empty objects to store the 
-								   # user_submissions for  each questions of this test
-							old_user_submission=User_submission.objects.get(user=user_obj,question=i)
-							old_user_submission.delete()
-							store_users_submission.append(User_submission.objects.create(user=user_obj,question=i))
-						except:
-							store_users_submission.append(User_submission.objects.create(user=user_obj,question=i))
-						
+			return render(request, 'quiz.html',context) 
 
+		# from hereon the code runs when usersubmission is made.
+		crawler_node= Node.objects.get(id=node_id)  # this is the node from which state from which question has just been answered. Quiz is now formally at this node
 
-					context = {'questions':questions,
-									'state':state,
-									'store_users_submission':store_users_submission,
-									 'testtime':state.time,
-									 'firstrun':1,                      #to set timer properly for the first run                
-									  'currentquestion':questions[0]   #by default displaying the 1st question for first time
-									 }
+		op1=0
+		op2=0
+		op3=0
+		op4=0
+		integer_type_submission=""
 
+		if request.POST.get('rad', False)=="1":
+			op1=1 
+		if request.POST.get('rad', False)=="2":
+			op2=1 
+		if request.POST.get('rad', False)=="3":
+			op3=1 
+		if request.POST.get('rad', False)=="4":
+			op4=1 
 
-					return render(request, 'quiz.html', context)
+		if request.POST.get('one', False)=="1":
+			op1=1
+		if request.POST.get('two', False)=="1":
+			op2=1
+		if request.POST.get('three', False)=="1":
+			op3=1
+		if request.POST.get('four', False)=="1":
+			op4=1
 
-                    # Below 'timeshow' and 'timeshow_second' both have the same value, but since there are 2 forms in the page, 
-                    # one when user switches between  questions and another where user submits an answer, the time value needs
-                    # to be sent through both the forms so time can be updated properly. 
+		if current_question.integer_type:
+			integer_type_submission=str(request.POST.get('integertype', False))
 
-				if request.method == 'POST':
-					testtime_remaining=request.POST.get('timeshow', False)
+		correct_answer_submission=0
+		if op1==current_question.op1 and op2==current_question.op2 and op3==current_question.op3 and op4==current_question.op4 and integer_type_submission==current_question.integeral_answer:
+			correct_answer_submission = 1
 
-					if not testtime_remaining:
-						testtime_remaining=request.POST.get('timeshow_second', False)
+		
 
-				
-				if qnumber=="end":   #when user clicks end_quiz we check the user's submissions from the actual answers for the questions
-					for i in questions:
-						u=User_submission.objects.get(user=user_obj,question=i)
-						if u.op1==i.op1 and u.op2==i.op2 and u.op3==i.op3 and u.op4==i.op4 and u.integer_type_submission==i.integeral_answer:
-							u.correctans=1
-							u.save()
-							score=score+i.score
-					test_result.score=score
-					test_result.save()
-					return endquiz(request,score,1)
+		if correct_answer_submission==1:
+			print("KARRACT!!")
+			if previous_submissions_status<=0:
+				previous_submissions_status=1
+			else:
+				previous_submissions_status= min(previous_submissions_status+1, 3)
+		elif correct_answer_submission==0:
+			print("WORNG!!")
+			if previous_submissions_status>=0:
+				previous_submissions_status=-1
+			else:
+				previous_submissions_status= max(previous_submissions_status-1, -3)
 
-				if request.POST.get('gotoquestion',False)=="1": #goto_user_question is the question to which the user wants to go to 
-					goto_user_question=Question.objects.get(id=qnumber)
-					question_submission=User_submission.objects.get(user=user_obj,question=goto_user_question)
-					state=State.objects.get(title=state_title)
+		iteration = iteration + 1   # iteration holds the number of question already evaluated corresponding to user answer
+		
+		if(iteration==num_quiz_questions):
+			try:
+				UserCurrentNode.objects.get(user=user_obj, chapter=chapter).delete()
+				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=crawler_node)
+			except:
+				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=crawler_node)
+			print("NORMAL") ###############################
 
-					context = {'questions':questions, 
-					'state':state, 
-					'store_users_submission':store_users_submission, 
-					'firstrun':0,'testtime':testtime_remaining, 
-					'currentquestion':goto_user_question, 
-					'question_submission':question_submission}
+			return render(request, 'end.html')
 
-					return render(request, 'quiz.html',context)
-#case when user presses submit button for the current quiz question
-#question_submission is used to store the response of the user's submission for the currently submitted question
-				state=State.objects.get(title=state_title)
-				if int(state.time)>60:
-					hours = int(int(state.time)/60)
-					minutes = int(int(state.time)%60)
-					total_time_in_string=str(str(hours)+':'+str(minutes))+":00"
-				else:
-					total_time_in_string=str(state.time)+":00"
-
-
-				
-				format = '%H:%M:%S'
-				#print(ggg)
-				current_question=Question.objects.get(id=qnumber)
-				question_submission=User_submission.objects.get(user=user_obj,question=current_question)
-				question_submission.op1=0
-				question_submission.op2=0
-				question_submission.op3=0
-				question_submission.op4=0
-
-				startDateTime = datetime.datetime.strptime(total_time_in_string, format)
-				endDateTime = datetime.datetime.strptime(testtime_remaining, format)
-				time_difference = startDateTime - endDateTime
-				# print(time_difference)
-
-				question_submission.time_of_sumbission=str(time_difference)
-				question_submission.submitted_by_user=1
-				question_submission.save()
+		
 
 
-				if request.POST.get('rad', False)=="1":
-					question_submission.op1=1
-				if request.POST.get('rad', False)=="2":
-					question_submission.op2=1
-				if request.POST.get('rad', False)=="3":
-					question_submission.op3=1
-				if request.POST.get('rad', False)=="4":
-					question_submission.op4=1
+		next_node= crawl_node(domain_count, previous_submissions_status, crawler_node, kstr, chapter)
+		
+		
+		if next_node == "nothing":
+			nl= Node.objects.get_or_create(description='empty')
+			try:
+				UserCurrentNode.objects.get(user=user_obj, chapter=chapter).delete()
+				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=nl)
+			except:
+				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=nl)
+			print("NOTHING") ###############################
+			return render(request, 'end.html')
 
-				if request.POST.get('one', False)=="1":
-					question_submission.op1=1
-				if request.POST.get('two', False)=="1":
-					question_submission.op2=1
-				if request.POST.get('three', False)=="1":
-					question_submission.op3=1
-				if request.POST.get('four', False)=="1":
-					question_submission.op4=1
+		
+		elif next_node == "everything":
+			domain_node= utility_kst.domain_kstate(kstr)
+			print("domain node is "+str(domain_node)) ############################################################
+			try:
+				UserCurrentNode.objects.get(user=user_obj, chapter=chapter).delete()
+				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=crawler_node)
+			except:
+				UserCurrentNode.objects.create(user=user_obj, chapter=chapter, node=crawler_node)
+			print("EVERYTHING") ###############################
 
-				if current_question.integer_type:
-					
-					question_submission.integer_type_submission=str(request.POST.get('integertype', False))
-					
-				question_submission.save()
-				for i in store_users_submission:
-					if i.question == question_submission.question:
-						i.submitted_by_user=1
-				
-				state=State.objects.get(title=state_title)
+			return render(request, 'end.html')
+			
+		
+		ssid= utility_kst.surplus_state(crawler_node, next_node)
+		
+		successor_state = State.objects.get(id= ssid)
+		all_questions = Question.objects.filter(state=successor_state)
+		current_question = all_questions[randint(0, all_questions.count() - 1)] #selecting a random question from selected state
+
+		
+		context = {
+		'chapter_title':chapter_title,
+		'node_id':next_node.id,
+		'currentquestion':current_question
+		}
+
+		return render(request, 'quiz.html',context)
 
 
-				#below algorithm is used to cyclically obtain the next question for displaying to the user as 
-				# the user needs to be shown the next un-attempted question
 
-				qq = cycle(questions)
-				flag=0
-				flag2=0
-				for i in qq:
-					if flag:
-						uu=User_submission.objects.get(user=user_obj,question=i)
-						if flag2:
-							nextirrespective = i
-							flag2=0
-						if uu.submitted_by_user == 0:
-							truenext=i
-							break
-						if i == current_question:
-							flag = 2
-							break
-					if i == current_question:
-						flag = 1
-						flag2 = 1
-				if flag == 2:
-					question_submission=User_submission.objects.get(user=user_obj,question=nextirrespective)
 
-					context = {'questions':questions, 
-					'state':state, 
-					'store_users_submission':store_users_submission, 
-					'firstrun':0,
-					'testtime':testtime_remaining, 
-					'currentquestion':nextirrespective, 
-					'question_submission':question_submission}
 
-					return render(request, 'quiz.html',context)
-				else:
-					question_submission=User_submission.objects.get(user=user_obj,question=truenext)
 
-					context = {'questions':questions, 
-					'state':state, 
-					'store_users_submission':store_users_submission, 
-					'firstrun':0,
-					'testtime':testtime_remaining, 
-					'currentquestion':truenext, 
-					'question_submission':question_submission}
-
-					return render(request, 'quiz.html',context)
 	else:
 		return redirect('/auth/login/')
+			
+			
+		
 
 
 
-def endquiz(request,score,valid):
-	if request.user.is_authenticated:
-		print(score)
-		return render(request, 'index.html',{'score':score, 'valid':valid})
-	else:
-		return redirect('/auth/login/')
-	
+
+
+# This function takes the number of levels of nodes and the no of continuous correct or wrong as i/p and gives the node to be
+# crawled to based on previous response if available as o/p
+
+def crawl_node(qlevel, lc, node, kstruct,chapter):
+	curr_level= node.state_node.all().count()
+	stride=1
+	node_crawler= node
+	if lc > 0:    #satisfied when current evaluation answer is correct
+		'''if lc==1: stride=1
+		elif lc==2: stride=3
+		elif lc==3: stride=6
+		'''
+		if curr_level + stride < qlevel:
+			for i in range(stride):
+				kfringe_outer= utility_kst.outer_fringe(chapter, node)
+				node_crawler= random.choice(kfringe_outer)
+		else:
+			#node_crawler= utility_kst.domain_kstate(kstruct)
+			return "everything"
+	elif lc < 0:   # satisfied when current evaluated answwr is wrong
+		'''if lc==1: stride=1
+		elif lc==2: stride=2
+		elif lc==3: stride=3
+	'''
+		if curr_level - stride > 0:
+			for i in range(stride):
+				kfringe_inner= utility_kst.inner_fringe(chapter, node)
+				print("inside crawl node function") #############################
+				print(kfringe_inner)
+				node_crawler= random.choice(kfringe_inner)
+		else:
+			return "nothing"
+
+			'''min_node=None
+			min_count=qlevel
+			for state in node.state_node.all():
+				nd= utility_kst.atom(kstruct, state)
+				print("*************") ############################
+				print(nd)
+				if nd.state_node.all().count() < min_count:
+					min_node= nd
+					min_count= nd.state_node.all().count()
+			node_crawler= min_node'''
+	return node_crawler
+

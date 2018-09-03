@@ -2,26 +2,26 @@
 {% block content %}
 
 
-<!DOCTYPE html>
-<html lang="en" >
+  <!DOCTYPE html>
+  <html lang="en" >
 
-<head>
-  <meta charset="UTF-8">
-  <title>Multiple Choice Quiz</title>
-  
-  
-  
-    <style type="text/css">
-      div.hidden
-{
-   display: none
-}
-    </style>
-<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-  <script  src="{% static 'assessment/js/mainquiz.js' %}"></script>
-</head>
+  <head>
+    <meta charset="UTF-8">
+    <title>Multiple Choice Quiz</title>
+    
+    
+    
+      <style type="text/css">
+        div.hidden
+  {
+    display: none
+  }
+      </style>
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+    <script  src="{% static 'assessment/js/mainquiz.js' %}"></script>
+  </head>
 
-<body>
+  <body>
  
 <!-- 
    
@@ -106,191 +106,149 @@
 
                  <div id="nexter"><button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Submit</button></div>
            </form> -->
-<div id="disableforpropertime">
-  <br>
-  List of Questions:<br>
-{% for i in store_users_submission %}
- <form class="col s12" method="POST" action="/assess/beginquiz/{{state}}/{{i.question.id}}/" enctype="multipart/form-data">
-  {% csrf_token %}
-  <input placeholder="" id="timeshow_second" type="hidden" name="timeshow_second" value="1">
-
-  <input placeholder="" id="gotoquestion" type="hidden" name="gotoquestion" value="1">
-  {% if i.submitted_by_user %}
-  <button id="questionlist" type="submit" class="btn" style="margin-bottom: 2px; background-color: #4CAF50; ">Q{{i.question.id}}</button> &nbsp
- {% else %}
-<button id="questionlist" type="submit" class="btn" style="margin-bottom: 2px">Q{{i.question.id}}</button> &nbsp
- {% endif %}
-</form>
-{% endfor %}
-</div>
 
 
- {% if currentquestion.question_image  %}
-         <img src=" {{ currentquestion.question_image.url }}" height="250px" width="250px">
 
+    {% if currentquestion.question_image  %}
+      <img src=" {{ currentquestion.question_image.url }}" height="250px" width="250px">
     {% endif %}
 
-      <h2 id="qstntitle" style="margin-bottom: 0px">
- {{currentquestion.id}}]  {{currentquestion.text }} 
-</h2>
+    <h2 id="qstntitle" style="margin-bottom: 0px">
+      {{currentquestion.id}}]  {{currentquestion.text }} 
+    </h2>
+
+
+    <form class="col s12" method="POST" action="/assess/beginquiz/{{chapter_title}}/{{node_id}}/" enctype="multipart/form-data">
+      {% csrf_token %}
+      <h4>
+        Score :  {{currentquestion.score }}   
+    
+      
+      </h4> 
+                
+              
+      <div class="panel-primary" >
+
+        {% if currentquestion.integer_type %}
+          <input placeholder="" id="integertype" type="text" name="integertype" value="{{question_submission.integer_type_submission}}">
+          <label for="integertype">Enter answer</label><br><br><br>
+          
+        {% endif %}
+
+        {% if currentquestion.single_option %}  
+      
+          {% if question_submission.op1  %}
+            <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="1" checked>
+            <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option1 }}</label>
+          {% endif %}
+          
+          {% if not question_submission.op1 %}
+            <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="1">
+            <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option1 }}</label>
+          {% endif %}
+
+          {% if question_submission.op2  %}
+            <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="2" checked>
+            <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option2 }}</label>
+          {% endif %}
+
+          {% if not question_submission.op2 %}
+            <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="2">
+            <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option2 }}</label>
+          {% endif %}
 
 
 
+          {% if question_submission.op3  %}
+            <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="3" checked>
+            <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option3 }}</label>
+          {% endif %}
+          
+          {% if not question_submission.op3 %}
+            <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="3">
+            <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option3 }}</label>
+          {% endif %}
 
+
+
+          {% if question_submission.op4  %}
+            <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="4" checked>
+            <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option4 }}</label>
+          {% endif %}
+          
+          {% if not question_submission.op4 %}
+            <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="4">
+            <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option4 }}</label>
+          {% endif %}
+
+          <br><br><br>
+                  
+        {% endif %}
+
+
+        {% if not currentquestion.integer_type %}
+          
+          {% if not currentquestion.single_option %}
+
+            {% if question_submission.op1  %}
+              <input type="checkbox" id="person_{{ currentquestion.topic }}" name="one" value="1" checked>
+              <label for="person_{{ currentquestion.topic }}">{{currentquestion.option1}}</label>
+            {% endif %}
+      
+            {% if not question_submission.op1 %}
+              <input type="checkbox" id="person_{{ currentquestion.topic }}" name="one" value="1">
+              <label for="person_{{ currentquestion.topic }}">{{currentquestion.option1}}</label>
+            {% endif %}
+
+            {% if question_submission.op2  %}
+              <input type="checkbox" id="person_{{ currentquestion.topic }}" name="two" value="1" checked>
+              <label for="person_{{ currentquestion.topic }}">{{currentquestion.option2}}</label>
+            {% endif %}
+      
+            {% if not question_submission.op2 %}
+              <input type="checkbox" id="person_{{ currentquestion.topic }}" name="two" value="1">
+              <label for="person_{{ currentquestion.topic }}">{{currentquestion.option2}}</label>
+            {% endif %}
+
+            {% if question_submission.op3  %}
+              <input type="checkbox" id="person_{{ currentquestion.topic }}" name="three" value="1" checked>
+              <label for="person_{{ currentquestion.topic }}">{{currentquestion.option3}}</label>
+            {% endif %}
+
+            {% if not question_submission.op3 %}
+              <input type="checkbox" id="person_{{ currentquestion.topic }}" name="three" value="1">
+              <label for="person_{{ currentquestion.topic }}">{{currentquestion.option3}}</label>
+            {% endif %}
+
+            {% if question_submission.op4  %}
+              <input type="checkbox" id="person_{{ currentquestion.topic }}" name="four" value="1" checked=>
+              <label for="person_{{ currentquestion.topic }}">{{currentquestion.option4}}</label>
+            {% endif %}
+      
+            {% if not question_submission.op4 %}
+              <input type="checkbox" id="person_{{ currentquestion.topic }}" name="four" value="1">
+              <label for="person_{{ currentquestion.topic }}">{{currentquestion.option4}}</label>
+            {% endif %}
+
+            <br><br><br>
+                  
+          {% endif %}
         
+        {% endif %}
+      </div>
 
- <form class="col s12" method="POST" action="/assess/beginquiz/{{currentquestion.state}}/{{currentquestion.id}}/" enctype="multipart/form-data">
-              {% csrf_token %}
-<h4>Score :  {{currentquestion.score }}    &nbsp &nbsp &nbsp  Level :   {{currentquestion.level }}  &nbsp &nbsp &nbsp 
- 
-  {% if firstrun %}
-  <span  id="time" name="time">0:{{testtime }}:00</span>
-  <input placeholder="" id="timeshow" type="text" name="timeshow" value="1">
-  {% endif %}
 
+      <div id="nexter">
+        <button id="submitter" class="btn" type="submit" style="margin-bottom: 2px">
+          Submit and Next
+        </button>
+      </div>
   
-  {% if not firstrun %}
-  <span  id="time" name="time">{{testtime }}</span>
-  <input placeholder="" id="timeshow" type="text" name="timeshow" value="1">
-  {% endif %}
-</h4> 
-             
-            
+    </form> 
 
+    <br>
 
-
-           <div class="panel-primary" >
-
-{% if currentquestion.integer_type %}
- <input placeholder="" id="integertype" type="text" name="integertype" value="{{question_submission.integer_type_submission}}">
-            <label for="integertype">Enter answer</label><br><br><br>
-       
-       {% endif %}
-
-  {% if currentquestion.single_option %}  
-  
-  {% if question_submission.op1  %}
-  <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="1" checked>
-  <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option1 }}</label>
-  {% endif %}
-  {% if not question_submission.op1 %}
-       <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="1">
-        <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option1 }}</label>
-  {% endif %}
-
-
-
-
-  {% if question_submission.op2  %}
-  <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="2" checked>
-  <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option2 }}</label>
-  {% endif %}
-  {% if not question_submission.op2 %}
-       <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="2">
-        <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option2 }}</label>
-  {% endif %}
-
-
-
-
-
-
-
-    {% if question_submission.op3  %}
-  <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="3" checked>
-  <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option3 }}</label>
-  {% endif %}
-  {% if not question_submission.op3 %}
-       <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="3">
-        <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option3 }}</label>
-  {% endif %}
-
-
-
-
-
-
-
-    {% if question_submission.op4  %}
-  <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="4" checked>
-  <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option4 }}</label>
-  {% endif %}
-  {% if not question_submission.op4 %}
-       <input type="radio" id="person_{{ currentquestion.topic }}" name="rad" value="4">
-        <label for="person_{{ currentquestion.topic }}">{{ currentquestion.option4 }}</label>
-  {% endif %}
-
-
-
-
-
-<br><br><br>
-              
-   {% endif %}
-
-
-{% if not currentquestion.integer_type %}
-{% if not currentquestion.single_option %}
-
-
-
-
- 
-    {% if question_submission.op1  %}
-  <input type="checkbox" id="person_{{ currentquestion.topic }}" name="one" value="1" checked>
-<label for="person_{{ currentquestion.topic }}">{{currentquestion.option1}}</label>
-  {% endif %}
-  {% if not question_submission.op1 %}
-       <input type="checkbox" id="person_{{ currentquestion.topic }}" name="one" value="1">
-<label for="person_{{ currentquestion.topic }}">{{currentquestion.option1}}</label>
-  {% endif %}
-
-
-    {% if question_submission.op2  %}
-  <input type="checkbox" id="person_{{ currentquestion.topic }}" name="two" value="1" checked>
-<label for="person_{{ currentquestion.topic }}">{{currentquestion.option2}}</label>
-  {% endif %}
-  {% if not question_submission.op2 %}
-         <input type="checkbox" id="person_{{ currentquestion.topic }}" name="two" value="1">
-<label for="person_{{ currentquestion.topic }}">{{currentquestion.option2}}</label>
-  {% endif %}
-
-    {% if question_submission.op3  %}
-  <input type="checkbox" id="person_{{ currentquestion.topic }}" name="three" value="1" checked>
-<label for="person_{{ currentquestion.topic }}">{{currentquestion.option3}}</label>
-  {% endif %}
-  {% if not question_submission.op3 %}
- <input type="checkbox" id="person_{{ currentquestion.topic }}" name="three" value="1">
-<label for="person_{{ currentquestion.topic }}">{{currentquestion.option3}}</label>
-  {% endif %}
-
-    {% if question_submission.op4  %}
-  <input type="checkbox" id="person_{{ currentquestion.topic }}" name="four" value="1" checked=>
-<label for="person_{{ currentquestion.topic }}">{{currentquestion.option4}}</label>
-  {% endif %}
-  {% if not question_submission.op4 %}
-       <input type="checkbox" id="person_{{ currentquestion.topic }}" name="four" value="1">
-<label for="person_{{ currentquestion.topic }}">{{currentquestion.option4}}</label>
-  {% endif %}
-
-<br><br><br>
-              
-               {% endif %}
-              {% endif %}
-           </div>
-</div>
-
-
-                 <div id="nexter"><button id="submitter" class="btn" type="submit" style="margin-bottom: 2px">Submit and Next</button></div>
-           </form> 
-
-
-
-<br>
-<form class="col s12" method="POST" action="/assess/beginquiz/{{state}}/end/" enctype="multipart/form-data">
-  {% csrf_token %}
-<button id="endgame" type="submit" class="btn" style="margin-bottom: 2px">End Quiz</button> 
-</form>
+   
 
 
 
@@ -314,7 +272,7 @@
 </div> -->
 
 
-</body>
+  </body>
 
 
 

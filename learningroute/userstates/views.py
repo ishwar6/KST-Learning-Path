@@ -11,7 +11,7 @@ from states.models import Node, State
 class IntroductoryResponse(View):
 
     the_chapters= Chapter.objects.filter(standard=9)
-    print(the_chapters)
+    #print(the_chapters)
 
     def get(self, request):
         return render(request, 'userstates/initialresponse_form.html', {'chapters': self.the_chapters})
@@ -56,7 +56,7 @@ class IntroductoryResponse(View):
                     list_of_nodes.append(n)
                     print(list_of_nodes)
                     the_node= random.choice(list_of_nodes)
-
+                    print(the_node)
             if TempActiveNode.objects.filter(user = self.request.user).exists():
                 TempActiveNode.objects.filter(user = self.request.user).delete()
             
