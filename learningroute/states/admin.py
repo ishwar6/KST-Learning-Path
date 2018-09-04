@@ -10,6 +10,7 @@ class NodeInline(admin.TabularInline):
     model = Node.state_node.through
 
 class StateAdmin(admin.ModelAdmin):
+    list_display = ('title', 'topic', 'tag')
     inlines = [
         NodeInline,
     ]
