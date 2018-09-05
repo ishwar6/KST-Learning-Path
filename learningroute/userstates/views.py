@@ -79,7 +79,7 @@ class IntroductoryResponse(View):
                     chapter= the_chapter,
                     node= the_node
                 )
-        return render(request, 'userstates/initial_questions.html')
+        return redirect('assess/main/', permanent=True)
 
 
 
