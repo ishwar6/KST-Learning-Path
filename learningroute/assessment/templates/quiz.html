@@ -112,13 +112,13 @@
     {% if currentquestion.question_image  %}
       <img src=" {{ currentquestion.question_image.url }}" height="250px" width="250px">
     {% endif %}
-
+    <h5>you are currently attending evaluation on {{ chapter_title }}</h5><br><br>
     <h2 id="qstntitle" style="margin-bottom: 0px">
       {{currentquestion.id}}]  {{currentquestion.text }} 
     </h2>
 
 
-    <form class="col s12" method="POST" action="/assess/beginquiz/{{chapter_title}}/{{node_id}}/" enctype="multipart/form-data">
+    <form class="col s12" method="POST" action="/assess/quiz/{{chapter_title}}/{{node_id}}/" enctype="multipart/form-data">
       {% csrf_token %}
       <h4>
         Score :  {{currentquestion.score }}   
