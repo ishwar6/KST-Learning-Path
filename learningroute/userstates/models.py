@@ -10,41 +10,36 @@ CHAPTER_PROFIENCY= (
     ('advanced','Advanced')
 )
 class Proficiency(models.Model):
-    user= models.ForeignKey(User, on_delete=models.CASCADE, default=None)
-    chapter= models.ForeignKey('chapters.Chapter', on_delete=models.CASCADE)
-    level= models.CharField(max_length = 60, choices = CHAPTER_PROFIENCY, blank=False)
-    significance= models.IntegerField(blank = True, null = True)
+    user         = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
+    chapter      = models.ForeignKey('chapters.Chapter', on_delete=models.CASCADE)
+    level        = models.CharField(max_length = 60, choices = CHAPTER_PROFIENCY, blank=False)
+    significance = models.IntegerField(blank = True, null = True)
 
     def __str__(self):
         return str(self.user) + ' have ' + str(self.level) + ' level for the chapter:- ' + str(self.chapter)
 
 
-
-
-
-
-
 class TempActiveNode(models.Model):
-    user = models.ForeignKey(User, on_delete=  models.CASCADE)
-    chapter = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE)
-    node = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None)
+    user        = models.ForeignKey(User, on_delete=  models.CASCADE)
+    chapter     = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE)
+    node        = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None)
 
     def __str__(self):
         return str(self.user) + ' - ' + str(self.node) + ' - for the chapter ' + str(self.chapter)
 
-
-
-
-
 class UserCurrentNode(models.Model):
     user        = models.ForeignKey(User, on_delete=models.CASCADE)
-    node = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None, blank=True)
-    chapter = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE, default=None)
+    node        = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None, blank=True)
+    chapter     = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE, default=None)
     incorrect   = models.IntegerField(default = 0)
     timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
 
     def __str__(self):
         return str(self.user) + ' - ' +str(self.node)
+
+
+
+
 
 
 

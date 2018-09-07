@@ -1,0 +1,44 @@
+
+{% if empty %}
+
+<h2>NEXT Chapter</h2>
+
+{% else %}
+
+
+<h1>{{chapter}}</h1>
+Currently you knows:
+<br>
+{{q}}
+<br>
+
+<br>
+
+<h2>Different states to cover for this chapter</h2>
+{% for s in state  %}
+{{s}}<br>
+{% endfor %}
+
+<h2>Different knowledge sets you might have</h2>
+<br>
+{% for n in node  %}
+{{n}}<br>
+{% endfor %}
+<h3>You are currently in: <br>{{current}}</h3>
+<h2>Ohkk! Topic to learn for now</h2>
+
+<h3>{{topic.title}}</h3>
+<p>{{topic.text}}</p>
+
+
+
+<ul>
+{% for a in illust  %}
+<li>
+{{a}}<br>
+{{a.text}}<br>
+</li><br>
+{% endfor %}
+
+</ul>
+{% endif %}
