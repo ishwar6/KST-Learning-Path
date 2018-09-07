@@ -11,7 +11,7 @@ import utility_kst
 import random
 from random import randint
 
-
+from django.contrib import messages
 from assessment.models import TestsTaken, User_submission
 from states.models import State, Node
 from questions.models import Question
@@ -63,7 +63,8 @@ def index(request):
 
 
 # helper function for assigning glob-vars with appropriate values before quiz from a new chapter begins
-def beginquiz(user_obj, chapter_from_url):     
+def beginquiz(request, user_obj, chapter_from_url, fr):     
+	
 	global previous_submissions_status,  end_quiz, curr_knowledge
 	global domain_count, kstr, num_quiz_questions, current_question, successor_state ,iteration
 	global chapter, qset_chaters
@@ -76,27 +77,42 @@ def beginquiz(user_obj, chapter_from_url):
 	chapter= Chapter.objects.get(title=chapter_from_url)
 	nodes= Node.objects.all().filter(state_node__topic__chapter= chapter_from_url) #querying out all nodes of chapter in which assessment to be taken
 	if nodes.count()==0:
-		return 1
+		messages.error(request, 'mdisplay.html')
+		return render(request, 'mdisplay.html')
 
 	kstr= utility_kst.nodes2kstructure(nodes) # storing the knowledge structure
 	domain_count= utility_kst.num_items_in_domain(kstr) # no of states in domain node(gives us a count of no of steps from {} to Q)
-	num_quiz_questions= number_optimum(domain_count) # stores the number of questions of assessment test
+	
+	num_quiz_questions= number_optimum(domain_count)    # stores the number of questions of assessment test while making sure that number of node levels is not too small than we can work with 
+	if num_quiz_questions==0:                           # num_quiz_questions would be zero if n(States in chapter) < 4 Avoid that from happening even during testing
+		messages.error(request, 'Number of states in chapter is too less. Not even permissible in development env ')
+		return render(request, 'mdisplay.html')
 	print("the total number of questions is "+str(num_quiz_questions))##########################################
 	#num_quiz_questions=4
+	
 	try:
 		temp= TempActiveNode.objects.get(user=user_obj, chapter=chapter_from_url)
 	except:
-		print("except TempActiveNode")
+		messages.error(request, 'the temporary knowledge state of user has not been collected from previous introcudtory response step.')
+		return render(request, 'mdisplay.html')
 			
 	curr_knowledge= UserCurrentNode.objects.get_or_create(user=user_obj, chapter=chapter_from_url, node= temp.node)
 	next_node= crawl_node(domain_count, previous_submissions_status, temp.node, kstr, chapter_from_url)
+	if next_node is None:
+		messages.error(request, 'next node to be traversed couldnt be obtained. Check utility code and aux functions')
+		return render(request, 'mdisplay.html')
 			
 	successor_state = State.objects.get(id= utility_kst.surplus_state(temp.node, next_node)) 
-	all_questions = Question.objects.filter(state=successor_state)
+	
+	try:
+		all_questions = Question.objects.filter(state=successor_state)
+	except:
+		messages.error(request, 'Question with given criteria not found')
+		return render(request, 'mdisplay.html')
 	current_question = all_questions[randint(0, all_questions.count() - 1)] #selecting a random question from selected state
 			
 	context = {
-		'firstrun':1,
+		'firstrun':fr,
 		'chapter_title':chapter_from_url,
 		'node_id':next_node.id,
 		'currentquestion':current_question
@@ -117,9 +133,13 @@ def quiz(request, chapter_title, node_id):
 		
 		if node_id == "begin":
 			index_next_chapter=0
-			context= beginquiz(usr, chapter_title)
+			if index_next_chapter==0:
+				messages.info(request, 'this is a demo messege')
+				return render(request, 'mdisplay.html')
+			print(chapter_title)
+			context= beginquiz(request, usr, chapter_title,1)
 			while(context==1):
-				context= beginquiz(usr, qset_chapters[index_next_chapter])
+				context= beginquiz(request, usr, qset_chapters[index_next_chapter].title,0)
 			return render(request, 'quiz.html',context) 
 
 		# from hereon the code runs when usersubmission is made.
@@ -182,9 +202,9 @@ def quiz(request, chapter_title, node_id):
 			try:
 				next_chapter= qset_chapters[index_next_chapter]
 				print("next chapter is : "+ str(next_chapter))
-				context= beginquiz(usr, next_chapter.title)
+				context= beginquiz(request, usr, next_chapter.title,0)
 				while(context==1):
-					context= beginquiz(usr, qset_chapters[index_next_chapter].title)
+					context= beginquiz(request, usr, qset_chapters[index_next_chapter].title,0)
 				return render(request, 'quiz.html', context)
 			except:
 				return render(request, 'end.html')
@@ -204,9 +224,9 @@ def quiz(request, chapter_title, node_id):
 
 			try:
 				next_chapter= qset_chapters[index_next_chapter]
-				context= beginquiz(usr, next_chapter.title)
+				context= beginquiz(request, usr, next_chapter.title,0)
 				while(context==1):
-					context= beginquiz(usr, qset_chapters[index_next_chapter].title)
+					context= beginquiz(request, usr, qset_chapters[index_next_chapter].title,0)
 				return render(request, 'quiz.html', context)
 			except:
 				return render(request, 'end.html')
@@ -223,9 +243,9 @@ def quiz(request, chapter_title, node_id):
 
 			try:
 				next_chapter= qset_chapters[index_next_chapter]
-				context= beginquiz(usr, next_chapter.title)
+				context= beginquiz(request, usr, next_chapter.title,0)
 				while(context==1):
-					context= beginquiz(usr, qset_chapters[index_next_chapter].title)
+					context= beginquiz(request ,usr, qset_chapters[index_next_chapter].title)
 				return render(request, 'quiz.html', context)
 			except:
 				return render(request, 'end.html')
