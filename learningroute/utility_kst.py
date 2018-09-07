@@ -43,7 +43,7 @@ def outer_fringe(chap, node):  # gives outer fringe in consumable format
     size= node.state_node.all().count()
     
     fringe_outer= list()
-    ch_nodes= Node.objects.filter(state_node__topic__chapter=chap).distinct()  # take all nodes E chapter
+    ch_nodes= Node.objects.filter(state_node__topic__chapter__title=chap).distinct()  # take all nodes E chapter
     for nd in ch_nodes:
         if nd.state_node.all().count()== size+1:  # select ony those whos state count is one more than curr nodes state count
             a_match=1
@@ -75,7 +75,7 @@ def inner_fringe(chap, node):  #gives the inner fringe in a consumable format
     print("node is "+str(node)) #################################################
     size= node.state_node.all().count()
     fringe_inner= list()
-    ch_nodes= Node.objects.filter(state_node__topic__chapter=chap).distinct()  # take all nodes E chapter
+    ch_nodes= Node.objects.filter(state_node__topic__chapter__title=chap).distinct()  # take all nodes E chapter
     for nd in ch_nodes:
         if nd.state_node.all().count()== size-1:  # select ony those whos state count is one more than curr nodes state count
             a_match=1
