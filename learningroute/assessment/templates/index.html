@@ -28,6 +28,8 @@
 
     <div class="row" style="margin:5px">
       {% if first_chapter %}
+
+   
         <!--
           <ul>  
           {% for i in all_chapters %}  
@@ -35,7 +37,8 @@
           {% endfor %}
         </ul>
         -->  
-        <form class="col s12" method="POST" action="/assess/quiz/{{first_chapter.title}}/begin/" >
+        <form class="col s12" method="POST" action="{% url 'assess:quiz' first_chapter.title 'begin'  %}" >
+
           {% csrf_token %}
           <button id="submit" class="btn" type="submit" style="margin-bottom: 2px">Enter Assessment</button>            
         </form>

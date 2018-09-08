@@ -56,7 +56,11 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
   <div class="row" style="margin:5px">
    
 {% for i in chapters %}
-<form method="POST" action="/states/admin/addnode/{{i.id}}/">
+<form method="POST" action="{% url 'states:addnode'  i.id %}">
+
+   
+
+
   {% csrf_token %}
  <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
       <div class="panel panel-primary">
@@ -85,7 +89,10 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
       <div class="row" style="margin:5px">
 
 
-<form class="col s12" method="POST" action="/states/admin/node/" >
+<form class="col s12" method="POST" action=" {% url 'states:nodeadmin' %}" >
+
+ 
+
    {% csrf_token %}
    <input id="standard" type="hidden" class="standard" name="standard" value="7" />
       <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
@@ -103,7 +110,7 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
 
 
 
-<form class="col s12" method="POST" action="/states/admin/node/" >
+<form class="col s12" method="POST" action=" {% url 'states:nodeadmin' %}" >
    {% csrf_token %}
    <input id="standard" type="hidden" class="standard" name="standard" value="8" />
       <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
@@ -119,7 +126,7 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
       </div>
 </form>
 
-<form class="col s12" method="POST" action="/states/admin/node/" >
+<form class="col s12" method="POST" action=" {% url 'states:nodeadmin' %}" >
    {% csrf_token %}
    <input id="standard" type="hidden" class="standard" name="standard" value="9" />
       <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
@@ -135,7 +142,7 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
       </div>
 </form>
 
-<form class="col s12" method="POST" action="/states/admin/node/" >
+<form class="col s12" method="POST" action=" {% url 'states:nodeadmin' %}" >
    {% csrf_token %}
    <input id="standard" type="hidden" class="standard" name="standard" value="10" />
       <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
@@ -171,7 +178,11 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
   <div class="row" style="margin:5px">
    
 {% for i in nodes %}
-<form class="col s12" method="POST" action="/states/admin/node/{{i.id}}/" enctype="multipart/form-data">
+<form class="col s12" method="POST" action="{% url 'states:nodeedit' i.id %}" enctype="multipart/form-data">
+
+   
+
+
               {% csrf_token %}
 <input id="edit" type="hidden" class="edit" name="edit" value="1" />
 
@@ -197,18 +208,7 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
     </div>
 {% endif %}
 
-
- 
-
-
   </div>
-
-
-
-
-
-
 </body>
-
 </html>
 {% endblock content %}

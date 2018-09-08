@@ -56,8 +56,11 @@ def index(request):
 	if request.user.is_authenticated:
 		user_obj = User.objects.get(username=request.user)
 		all_chapters=Chapter.objects.filter(standard=9)
+		try:
+			return render(request, 'index.html', {'first_chapter':all_chapters[0], 'profile':user_obj})
+		except:
+			return render(request, 'index.html', {'first_chapter':all_chapters, 'profile':user_obj})
 
-		return render(request, 'index.html', {'first_chapter':all_chapters[0], 'profile':user_obj})
 	else:
 		return redirect('/auth/login/')
 
@@ -397,4 +400,4 @@ class IntroductoryResponse(View):
                     chapter= the_chapter,
                     node= the_node
                 )
-        return redirect('main/')
+        return redirect(reverse_lazy('index'))

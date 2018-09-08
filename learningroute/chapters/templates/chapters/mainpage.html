@@ -53,7 +53,11 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
  <h3>Enter details and Press ADD Chapter to add a new Chapter:</h3>
 
 
-<form method="POST" action="/chapters/" enctype="multipart/form-data">
+<form method="POST" action="{% url 'chapters:mainpage' %}" enctype="multipart/form-data">
+
+ 
+
+
   {% csrf_token %}
 <input id="add" type="hidden" class="add" name="add" value="1" />
 
@@ -94,7 +98,9 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
 {% for i in chapters %}
 
 
-<form class="col s12" method="POST" action="/chapters/{{i.id}}/" enctype="multipart/form-data">
+<form class="col s12" method="POST" action="{% url 'chapters:editchapter' i.id   %}" enctype="multipart/form-data">
+
+  
               {% csrf_token %}
 <input id="edit" type="hidden" class="edit" name="edit" value="1" />
 

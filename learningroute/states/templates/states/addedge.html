@@ -46,7 +46,11 @@
 </div>
 {% endif %}
 
-<form method="POST" action="/states/admin/addedge/{{chapter.id}}/">
+<form method="POST" action="{% url 'states:addedge' chapter.id   %}">
+
+  
+
+  
     {% csrf_token %}
 
 <h2 id="title" style="margin-bottom: 30px">

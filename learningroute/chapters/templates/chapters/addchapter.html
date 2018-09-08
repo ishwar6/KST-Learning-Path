@@ -20,16 +20,18 @@
  <div style="text-align: left; margin-left: 30%" >
   <div id="quiz text-center">
  <h2 id="title" style="margin-bottom: 30px">
-  Update State: 
+  Update topic: 
 </h2>
 
 
- <h3>Enter the details for this state:</h3>
+ <h3>Enter the details for this topic:</h3>
 </div>
 </div>
 
 
-     <form method="POST" action="/states/admin/topic/{{topics.title}}/" >
+     <form method="POST" action="{% url 'chapters:edittopic' topics.title   %}" >
+
+
   {% csrf_token %}
   <div style="text-align: left; margin-left: 30%" >
 <input id="add" type="hidden" class="add" name="add" value="1" />

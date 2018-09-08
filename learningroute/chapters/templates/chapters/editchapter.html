@@ -54,7 +54,9 @@
 </div>
 
 
-     <form method="POST" action="/chapters/{{chapter.id}}/" enctype="multipart/form-data">
+     <form method="POST" action="{% url 'chapters:editchapter' chapter.id   %}" enctype="multipart/form-data">
+
+
   {% csrf_token %}
   <div style="text-align: left; margin-left: 30%" >
 <input id="update" type="hidden" class="update" name="update" value="1" />
@@ -76,7 +78,10 @@
 
 
 
- <form method="POST" action="/chapters/{{chapter.id}}/" >
+ <form method="POST" action=" {% url 'chapters:editchapter' chapter.id   %}" >
+
+ 
+
   {% csrf_token %}
   <div style="text-align: left; margin-left: 30%" >
    
@@ -114,8 +119,8 @@
 <h3 id="title" style="margin-bottom: 30px">
   Fill the details and press Add topic to add your topic to this chapter:
 </h3>
- <form method="POST" action="/chapters/{{chapter.id}}/" enctype="multipart/form-data">
-
+ <form method="POST" action="{% url 'chapters:editchapter' chapter.id   %}" enctype="multipart/form-data">
+ 
 {% csrf_token %}
 <input id="addtopic" type="hidden" class="add" name="addtopic" value="1" />
 
@@ -136,7 +141,8 @@
     
 
 {% for i in topics %}
-<form class="col s12" method="POST" action="/chapters/topic/{{i.id}}/" enctype="multipart/form-data">
+<form class="col s12" method="POST" action="{% url 'chapters:edittopic' i.id   %}" enctype="multipart/form-data">
+  
               {% csrf_token %}
 <input id="topicedit" type="hidden" class="topicedit" name="topicedit" value="1" />
 <input id="topicnumber" type="hidden" class="topicnumber" name="topicnumber" value="{{i.id}}" />

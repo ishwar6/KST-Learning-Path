@@ -33,7 +33,9 @@
 
 
 
-<form method="POST" action="/states/admin/addnode/{{chapter.id}}/">
+<form method="POST" action="{% url 'states:addnode' chapter.id   %}">
+
+  
     {% csrf_token %}
 
 

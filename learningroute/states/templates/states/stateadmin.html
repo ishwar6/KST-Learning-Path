@@ -47,7 +47,10 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
 
  <h3>Press ADD State to add a new State:</h3>
 
-<form method="POST" action="/states/admin/">
+<form method="POST" action="{% url 'states:stateadmin'  %}">
+
+  
+  
   {% csrf_token %}
 <input id="add" type="hidden" class="add" name="add" value="1" />
   <button class= "btn" type="submit">ADD State</button>
@@ -70,7 +73,10 @@ Welcome {{profile.first_name}} {{profile.last_name}}!
   <div class="row" style="margin:5px">
    
 {% for i in states %}
-<form class="col s12" method="POST" action="/states/admin/{{i.title}}/{{i.topic}}/" enctype="multipart/form-data">
+<form class="col s12" method="POST" action="{% url 'states:stateedit' i.title i.topic %}" enctype="multipart/form-data">
+
+  
+
               {% csrf_token %}
 <input id="edit" type="hidden" class="edit" name="edit" value="1" />
 

@@ -29,7 +29,9 @@
 </div>
 
 
-     <form method="POST" action="/states/admin/edge/{{edge.id}}/" >
+     <form method="POST" action="{% url 'states:edgeedit' edge.id %}" >
+
+
   {% csrf_token %}
   <div style="text-align: left; margin-left: 30%" >
 
@@ -49,7 +51,9 @@
 
 
 
- <form method="POST" action="/states/admin/edge/{{edge.id}}/" >
+ <form method="POST" action="{% url 'states:edgeedit' edge.id %}" >
+
+  
   {% csrf_token %}
   <div style="text-align: left; margin-left: 30%" >
    

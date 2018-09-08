@@ -41,7 +41,10 @@
 </div>
 
 
-     <form method="POST" action="/states/admin/topic/{{topics.title}}/" >
+     <form method="POST" action="{% url 'states:selecttopic' topics.title   %}" >
+
+      
+      
   {% csrf_token %}
   <div style="text-align: left; margin-left: 30%" >
 <input id="add" type="hidden" class="add" name="add" value="1" />

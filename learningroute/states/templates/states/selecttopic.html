@@ -33,7 +33,10 @@
   <div class="row" style="margin:5px">
    
 {% for i in topics %}
-<form class="col s12" method="POST" action="/states/admin/topic/{{i.title}}/" >
+<form class="col s12" method="POST" action="{% url 'states:selecttopic'  i.title %}" >
+
+  
+
               {% csrf_token %}
 <!-- <input id="edit" type="hidden" class="edit" name="edit" value="1" /> -->
 
@@ -67,7 +70,7 @@
 
  <br>
   <h3>If you want to add/ update/ delete Topics click the button below and make the necessary changes and come bak here:</h3>
-   <a href="/chapters/"><button id="topic" class="btn"  style="margin-bottom: 2px">ADD / Delete/ Modify topic</button>
+   <a href="{% url 'chapters:mainpage'  %}"><button id="topic" class="btn"  style="margin-bottom: 2px">ADD / Delete/ Modify topic</button>
   </div>
 
 

@@ -26,7 +26,10 @@
       <div class="row" style="margin:5px">
 
 
-<form class="col s12" method="POST" action="/states/admin/" >
+<form class="col s12" method="POST" action="{% url 'states:stateadmin'  %}" >
+
+  
+
    {% csrf_token %}
    <input id="standard" type="hidden" class="standard" name="standard" value="7" />
       <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
@@ -44,7 +47,7 @@
 
 
 
-<form class="col s12" method="POST" action="/states/admin/" >
+<form class="col s12" method="POST" action="{% url 'states:stateadmin'  %}" >
    {% csrf_token %}
    <input id="standard" type="hidden" class="standard" name="standard" value="8" />
       <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
@@ -60,7 +63,7 @@
       </div>
 </form>
 
-<form class="col s12" method="POST" action="/states/admin/" >
+<form class="col s12" method="POST" action="{% url 'states:stateadmin'  %}" >
    {% csrf_token %}
    <input id="standard" type="hidden" class="standard" name="standard" value="9" />
       <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
@@ -76,7 +79,7 @@
       </div>
 </form>
 
-<form class="col s12" method="POST" action="/states/admin/" >
+<form class="col s12" method="POST" action="{% url 'states:stateadmin'  %}" >
    {% csrf_token %}
    <input id="standard" type="hidden" class="standard" name="standard" value="10" />
       <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
@@ -107,7 +110,9 @@
   <div class="row" style="margin:5px">
    
 {% for i in chapters %}
-<form class="col s12" method="POST" action="/states/admin/chapter/{{i.title}}/" >
+<form class="col s12" method="POST" action=" {% url 'states:selectchapter' i.title  %}" >
+
+
               {% csrf_token %}
 <!-- <input id="edit" type="hidden" class="edit" name="edit" value="1" /> -->
 
@@ -142,7 +147,7 @@
  <br>
 
  <h3>If you want to add/ update/ delete chapters click the button below and make the necessary changes and come bak here:</h3>
-  <a href="/chapters/"><button id="chapter" class="btn"  style="margin-bottom: 2px">ADD / Delete/ Modify chapter</button></a>
+  <a href="{% url 'chapters:mainpage'  %}"><button id="chapter" class="btn"  style="margin-bottom: 2px">ADD / Delete/ Modify chapter</button></a>
   </div>
 
  {% endif %}

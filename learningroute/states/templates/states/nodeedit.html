@@ -37,7 +37,9 @@
 </div>
 
 
-     <form method="POST" action="/states/admin/node/{{node.id}}/" >
+     <form method="POST" action="{% url 'states:nodeedit' node.id %}" >
+
+      
   {% csrf_token %}
   <div style="text-align: left; margin-left: 30%" >
 
@@ -57,7 +59,7 @@
 
 
 
- <form method="POST" action="/states/admin/node/{{node.id}}/" >
+ <form method="POST" action="{% url 'states:nodeedit' node.id %}" >
   {% csrf_token %}
   <div style="text-align: left; margin-left: 30%" >
    

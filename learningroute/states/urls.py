@@ -2,8 +2,8 @@ from django.conf.urls import url
 from .views import myview, nodes, stateadmin, stateedit, selectchapter, selecttopic, nodeadmin, nodeedit, addnode, edgeadmin, edgeedit, addedge
 
 urlpatterns = [
-    url(r'^$', myview  ),
-    url(r'^admin/$', stateadmin),
+    url(r'^$', myview, name ='myview'  ),
+    url(r'^admin/$', stateadmin, name='stateadmin'),
     url(r'^admin/node/$', nodeadmin , name='nodeadmin' ), 
     url(r'^admin/edge/$', edgeadmin , name='edgeadmin' ), 
 
