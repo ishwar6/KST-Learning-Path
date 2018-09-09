@@ -17,19 +17,19 @@ from states.models import State, Node
 from questions.models import Question
 from chapters.models import Topic, Chapter
 from userstates.models import TempActiveNode, UserCurrentNode, Proficiency
-from django.db.models import Q 
+from django.db.models import Q
 from itertools import *
 import datetime
 
-previous_submissions_status = 0 
-#previous_two_submissions_status : if last two user submissions are correct value is 2, 
-# value is 1 if only last submission is correct, "-1" if ONLY last one was wrong and "-2" if both last two submissions are wrong
-# and value 0 if no information present yet
+previous_submissions_status = 0
+'''previous_two_submissions_status : if last two user submissions are correct value is 2,
+value is 1 if only last submission is correct, "-1" if ONLY last one was wrong and "-2" if both last two submissions are wrong
+ and value 0 if no information present yet'''
 
 kstr= 0
 num_quiz_questions=0
 domain_count=0
-chapter=0	
+chapter=0
 qset_chapters= Chapter.objects.filter(standard=9)
 curr_knowledge=0
 current_question=0
@@ -64,10 +64,10 @@ def index(request):
 	else:
 		return redirect('/auth/login/')
 
-
+# fr stands for first_run in arguments
 # helper function for assigning glob-vars with appropriate values before quiz from a new chapter begins
-def beginquiz(request, user_obj, chapter_from_url, fr):     
-	
+def beginquiz(request, user_obj, chapter_from_url, fr):
+
 	global previous_submissions_status,  end_quiz, curr_knowledge
 	global domain_count, kstr, num_quiz_questions, current_question, successor_state ,iteration
 	global chapter, qset_chaters
@@ -75,78 +75,125 @@ def beginquiz(request, user_obj, chapter_from_url, fr):
 	previous_submissions_status=1
 
 	iteration = 0
+
 	index_next_chapter= index_next_chapter + 1
 	chapter_from_url= Chapter.objects.get(title= chapter_from_url)
 	chapter= Chapter.objects.get(title=chapter_from_url)
 	nodes= Node.objects.all().filter(state_node__topic__chapter= chapter_from_url) #querying out all nodes of chapter in which assessment to be taken
 	if nodes.count()==0:
-		messages.error(request, 'mdisplay.html')
-		return render(request, 'mdisplay.html')
+		return 1
+# storing the knowledge structure
+	#print(nodes)
+	kstr= utility_kst.nodes2kstructure(nodes)
 
-	kstr= utility_kst.nodes2kstructure(nodes) # storing the knowledge structure
-	domain_count= utility_kst.num_items_in_domain(kstr) # no of states in domain node(gives us a count of no of steps from {} to Q)
-	
-	num_quiz_questions= number_optimum(domain_count)    # stores the number of questions of assessment test while making sure that number of node levels is not too small than we can work with 
-	if num_quiz_questions==0:                           # num_quiz_questions would be zero if n(States in chapter) < 4 Avoid that from happening even during testing
+	#print(kstr)
+    # no of states in domain node(gives us a count of no of steps from {} to Q)
+	domain_count= utility_kst.num_items_in_domain(kstr)
+
+	print('domain count is', domain_count)
+ # stores the number of questions of assessment test while making sure that number of node levels is not too small than we can work with
+
+ #number_optimal returns number of questions to be asked in assessment on the basis of domain count
+	num_quiz_questions= number_optimum(domain_count)  
+
+	# num_quiz_questions would be zero if n(States in chapter) < 4 Avoid that from happening even during testing 
+
+	if num_quiz_questions==0:                           
 		messages.error(request, 'Number of states in chapter is too less. Not even permissible in development env ')
-		return render(request, 'mdisplay.html')
+		return 1
+
 	print("the total number of questions is "+str(num_quiz_questions))##########################################
 	#num_quiz_questions=4
-	
+
 	try:
 		temp= TempActiveNode.objects.get(user=user_obj, chapter=chapter_from_url)
 	except:
-		messages.error(request, 'the temporary knowledge state of user has not been collected from previous introcudtory response step.')
+		messages.error(request, 'the temporary knowledge state of user has not been collected from previous introcudtory response step. Please proceed again')
 		return render(request, 'mdisplay.html')
-			
+
 	curr_knowledge= UserCurrentNode.objects.get_or_create(user=user_obj, chapter=chapter_from_url, node= temp.node)
+
+	#going to crawl_node function
+	#####################________________________________CRAWL NODE_______________________________________####################
+
 	next_node= crawl_node(domain_count, previous_submissions_status, temp.node, kstr, chapter_from_url)
+
+	#####################________________________________CRAWL NODE DONE_______________________________________####################
+
+
 	if next_node is None:
 		messages.error(request, 'next node to be traversed couldnt be obtained. Check utility code and aux functions')
 		return render(request, 'mdisplay.html')
-			
-	successor_state = State.objects.get(id= utility_kst.surplus_state(temp.node, next_node)) 
-	
+
+	successor_state = State.objects.get(id= utility_kst.surplus_state(temp.node, next_node))
+
+
 	try:
 		all_questions = Question.objects.filter(state=successor_state)
+		print(all_questions)
 	except:
-		messages.error(request, 'Question with given criteria not found')
-		return render(request, 'mdisplay.html')
-	current_question = all_questions[randint(0, all_questions.count() - 1)] #selecting a random question from selected state
+		messages.error(request, 'Question with given state', successor_state, 'not found')
+
+	
+	
+	if not all_questions.exists():
+			messages.error(request, 'Question with given state', successor_state, 'not found')
 			
+
+
+
+ #selecting a random question from selected state
+
+	current_question = all_questions[randint(0, all_questions.count() - 1)]
+
+
 	context = {
 		'firstrun':fr,
 		'chapter_title':chapter_from_url,
 		'node_id':next_node.id,
 		'currentquestion':current_question
 	}
+	print(context)
 	return context
 
 
 
 def quiz(request, chapter_title, node_id):
 	if request.user.is_authenticated:
-		
+
 		usr = User.objects.get(username=request.user)
 
 		global previous_submissions_status,  end_quiz, curr_knowledge
 		global domain_count, kstr, num_quiz_questions, current_question, successor_state ,iteration
 		global chapter, qset_chaters
 		global index_next_chapter
-		
+
+
+#####################################################  FIRST QUESTION TURN   ################
+
 		if node_id == "begin":
 			index_next_chapter=0
-			if index_next_chapter==0:
-				messages.info(request, 'this is a demo messege')
-				return render(request, 'mdisplay.html')
 			print(chapter_title)
-			context= beginquiz(request, usr, chapter_title,1)
+#first_run =1 
+			context = beginquiz(request, usr, chapter_title, 1)
+			print(context)
+			
+	# Iterate over all of the other chapters while context is one
+	# qset_chapters is a queryset that returns chapters whith given standard; declared in above variables
+	#In case kstructure is not in a chapter
 			while(context==1):
-				context= beginquiz(request, usr, qset_chapters[index_next_chapter].title,0)
-			return render(request, 'quiz.html',context) 
+				context = beginquiz(request, usr, qset_chapters[index_next_chapter].title, 0)
+			return render(request, 'quiz.html',context)
+
+
 
 		# from hereon the code runs when usersubmission is made.
-		crawler_node= Node.objects.get(id=node_id)  # this is the node from which state from which question has just been answered. Quiz is now formally at this node
+
+
+		
+		# this is the node from which state from which question has just been answered. 
+		# Quiz is now formally at this node
+		crawler_node= Node.objects.get(id=node_id)  
 
 		op1=0
 		op2=0
@@ -155,13 +202,13 @@ def quiz(request, chapter_title, node_id):
 		integer_type_submission=""
 
 		if request.POST.get('rad', False)=="1":
-			op1=1 
+			op1=1
 		if request.POST.get('rad', False)=="2":
-			op2=1 
+			op2=1
 		if request.POST.get('rad', False)=="3":
-			op3=1 
+			op3=1
 		if request.POST.get('rad', False)=="4":
-			op4=1 
+			op4=1
 
 		if request.POST.get('one', False)=="1":
 			op1=1
@@ -176,48 +223,65 @@ def quiz(request, chapter_title, node_id):
 			integer_type_submission=str(request.POST.get('integertype', False))
 
 		correct_answer_submission=0
+
 		if op1==current_question.op1 and op2==current_question.op2 and op3==current_question.op3 and op4==current_question.op4 and integer_type_submission==current_question.integeral_answer:
 			correct_answer_submission = 1
 
-		
+
+
+#setting previous_submissions_status 1,2,-1,-2 or 0 on the basis of current and previous_status values
 
 		if correct_answer_submission==1:
+
 			print("Correct!!")
+
 			if previous_submissions_status<=0:
 				previous_submissions_status=1
+
 			else:
 				previous_submissions_status= min(previous_submissions_status+1, 3)
+
 		elif correct_answer_submission==0:
+
 			print("Wrong!!")
+
 			if previous_submissions_status>=0:
 				previous_submissions_status=-1
 			else:
 				previous_submissions_status= max(previous_submissions_status-1, -3)
 
-		iteration = iteration + 1   # iteration holds the number of question already evaluated corresponding to user answer
-		
+# iteration holds the number of question already evaluated corresponding to user answer
+		iteration = iteration + 1   
+
 		if(iteration==num_quiz_questions):
+
 			if UserCurrentNode.objects.filter(user=usr, chapter=chapter).exists():
 				UserCurrentNode.objects.filter(user=usr, chapter=chapter).delete()
+
 			UserCurrentNode.objects.create(user=usr, chapter=chapter, node=crawler_node)
-			print("NORMAL") ###############################
+
+			print("NORMAL")
+	 ###############################
 
 			try:
 				next_chapter= qset_chapters[index_next_chapter]
 				print("next chapter is : "+ str(next_chapter))
 				context= beginquiz(request, usr, next_chapter.title,0)
+
 				while(context==1):
 					context= beginquiz(request, usr, qset_chapters[index_next_chapter].title,0)
+
 				return render(request, 'quiz.html', context)
+
 			except:
 				return render(request, 'end.html')
 
-		
+
 
 
 		next_node= crawl_node(domain_count, previous_submissions_status, crawler_node, kstr, chapter_title)
-		
-		
+
+
 		if next_node == "nothing":
 			nl= Node.objects.get_or_create(description='empty')
 			if UserCurrentNode.objects.filter(user=usr, chapter=chapter).exists():
@@ -227,18 +291,18 @@ def quiz(request, chapter_title, node_id):
 
 			try:
 				next_chapter= qset_chapters[index_next_chapter]
-				context= beginquiz(request, usr, next_chapter.title,0)
+				context= beginquiz(request, usr, next_chapter.title, 0)
 				while(context==1):
 					context= beginquiz(request, usr, qset_chapters[index_next_chapter].title,0)
 				return render(request, 'quiz.html', context)
 			except:
 				return render(request, 'end.html')
 
-		
+
 		elif next_node == "everything":
 			domain_node= utility_kst.domain_kstate(kstr)
 			print("domain node is "+str(domain_node)) ############################################################
-			
+
 			if UserCurrentNode.objects.filter(user=usr, chapter=chapter).exists():
 				UserCurrentNode.objects.filter(user=usr, chapter=chapter).delete()
 			UserCurrentNode.objects.create(user=usr, chapter=chapter, node=crawler_node)
@@ -252,15 +316,15 @@ def quiz(request, chapter_title, node_id):
 				return render(request, 'quiz.html', context)
 			except:
 				return render(request, 'end.html')
-			
-		
+
+
 		ssid= utility_kst.surplus_state(crawler_node, next_node)
-		
+
 		successor_state = State.objects.get(id= ssid)
 		all_questions = Question.objects.filter(state=successor_state)
 		current_question = all_questions[randint(0, all_questions.count() - 1)] #selecting a random question from selected state
 
-		
+
 		context = {
 		'chapter_title':chapter_title,
 		'node_id':next_node.id,
@@ -276,18 +340,21 @@ def quiz(request, chapter_title, node_id):
 
 	else:
 		return redirect('/auth/login/')
-			
-			
-		
 
 
 
 
 
-# This function takes the number of levels of nodes and the no of continuous correct or wrong as i/p and gives the node to be
+
+
+
+# This function takes the number of levels of nodes and 
+# the no of continuous correct or wrong as i/p and gives the node to be
 # crawled to based on previous response if available as o/p
 
-def crawl_node(qlevel, lc, node, kstruct,chapter):
+#lc is previous_submission_status
+#qlevel is domain_count
+def crawl_node(qlevel, lc, node, kstruct, chapter):
 	curr_level= node.state_node.all().count()
 	stride=1
 	node_crawler= node
@@ -303,7 +370,7 @@ def crawl_node(qlevel, lc, node, kstruct,chapter):
 		else:
 			#node_crawler= utility_kst.domain_kstate(kstruct)
 			return "everything"
-	elif lc < 0:   # satisfied when current evaluated answwr is wrong
+	elif lc < 0:   # satisfied when current evaluated answer is wrong
 		'''if lc==1: stride=1
 		elif lc==2: stride=2
 		elif lc==3: stride=3
@@ -401,3 +468,8 @@ class IntroductoryResponse(View):
                     node= the_node
                 )
         return redirect(reverse_lazy('index'))
+
+
+
+def endview(request):
+	return render(request, 'mdisplay.html', {})

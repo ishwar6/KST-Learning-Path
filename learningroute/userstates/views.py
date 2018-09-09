@@ -79,10 +79,4 @@ class IntroductoryResponse(View):
                     chapter= the_chapter,
                     node= the_node
                 )
-        return redirect('assess/main/', permanent=True)
-
-
-
-
-
-        
+        return redirect('/assess/main/', permanent=True)
