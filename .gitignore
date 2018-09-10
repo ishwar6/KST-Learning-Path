@@ -88,7 +88,7 @@ local_settings.py
 migrations/
 /migrations/
 .env
-db.sqlite3
+
 /migrations/
 migrations
 *.msg
