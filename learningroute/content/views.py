@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db.models import Q, Count
-from chapters.models import Chapter
+from chapters.models import Chapter, Topic
 from userstates.models import UserCurrentNode, TempActiveNode
 from states.models import State, Node
 from content.models import Content, Illustration, IllustrationGiven
@@ -38,12 +38,15 @@ def showcontent(request):
 
 
 
-
+        topic  = Topic.objects.all().first()
         topic_to_learn = Content.objects.filter(state__title = current_node).first()
 
         illustrations  = Illustration.objects.filter(content = topic_to_learn)
-
+        print(topic)
+        print(Illustration.objects.topic_count(topic))
         illustration_given  = IllustrationGiven.objects.all()
+        print(illustration_given)
+
 
 
 

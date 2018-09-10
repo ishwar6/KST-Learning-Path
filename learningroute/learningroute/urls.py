@@ -11,7 +11,7 @@ urlpatterns = [
     url(r'^userstates/', include('userstates.urls')),
     url(r'^assess/', include('assessment.urls', namespace='assess')),
     url(r'^chapters/', include('chapters.urls', namespace='chapters')),
-    url(r'^content/', include('content.urls'))
+    url(r'^content/', include('content.urls', namespace='content'))
 ]
 
 

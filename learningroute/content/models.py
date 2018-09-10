@@ -39,8 +39,8 @@ class Content(models.Model):
     image   =   models.FileField(upload_to = upload_image_path_content, null = True, blank = True)
     image2  =   models.FileField(upload_to = upload_image_path_content, null = True, blank = True)
     credit  =   models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)], default='1', blank=False)
-    time    =   models.IntegerField()
+        validators=[MinValueValidator(1), MaxValueValidator(5)], default='2', blank=False,  help_text= 'Give a number according to difficulty of content between 1 to 5')
+    time    =   models.IntegerField(default='6', help_text='Time in minutes')
     tag     =   models.CharField(max_length=15, blank=True, null=True)
 
     def __str__(self):
@@ -49,30 +49,89 @@ class Content(models.Model):
     #def get_absolute_url(self):
     #    return reverse('content:detail', kwargs={"slug": self.state})
 
+class IllusManager(models.Manager):
+    def topic_count(self, topic):
+        count_ = 0
+        states  = State.objects.filter(topic = topic)
+        for state in states:
+            content = Content.objects.filter(state = state).first()
+            if content:
+                illus_count = self.filter(content = content).last().counts
+                if illus_count:
+                    return illus_count
+        return count_
+            
+
 
 class Illustration(models.Model):
     content   =   models.ForeignKey(Content, on_delete=models.CASCADE)
-    title     =   models.CharField(max_length=120, blank=False, null=False)
-    text      =   models.TextField()
-    answer    =   models.TextField()
+    text      =   models.TextField(blank = False, null = False )
+    answer    =   models.TextField(blank = True, null = True)
     image     =   models.FileField(upload_to = upload_image_path_illus, null = True, blank = True)
     image2    =   models.FileField(upload_to = upload_image_path_illus, null = True, blank = True)
     credit    =   models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)], default='3', blank=False)
-    time      =   models.IntegerField()
+        validators=[MinValueValidator(1), MaxValueValidator(5)], default='2', blank=False, help_text= 'Give a number according to difficulty of illustration between 1 to 5')
+    time      =   models.IntegerField(default='3', help_text='Time in minutes')
+    counts    =   models.IntegerField(blank = True, null = True, help_text='Leave it blank')
+
+    objects   = IllusManager()
 
 
     def __str__(self):
-        return  str(self.title)
+        return  str(self.text)
 
 
+def illus_created_reciever(sender, instance, *args, **kwargs):
+            illust_last  =  Illustration.objects.filter(content = instance.content)
+            if illust_last.exists():
+                illust_last_count = illust_last.last().counts
+                instance.counts   = illust_last_count + 1
+            else:
+                instance.counts = 1
 
+        
+pre_save.connect(illus_created_reciever, sender=Illustration)
+
+
+################################################
 # User specific models #
+
+class IllusManager(models.Manager):
+    def user_topic_count(self, topic):
+        user = self.request.user
+        count_ = 0
+        states  = State.objects.filter(topic = topic)
+        for state in states:
+            content = Content.objects.filter(state = state).first()
+            if content:
+                illus_count = self.filter(content = content, user = user).first().counts
+                if illus_count:
+                    count_ = count_ + illus_count
+        return count_
+
+
+    def user_chapter_count(self, chapter):
+        user = self.request.user
+        count_ = 0
+        topics  = Topic.objects.filter(chapter = chapter)
+        for topic in topics:
+            topic_count = topic.user_topic_count(self, topic)
+            if topic_count:
+                count_ = count_ + topic_count
+        return count_
+
+
+
 
 class IllustrationGiven(models.Model):
     user         = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
-    illustration = models.ForeignKey(Illustration, on_delete = models.CASCADE)
+    content      = models.ForeignKey(Content, on_delete = models.CASCADE)
+    count        = models.IntegerField(default=0, help_text='Will increase as the student will solve illustrations')
     timestamp    = models.DateTimeField(auto_now_add = True)
 
+    objects      = IllusManager()
+
     def __str__(self):
-        return str(self.user) + ' has solved ' + str(self.illustration)
+        return str(self.user) + ' has solved ' + str(self.count)
+
+
