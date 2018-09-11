@@ -150,8 +150,8 @@ class CurrentActiveChapter(models.Model):
 # Amount of illustrations solved, and amount of questions solved on a particular state.
 
 class CurrentActiveState(models.Model):
-    user         = models.ForeignKey(User, on_delete= models.CASCADE)
-    state        = models.ForeignKey(State, on_delete= models.CASCADE)
+    user         = models.OneToOneField(User, on_delete= models.CASCADE)
+    state        = models.OneToOneField(State, on_delete= models.CASCADE)
     theory       = models.BooleanField(default = 0)
     score_of_i   = models.IntegerField(default=0, help_text='Will increase as the student will solve illustrations')
     score_of_q   = models.IntegerField(default=0, help_text='Will increase as the student will solve Questions')
@@ -161,3 +161,16 @@ class CurrentActiveState(models.Model):
     def __str__(self):
         return str(self.state) + ' is active for ' + str(self.user)
 
+class CompletedState(models.Model):
+    user         = models.ForeignKey(User, on_delete= models.CASCADE)
+    state        = models.ForeignKey(State, on_delete= models.CASCADE)
+    success      = models.BooleanField(default = 0)
+    correct      = models.IntegerField(default=0, help_text='No of correct questions submitted by student')
+    incorrect    = models.IntegerField(default=0, help_text='No of incorrect questions submitted by student')
+    time_taken   = models.IntegerField(default = 0, help_text='Time taken by student to finish the state')
+    practice     = models.IntegerField(default=0, help_text='Number of practice questions solved by the student')
+    timestamp    = models.DateTimeField(auto_now_add= True)
+    timeupdate   = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.state) + ' is active for ' + str(self.user)

@@ -4,8 +4,9 @@ from chapters.models import Chapter, Topic
 from userstates.models import UserCurrentNode, TempActiveNode
 from states.models import State, Node
 import utility_kst as u
+from django.utils import timezone
 from django.contrib import messages
-
+from questions.models import Question
 from content.models import (    Content,
                                 Illustration, 
                                 IllustrationGiven,
@@ -52,21 +53,18 @@ def show_list_of_states(request, chapter = None):
     return None
 
 
-def showcontent(request, state = None):
+def showcontent(request):
     user = request.user
-    state = State.objects.filter(pk = 2).first()
-    if user.is_authenticated() and state is not None:
-        student_state  = CurrentActiveState.objects.filter(Q(user = user) and Q(state = state))
+    if user.is_authenticated():
+        student_state  = CurrentActiveState.objects.filter(user= user)
         if student_state.exists():
             student_state = student_state.first()
-        else:
-            student_state = CurrentActiveState.objects.create(
-                user = user, state = state, theory= 0
-            )
+        # else:
+        #     student_state = CurrentActiveState.objects.create(
+        #         user = user,  theory= 0
+        #     )
         
 
-        score_of_illus_needed  =   state.score_of_i()
-        score_of_ques_needed   =   state.score_of_q()
 
         content  =  Content.objects.filter(state = state)
         if content.exists():
@@ -84,17 +82,17 @@ def showcontent(request, state = None):
 
 def show_illustrations(request, content = None):
     user = request.user
-    content = Content.objects.filter(pk = 2).first()
-    state   = content.state
     message = ''
-    if user.is_authenticated() and content is not None:
-        student_state  = CurrentActiveState.objects.filter(Q(user = user) and Q(state = state))
+    if user.is_authenticated():
+        student_state  = CurrentActiveState.objects.filter(user = user)
         if student_state.exists():
             student_state = student_state.first()
         else:
             student_state = CurrentActiveState.objects.create(
                 user = user, state = state, theory= 0
             )
+        state = student_state.state
+        content = Content.objects.filter(state = state)
 
         student_illus_point    = student_state.score_of_i
         score_of_illus_needed  = state.score_of_i()
@@ -152,37 +150,160 @@ def show_illustrations(request, content = None):
 
 
 def show_questions(request):
+    user = request.user
+    message = ''
+    global questions, percentage_remaining, student_ques_point, score_of_ques_needed, questions_to_render, q, student_state, current_question, correct, incorrect
+    if user.is_authenticated():
+        if request.method == 'GET':
+            correct = incorrect = 0
+            student_state  = CurrentActiveState.objects.filter(Q(user = user))
+            if student_state.exists():
+                student_state = student_state.first()
+                state         = student_state.state
 
-        op1=0
-		op2=0
-		op3=0
-		op4=0
-		integer_type_submission=""
-		if request.POST.get('rad', False)=="1":
-			op1=1
-		if request.POST.get('rad', False)=="2":
-			op2=1
-		if request.POST.get('rad', False)=="3":
-			op3=1
-		if request.POST.get('rad', False)=="4":
-			op4=1
+                student_ques_point  = q   = student_state.score_of_q
+                score_of_ques_needed   = state.score_of_q()
 
-		if request.POST.get('one', False)=="1":
-			op1=1
-		if request.POST.get('two', False)=="1":
-			op2=1
-		if request.POST.get('three', False)=="1":
-			op3=1
-		if request.POST.get('four', False)=="1":
-			op4=1
+                percentage_remaining   = ( student_ques_point / score_of_ques_needed ) * 100
+                questions              = Question.objects.filter(state = state)
 
-		if current_question.integer_type:
-			integer_type_submission=str(request.POST.get('integertype', False))
-		correct_answer_submission=0
-		if op1==current_question.op1 and op2==current_question.op2 and op3==current_question.op3 and op4==current_question.op4 and integer_type_submission==current_question.integeral_answer:
-			correct_answer_submission = 1
+                questions_to_render = []
+                while(student_ques_point < score_of_ques_needed):
+                    student_ques_point    = student_ques_point + 1
+                    ques_now              = questions.filter(counts = student_ques_point)
+                    if ques_now.exists():
+                        questions_to_render.append(ques_now.first())
+                    
+                    else:
+                        if student_ques_point == q + 1:
+                            student_ques_point    = student_ques_point - 1
+                            print('in this smalllll block', student_ques_point, score_of_ques_needed)
+                            message = ' Our Fault: Sorry dear, no questions at this time. Please Move forward to next topic '
+                            return redirect('content:start')
+                            break
 
-		if correct_answer_submission==1:
-			print("Correct!!")
+                        # render very first question by GET request
 
-        return render(request, 'content/ques.html', {})
+                current_question        = questions_to_render[0]
+                questions_to_render     = questions_to_render[ 1::1]
+
+
+                context = {
+                    'currentquestion' : current_question,
+                    'message'        : message,
+                    'per_remaining'  : percentage_remaining,
+
+                }
+
+                return render(request, 'content/ques.html', context)
+
+
+
+        if request.method == 'POST':
+                op1 = op2 =  op3 =  op4 = 0
+                integer_type_submission=""
+                if request.POST.get('rad', False)=="1":
+                    op1=1
+                if request.POST.get('rad', False)=="2":
+                    op2=1
+                if request.POST.get('rad', False)=="3":
+                    op3=1
+                if request.POST.get('rad', False)=="4":
+                    op4=1
+
+                if request.POST.get('one', False)=="1":
+                    op1=1
+                if request.POST.get('two', False)=="1":
+                    op2=1
+                if request.POST.get('three', False)=="1":
+                    op3=1
+                if request.POST.get('four', False)=="1":
+                    op4=1
+
+                if current_question.integer_type:
+                    integer_type_submission=str(request.POST.get('integertype', False))
+                correct_answer_submission=0
+                if op1==current_question.op1 and op2==current_question.op2 and op3==current_question.op3 and op4==current_question.op4 and integer_type_submission==current_question.integeral_answer:
+                    correct_answer_submission = 1
+
+
+                if correct_answer_submission==1:
+                    correct = correct + 1
+                    message = ' Correct Answer, Nice!! '
+                else:
+                    incorrect  = incorrect + 1
+                    message = 'Incorrect Answer, Be careful next time. You can review all attempted questions by you in ACTIVITY tab'
+
+
+                if len(questions_to_render) == 0 and q == score_of_ques_needed:
+                    messages.error(request, 'Congrulations!, you have successfully completed this state.')
+                    return redirect('content:start')
+
+                if len(questions_to_render) == 0 and not q == score_of_ques_needed:
+                    print('in this block length both are equal', q, score_of_ques_needed)
+                    messages.error(request, 'Our Fault. No questions to show this time')
+                    return redirect('content:start')
+
+
+                print('in this block length is one and zero', q, score_of_ques_needed)
+                current_question       = questions_to_render[0]
+                questions_to_render  = questions_to_render[ 1::1]
+                q  =  q + 1 
+                student_state.score_of_q = q
+                student_state.save()
+                percentage_remaining   = ( q / score_of_ques_needed ) * 100
+                
+
+                context = {
+                'currentquestion' : current_question,
+                'message'         : message,
+                'per_remaining'   : percentage_remaining,
+                'questions'       : questions, 
+
+            }
+                return render(request, 'content/ques.html', context)
+
+                        
+
+
+
+
+def assign_new_state(request, correct= 0, incorrect = 0, success = 0):
+    user = request.user
+    if user.is_authenticated():
+        student_state  = CurrentActiveState.objects.filter(Q(user = user)).first()
+
+        # calculate time taken by student in hours
+        duration     = timezone.now() - student_state.timestamp
+        days, seconds = duration.days, duration.seconds
+        time_taken = days * 24 + seconds // 3600
+
+        CompletedState.objects.create(
+            user        = user,
+            state       = student_state.state,
+            success     = success,
+            correct     = correct,
+            incorrect   = incorrect,
+            time_taken  = time_taken,
+        )
+
+        
+
+
+
+
+       
+
+
+
+
+
+
+
+
+
+    
+        
+    
+
+   
