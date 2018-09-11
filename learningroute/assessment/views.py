@@ -8,7 +8,7 @@ import hashlib
 import datetime
 import smtplib
 import utility_kst
-import random
+from random import choice
 from random import randint
 
 from django.contrib import messages
@@ -30,7 +30,7 @@ kstr= 0
 num_quiz_questions=0
 domain_count=0
 chapter=0
-qset_chapters= Chapter.objects.filter(standard=9)
+qset_chapters= Chapter.objects.filter(standard=11)
 curr_knowledge=0
 current_question=0
 successor_state=0
@@ -39,23 +39,23 @@ index_next_chapter=0
 end_quiz=0
 
 def number_optimum(num):
-    if num<=20:
-        return num//3
-    elif num in range(20,30):
-        return num//4
-    elif num in range(30,50):
-        return num//6
-    elif num>50 & num<100:
-        return num//10
-    elif num>100:
-        return min(num//15, 30)
+	if num<=20:
+		return num//3
+	elif num in range(20,30):
+		return num//4
+	elif num in range(30,50):
+		return num//6
+	elif num>50 & num<100:
+		return num//10
+	elif num>100:
+		return min(num//15, 30)
 
 
 def index(request):
 	global counter, score
 	if request.user.is_authenticated:
 		user_obj = User.objects.get(username=request.user)
-		all_chapters=Chapter.objects.filter(standard=9)
+		all_chapters=Chapter.objects.filter(standard=11)
 		try:
 			return render(request, 'index.html', {'first_chapter':all_chapters[0], 'profile':user_obj})
 		except:
@@ -79,15 +79,16 @@ def beginquiz(request, user_obj, chapter_from_url, fr):
 	index_next_chapter= index_next_chapter + 1
 	chapter_from_url= Chapter.objects.get(title= chapter_from_url)
 	chapter= Chapter.objects.get(title=chapter_from_url)
+	print(" quiz on : ",chapter.title)
 	nodes= Node.objects.all().filter(state_node__topic__chapter= chapter_from_url) #querying out all nodes of chapter in which assessment to be taken
 	if nodes.count()==0:
 		return 1
-# storing the knowledge structure
+	# storing the knowledge structure
 	#print(nodes)
 	kstr= utility_kst.nodes2kstructure(nodes)
 
 	#print(kstr)
-    # no of states in domain node(gives us a count of no of steps from {} to Q)
+	# no of states in domain node(gives us a count of no of steps from {} to Q)
 	domain_count= utility_kst.num_items_in_domain(kstr)
 
 	print('domain count is', domain_count)
@@ -105,40 +106,57 @@ def beginquiz(request, user_obj, chapter_from_url, fr):
 	print("the total number of questions is "+str(num_quiz_questions))##########################################
 	#num_quiz_questions=4
 
-	try:
-		temp= TempActiveNode.objects.get(user=user_obj, chapter=chapter_from_url)
-	except:
+	temp= TempActiveNode.objects.get(user=user_obj, chapter=chapter_from_url)
+	if not temp:
 		messages.error(request, 'the temporary knowledge state of user has not been collected from previous introcudtory response step. Please proceed again')
 		return render(request, 'mdisplay.html')
 
-	curr_knowledge= UserCurrentNode.objects.get_or_create(user=user_obj, chapter=chapter_from_url, node= temp.node)
-
-	#going to crawl_node function
-	#####################________________________________CRAWL NODE_______________________________________####################
-
-	next_node= crawl_node(domain_count, previous_submissions_status, temp.node, kstr, chapter_from_url)
-
-	#####################________________________________CRAWL NODE DONE_______________________________________####################
 
 
-	if next_node is None:
-		messages.error(request, 'next node to be traversed couldnt be obtained. Check utility code and aux functions')
-		return render(request, 'mdisplay.html')
-
-	successor_state = State.objects.get(id= utility_kst.surplus_state(temp.node, next_node))
+	next_node=None
+	successor_state=None
 
 
+	if temp.dont_know_switch:            # if the user has selected that he doesnt know chapter then he knows nothing
+		
+		# to get all the nodes with 1 state in them
+		unity_nodes= []
+		for nd in nodes:
+			if nd.state_node.all().count()==1:
+				unity_nodes.append(nd)
+		next_node= choice(unity_nodes)
+		
+		first_question_state= [st for st in next_node.state_node.all()]
+		successor_state= first_question_state[0]
+
+	
+	else:     # if user has selected proficency other than 'dont know' then node is called from temp active node
+
+		#going to crawl_node function 
+		#####################________________________________CRAWL NODE_______________________________________####################
+
+		next_node= crawl_node(domain_count, previous_submissions_status, temp.node, kstr, chapter_from_url)
+
+		#####################________________________________CRAWL NODE DONE_______________________________________####################
+
+		if next_node is None:
+			messages.error(request, 'next node to be traversed couldnt be obtained. Check utility code and aux functions')
+			return render(request, 'mdisplay.html')
+
+		successor_state = State.objects.get(id= utility_kst.surplus_state(temp.node, next_node))
+
+
+
+	print("starting with this state :", successor_state)
+	# at this point we have the dest node and also the state from which question to be given.
 	try:
 		all_questions = Question.objects.filter(state=successor_state)
+		if not all_questions:
+			messages.error(request, 'Question with given state', successor_state, 'not found')
+			return render(request, 'mdisplay.html')
 		print(all_questions)
 	except:
-		messages.error(request, 'Question with given state', successor_state, 'not found')
-
-	
-	
-	if not all_questions.exists():
-			messages.error(request, 'Question with given state', successor_state, 'not found')
-			
+		messages.error(request, 'error retreiving Question with given state', successor_state)			
 
 
 
@@ -169,25 +187,25 @@ def quiz(request, chapter_title, node_id):
 		global index_next_chapter
 
 
-#####################################################  FIRST QUESTION TURN   ################
+		#############################################  FIRST QUESTION TURN   ################
 
 		if node_id == "begin":
 			index_next_chapter=0
 			print(chapter_title)
-#first_run =1 
+			#first_run =1 
 			context = beginquiz(request, usr, chapter_title, 1)
 			print(context)
 			
-	# Iterate over all of the other chapters while context is one
-	# qset_chapters is a queryset that returns chapters whith given standard; declared in above variables
-	#In case kstructure is not in a chapter
+			# Iterate over all of the other chapters while context is one
+			# qset_chapters is a queryset that returns chapters whith given standard; declared in above variables
+			#In case kstructure is not in a chapter
 			while(context==1):
 				context = beginquiz(request, usr, qset_chapters[index_next_chapter].title, 0)
 			return render(request, 'quiz.html',context)
 
 
 
-		# from hereon the code runs when usersubmission is made.
+			# from hereon the code runs when usersubmission is made.
 
 
 		
@@ -265,7 +283,6 @@ def quiz(request, chapter_title, node_id):
 
 			try:
 				next_chapter= qset_chapters[index_next_chapter]
-				print("next chapter is : "+ str(next_chapter))
 				context= beginquiz(request, usr, next_chapter.title,0)
 
 				while(context==1):
@@ -366,7 +383,7 @@ def crawl_node(qlevel, lc, node, kstruct, chapter):
 		if curr_level + stride < qlevel:
 			for i in range(stride):
 				kfringe_outer= utility_kst.outer_fringe(chapter, node)
-				node_crawler= random.choice(kfringe_outer)
+				node_crawler= choice(kfringe_outer)
 		else:
 			#node_crawler= utility_kst.domain_kstate(kstruct)
 			return "everything"
@@ -380,7 +397,7 @@ def crawl_node(qlevel, lc, node, kstruct, chapter):
 				kfringe_inner= utility_kst.inner_fringe(chapter, node)
 				print("inside crawl node function") #############################
 				print(kfringe_inner)
-				node_crawler= random.choice(kfringe_inner)
+				node_crawler= choice(kfringe_inner)
 		else:
 			return "nothing"
 
@@ -399,75 +416,87 @@ def crawl_node(qlevel, lc, node, kstruct, chapter):
 
 
 class IntroductoryResponse(View):
-    the_chapters= Chapter.objects.filter(standard=9)
+	the_chapters= Chapter.objects.filter(standard=11)
 
-    def get(self, request):
-        return render(request, 'userstates/initialresponse_form.html', {'chapters': self.the_chapters})
+	def get(self, request):
+		return render(request, 'userstates/initialresponse_form.html', {'chapters': self.the_chapters})
+	
+	def post(self, request):
+		LEVEL_REF={
+			'beginer':1,
+			'Benginer':1,
+			'intermediate':2,
+			'Intermediate':2,
+			'advanced':3,
+			'Advanced':3,
+			'dont know':0,
+			'Dont Know':0
+			}
+		for the_chapter in self.the_chapters :
+			the_node = None
+			if Proficiency.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).exists():
+				Proficiency.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).delete()
 
-    def post(self, request):
-        for the_chapter in self.the_chapters:
-            the_node = None
-            if Proficiency.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).exists():
-                Proficiency.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).delete()
+			ind_number= "imp-of-"+ str(the_chapter.id)
+			ind_select= "level-of-"+ str(the_chapter.id)
 
-            ind_number= "imp-of-"+ str(the_chapter.id)
-            ind_select= "level-of-"+ str(the_chapter.id)
+			if request.POST.get(ind_select):
+				level = request.POST.get(ind_select)
+			else:
+				level = None
+			if request.POST.get(ind_number):
+				significance= request.POST.get(ind_number)
+			else:
+				significance = None
 
-            if request.POST.get(ind_select):
-                level = request.POST.get(ind_select)
-            else:
-                level = None
-            if request.POST.get(ind_number):
-                significance= request.POST.get(ind_number)
-            else:
-                significance = None
-            Proficiency.objects.create(
-                user=self.request.user,
-                chapter=the_chapter,
-                level = level,
-                significance = significance
-            )
+			dont_know_var = False
+		
+			if LEVEL_REF[level]== 0:
+				dont_know_var=True
+			else:	
+				nodes= Node.objects.filter(state_node__topic__chapter=the_chapter).distinct()
 
-            LEVEL_REF= {
-                'beginer':1, 'Benginer':1,
-                'intermediate':2, 'Intermediate':2,
-                'advanced':3, 'Advanced':3
-            }
-            nodes= Node.objects.filter(state_node__topic__chapter=the_chapter).distinct()
-            num_states_in_domain = 0
-            if nodes is None:
-                break
-            for n in nodes:
-                print('queryset of node is', n)
-                num_mem= n.state_node.all().count()
-                num_states_in_domain= max(num_states_in_domain, num_mem)
-            print('max number of states in CHAPTER_PROFIENCY node', num_states_in_domain)
+				num_states_in_domain = 0
+				if nodes is None:
+					break
+				for n in nodes:
+					print('queryset of node is', n)
+					num_mem= n.state_node.all().count()
+					num_states_in_domain= max(num_states_in_domain, num_mem)
+				print('max number of states in CHAPTER_PROFIENCY node', num_states_in_domain)
 
-            list_of_nodes=[]
-            a = (num_states_in_domain//4)*LEVEL_REF[level]
-            if a==0 & LEVEL_REF[level]==1:
-                a = a + 1
-            if a==0 & (LEVEL_REF[level]==2 or LEVEL_REF[level]==3):
-                a = a+2
+				list_of_nodes=[]
+				a = (num_states_in_domain//4)*LEVEL_REF[level]
+				if a==0 & LEVEL_REF[level]==1:
+					a = a + 1
+				if a==0 & (LEVEL_REF[level]==2 or LEVEL_REF[level]==3):
+					a = a+2
 
+				for n in nodes:
+					q = n.state_node.all().count()
+					print( 'q is ', q , 'and a is', a )
+					if q==a or  ( q > a and q < a +  2): #If |Q|=20 node with |Q|/4 = 5 states is assigned to beginer, 10 to interm and so on
+						list_of_nodes.append(n)
+						the_node= choice(list_of_nodes)
+			
+			Proficiency.objects.create(
+				user=self.request.user,
+				chapter=the_chapter,
+				level = level,
+				significance = significance,
+				dont_know_switch= dont_know_var
+			)
+			if TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).exists():
+				TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).delete()
 
-            for n in nodes:
-                q = n.state_node.all().count()
-                print( 'q is ', q , 'and a is', a )
-                if q==a or  ( q > a and q < a +  2): #If |Q|=20 node with |Q|/4 = 5 states is assigned to beginer, 10 to interm and so on
-                    list_of_nodes.append(n)
-                    the_node= random.choice(list_of_nodes)
-            if TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).exists():
-                TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).delete()
-
-            if the_node is not None:
-
-                TempActiveNode.objects.create(
-                    user= self.request.user,
-                    chapter= the_chapter,
-                    node= the_node
-                )
-        return redirect(reverse_lazy('index'))
+			TempActiveNode.objects.create(
+				user= self.request.user,
+				chapter= the_chapter,
+				node= the_node,
+				dont_know_switch= dont_know_var
+			)
+		
+		return redirect('assessment:index')
 
 
 

@@ -111,10 +111,10 @@ def kstate_to_node(kstate): # set(db state) -> db node
         if match == 1:
             return nd
 
-def surplus_state(smaller_node, larger_node):  # db_node1, db_node2 -> db_state(in larger_node which is not present in smaller_node)
-    sm= node2kstate(smaller_node)
-    lg= node2kstate(larger_node)
-    print("am in %s.. going to %s"%(str(smaller_node), str(larger_node))) #####################################
+def surplus_state(source_node, dest_node):  # db_node1, db_node2 -> db_state(in dest_node which is not present in source_node)
+    sm= node2kstate(source_node)
+    lg= node2kstate(dest_node)
+    print("am in %s.. going to %s"%(str(source_node), str(dest_node))) #**************************************************
     for kitem in r.set_symdiff(sm,lg):
         return int(kitem[0])
 
