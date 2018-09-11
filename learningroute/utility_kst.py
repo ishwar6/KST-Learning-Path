@@ -56,6 +56,8 @@ def outer_fringe(chap, node):  # gives outer fringe in consumable format
                     a_match=0
             if a_match ==1:
                 fringe_outer.append(nd)
+
+                
     '''neigh= kst.kneighbourhood(kstr, r.set(kstate))
     print("inside of funcn")
     print(str(neigh))
@@ -68,6 +70,35 @@ def outer_fringe(chap, node):  # gives outer fringe in consumable format
             fringe_outer.append(kstate_to_node(padosi))
     '''
     return fringe_outer
+
+
+
+def outer_fringe_id(chap, node):  # gives outer fringe in consumable format
+    size= node.state_node.all().count()
+    
+    
+    fringe_outer= list()
+    ch_nodes= Node.objects.filter(state_node__topic__chapter__title=chap).distinct()  # take all nodes E chapter
+    for nd in ch_nodes:
+      
+        if nd.state_node.all().count()== size+1:  # select ony those whos state count is one more than curr nodes state count
+            a_match=1
+            for st_curr in node.state_node.all(): 
+                # check whether every state E curr_node in potential next_node
+                st_matches=0
+                for st_next in nd.state_node.all():
+                
+                    if st_curr.id == st_next.id:
+                       
+                        st_matches=1
+                if st_matches== 0:
+                    a_match=0
+            if a_match ==1:
+                fringe_outer.append( nd.id)
+
+    
+    return fringe_outer
+
 
 
 def inner_fringe(chap, node):  #gives the inner fringe in a consumable format

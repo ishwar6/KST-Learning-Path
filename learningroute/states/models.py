@@ -5,16 +5,46 @@ import string
 import random
 
 
+# score_of_i tells the score of illustrations needed to complete illustrations for a particular state
+
 class State(models.Model):
     title = models.CharField(max_length = 120, blank = False, null = False)
     topic = models.ForeignKey(Topic, on_delete = models.CASCADE)
-    rate  = models.IntegerField()
-    time  = models.IntegerField()
+    rate  = models.IntegerField(default=2, help_text='Difficulty of the state')
+    time  = models.IntegerField(default=0, help_text='approx time needed to solve this state fully')
     tag   = models.CharField( max_length = 15, blank = True, null = True  )
+
 
 
     def __str__(self):
         return str(self.title)
+
+    def score_of_i(self):
+        rate = self.rate
+        if rate == 1:
+            return 2
+        if rate == 2:
+            return 2
+        if rate == 3:
+            return 4
+        if rate == 4:
+            return 5
+        else:
+            return 7
+
+    def score_of_q(self):
+        rate = self.rate
+        if rate == 1:
+            return 3
+        if rate == 2:
+            return 6
+        if rate == 3:
+            return 9
+        if rate == 4:
+            return 11
+        else:
+            return 14
+
 
 
 class Node(models.Model):
