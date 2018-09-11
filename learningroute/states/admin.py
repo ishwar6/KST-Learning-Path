@@ -20,7 +20,7 @@ class StateAdmin(admin.ModelAdmin):
 
 
 
-    list_display = ('title', 'topic', 'tag', 'chapters')
+    list_display = ('title', 'topic', 'pk', 'tag', 'chapters')
     inlines = [
         NodeInline,
     ]   
@@ -29,6 +29,7 @@ class StateAdmin(admin.ModelAdmin):
 
 
 class NodeAdmin(admin.ModelAdmin):
+
     inlines = [
         NodeInline,
     ]

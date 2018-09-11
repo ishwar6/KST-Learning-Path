@@ -1,44 +1,9 @@
 
-{% if empty %}
+<h1>You will see content here</h1>
 
-<h2>NEXT Chapter</h2>
-
-{% else %}
-
-
-<h1>{{chapter}}</h1>
-Currently you knows:
-<br>
-{{q}}
-<br>
-
-<br>
-
-<h2>Different states to cover for this chapter</h2>
-{% for s in state  %}
-{{s}}<br>
-{% endfor %}
-
-<h2>Different knowledge sets you might have</h2>
-<br>
-{% for n in node  %}
-{{n}}<br>
-{% endfor %}
-<h3>You are currently in: <br>{{current}}</h3>
-<h2>Ohkk! Topic to learn for now</h2>
-
-<h3>{{topic.title}}</h3>
-<p>{{topic.text}}</p>
+<h2>State name is {{state}}</h2>
+{{content.text}}
 
 
 
-<ul>
-{% for a in illust  %}
-<li>
-{{a}}<br>
-{{a.text}}<br>
-</li><br>
-{% endfor %}
-
-</ul>
-{% endif %}
+<a href="{% url 'content:illustrations' %}">Go to illustrations for this chapter</a>
