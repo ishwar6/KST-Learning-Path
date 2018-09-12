@@ -7,13 +7,15 @@ User = get_user_model()
 CHAPTER_PROFIENCY= (
     ('beginer','Beginer'),
     ('intermediate','Intermediate'),
-    ('advanced','Advanced')
+    ('advanced','Advanced'),
+    ('dont know','Dont Know'),
 )
 class Proficiency(models.Model):
     user         = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
     chapter      = models.ForeignKey('chapters.Chapter', on_delete=models.CASCADE)
     level        = models.CharField(max_length = 60, choices = CHAPTER_PROFIENCY, blank=False)
     significance = models.IntegerField(blank = True, null = True)
+    dont_know_switch= models.BooleanField()
 
     def __str__(self):
         return str(self.user) + ' have ' + str(self.level) + ' level for the chapter:- ' + str(self.chapter)
@@ -22,14 +24,15 @@ class Proficiency(models.Model):
 class TempActiveNode(models.Model):
     user        = models.ForeignKey(User, on_delete=  models.CASCADE)
     chapter     = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE)
-    node        = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None)
+    node        = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None, null=True, blank=True)
+    dont_know_switch= models.BooleanField()
 
     def __str__(self):
         return str(self.user) + ' - ' + str(self.node) + ' - for the chapter ' + str(self.chapter)
 
 class UserCurrentNode(models.Model):
     user        = models.ForeignKey(User, on_delete=models.CASCADE)
-    node        = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None, blank=True)
+    node        = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None, blank=True, null=True)
     chapter     = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE, default=None)
     incorrect   = models.IntegerField(default = 0)
     timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
