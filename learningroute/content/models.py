@@ -1,5 +1,5 @@
 from django.db import models
-from states.models import State
+from states.models import State, Node
 from django.core.urlresolvers import reverse
 from django.db.models.signals import pre_save,post_save
 from django.core.validators import MinValueValidator , MaxValueValidator
@@ -94,55 +94,19 @@ pre_save.connect(illus_created_reciever, sender=Illustration)
 
 
 ################################################
-# User specific models #
-
-class IllusManager(models.Manager):
-    def user_topic_count(self, topic):
-        user = self.request.user
-        count_ = 0
-        states  = State.objects.filter(topic = topic)
-        for state in states:
-            content = Content.objects.filter(state = state).first()
-            if content:
-                illus_count = self.filter(content = content, user = user).first().counts
-                if illus_count:
-                    count_ = count_ + illus_count
-        return count_
 
 
-    def user_chapter_count(self, chapter):
-        user = self.request.user
-        count_ = 0
-        topics  = Topic.objects.filter(chapter = chapter)
-        for topic in topics:
-            topic_count = topic.user_topic_count(self, topic)
-            if topic_count:
-                count_ = count_ + topic_count
-        return count_
 
-
-class IllustrationGiven(models.Model):
-    user         = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
-    content      = models.ForeignKey(Content, on_delete = models.CASCADE)
-    count        = models.IntegerField(default=0, help_text='Will increase as the student will solve illustrations')
-    timestamp    = models.DateTimeField(auto_now_add = True)
-
-    objects      = IllusManager()
+class PreviousState(models.Model):
+    user                = models.ForeignKey(User, on_delete= models.CASCADE)
+    state               = models.ForeignKey(State, on_delete= models.CASCADE)
+    score_of_i          = models.IntegerField(default=0, help_text='Illustrations already Solved by the student')
+    score_of_q          = models.IntegerField(default=0, help_text='Questions already  solved by the student')
+    timestamp           = models.DateTimeField(auto_now_add= True)
+    timeupdate          = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.user) + ' has solved ' + str(self.count)
-
-
-# will keep all active chapters of student with complete boolean 0 or 1. @@ get_or_create will be used here to access. 
-class CurrentActiveChapter(models.Model):
-    user         = models.ForeignKey(User, on_delete= models.CASCADE)
-    chapter      = models.ForeignKey(Chapter, on_delete= models.CASCADE)
-    done         = models.BooleanField(default = 0)
-    timestamp    = models.DateTimeField(auto_now_add= True)
-    timeupdate   = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return str(self.user) + ' is in ' + str(self.chapter) + ' with status ' + str(self.done)
+        return str(self.user) + ' was in ' + str(self.state) 
 
 
 
@@ -161,6 +125,9 @@ class CurrentActiveState(models.Model):
     def __str__(self):
         return str(self.state) + ' is active for ' + str(self.user)
 
+
+
+
 class CompletedState(models.Model):
     user         = models.ForeignKey(User, on_delete= models.CASCADE)
     state        = models.ForeignKey(State, on_delete= models.CASCADE)
@@ -174,3 +141,28 @@ class CompletedState(models.Model):
 
     def __str__(self):
         return str(self.state) + ' is active for ' + str(self.user)
+
+
+
+
+class CurrentActiveNode(models.Model):
+    user        = models.OneToOneField(User, on_delete=models.CASCADE)
+    node        = models.OneToOneField(Node, on_delete = models.CASCADE, default = None, blank=True)
+    timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
+
+    def __str__(self):
+        return str(self.user) + ' - ' +str(self.node)
+
+
+
+
+class PreviousActiveNode(models.Model):
+    user        = models.ForeignKey(User, on_delete=models.CASCADE)
+    node        = models.ForeignKey(Node, on_delete = models.CASCADE, default = None, blank=True)
+    timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
+
+    def __str__(self):
+        return str(self.user) + ' - ' +str(self.node)
+
+
+

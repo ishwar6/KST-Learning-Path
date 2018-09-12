@@ -89,6 +89,7 @@ migrations/
 /migrations/
 .env
 db.sqlite3
+db.sqlite3
 /migrations/
 migrations
 *.msg
@@ -97,3 +98,4 @@ v
 /v
 v/
 tcl/
+db.sqlite3

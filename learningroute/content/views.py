@@ -6,12 +6,16 @@ from states.models import State, Node
 import utility_kst as u
 from django.utils import timezone
 from django.contrib import messages
-from questions.models import Question
+from questions.models import Question, QuestionResponse
 from content.models import (    Content,
                                 Illustration, 
-                                IllustrationGiven,
-                                CurrentActiveChapter, 
-                                CurrentActiveState 
+                             
+                                PreviousState, 
+                                CurrentActiveState,
+                                CompletedState,
+                                CurrentActiveNode,
+                                PreviousActiveNode,
+
                          )
 
 
@@ -24,10 +28,7 @@ def Diff(li1, li2):
 # this function shows all possible states to cover for a particular user. 
 def show_list_of_states(request, chapter = None):
     user = request.user
-    chapter = Chapter.objects.filter(title__contains = 'number').first()
     if user.is_authenticated() and chapter is not None:
-       
-
         # list is storing the individual state id's a student knows in a particular chapter
         user_active_node       = UserCurrentNode.objects.filter(Q(user = user) & Q(chapter = chapter)).first().node
         ready_to_learn         = u.outer_fringe_id(chapter, user_active_node)
@@ -53,10 +54,11 @@ def show_list_of_states(request, chapter = None):
     return None
 
 
-def showcontent(request):
+def showcontent(request, id):
     user = request.user
     if user.is_authenticated():
         student_state  = CurrentActiveState.objects.filter(user= user)
+        
         if student_state.exists():
             student_state = student_state.first()
         # else:
@@ -153,6 +155,7 @@ def show_questions(request):
     user = request.user
     message = ''
     global questions, percentage_remaining, student_ques_point, score_of_ques_needed, questions_to_render, q, student_state, current_question, correct, incorrect
+    global number_of_questions
     if user.is_authenticated():
         if request.method == 'GET':
             correct = incorrect = 0
@@ -166,24 +169,27 @@ def show_questions(request):
 
                 percentage_remaining   = ( student_ques_point / score_of_ques_needed ) * 100
                 questions              = Question.objects.filter(state = state)
+                count                  = q + 1
 
                 questions_to_render = []
+
                 while(student_ques_point < score_of_ques_needed):
-                    student_ques_point    = student_ques_point + 1
-                    ques_now              = questions.filter(counts = student_ques_point)
+                    print(student_ques_point, score_of_ques_needed)
+                    ques_now              = questions.filter(counts = count)
                     if ques_now.exists():
-                        questions_to_render.append(ques_now.first())
+                        ques_now              = ques_now.first()
+                        student_ques_point    = student_ques_point + int(ques_now.difficulty) 
+                        count    = count + 1
+                        questions_to_render.append(ques_now)
+                        print(questions_to_render)
                     
                     else:
-                        if student_ques_point == q + 1:
-                            student_ques_point    = student_ques_point - 1
-                            print('in this smalllll block', student_ques_point, score_of_ques_needed)
-                            message = ' Our Fault: Sorry dear, no questions at this time. Please Move forward to next topic '
-                            return redirect('content:start')
-                            break
+                        break
 
                         # render very first question by GET request
-
+                number_of_questions     = len(questions_to_render)
+                if number_of_questions == 0:
+                    return redirect('content:start')
                 current_question        = questions_to_render[0]
                 questions_to_render     = questions_to_render[ 1::1]
 
@@ -202,6 +208,7 @@ def show_questions(request):
         if request.method == 'POST':
                 op1 = op2 =  op3 =  op4 = 0
                 integer_type_submission=""
+                this_q = 0
                 if request.POST.get('rad', False)=="1":
                     op1=1
                 if request.POST.get('rad', False)=="2":
@@ -229,30 +236,51 @@ def show_questions(request):
 
                 if correct_answer_submission==1:
                     correct = correct + 1
+                    this_q = 1
                     message = ' Correct Answer, Nice!! '
                 else:
                     incorrect  = incorrect + 1
+                    this_q = 0
                     message = 'Incorrect Answer, Be careful next time. You can review all attempted questions by you in ACTIVITY tab'
+                
 
-
-                if len(questions_to_render) == 0 and q == score_of_ques_needed:
+                if len(questions_to_render) == 0:
+                    QuestionResponse.objects.create(
+                                user     = user,
+                                question = current_question,
+                                op1      = op1,
+                                op2      = op2,
+                                op3      = op3, 
+                                op4      = op4,
+                                integer_type_submission = integer_type_submission,
+                                correct = this_q
+                             )
+                    q  =  q + 1 
+                    student_state.score_of_q = q
+                    student_state.save()
                     messages.error(request, 'Congrulations!, you have successfully completed this state.')
-                    return redirect('content:start')
+                    return redirect('content:report')
 
-                if len(questions_to_render) == 0 and not q == score_of_ques_needed:
-                    print('in this block length both are equal', q, score_of_ques_needed)
-                    messages.error(request, 'Our Fault. No questions to show this time')
-                    return redirect('content:start')
+              
+                
 
+                QuestionResponse.objects.create(
+                                user     = user,
+                                question = current_question,
+                                op1      = op1,
+                                op2      = op2,
+                                op3      = op3, 
+                                op4      = op4,
+                                integer_type_submission = integer_type_submission,
+                                correct = this_q
+                                                  )
 
-                print('in this block length is one and zero', q, score_of_ques_needed)
                 current_question       = questions_to_render[0]
                 questions_to_render  = questions_to_render[ 1::1]
                 q  =  q + 1 
                 student_state.score_of_q = q
                 student_state.save()
-                percentage_remaining   = ( q / score_of_ques_needed ) * 100
-                
+                percentage_remaining   = ( q / number_of_questions ) * 100
 
                 context = {
                 'currentquestion' : current_question,
@@ -278,21 +306,179 @@ def assign_new_state(request, correct= 0, incorrect = 0, success = 0):
         days, seconds = duration.days, duration.seconds
         time_taken = days * 24 + seconds // 3600
 
-        CompletedState.objects.create(
-            user        = user,
-            state       = student_state.state,
-            success     = success,
-            correct     = correct,
-            incorrect   = incorrect,
-            time_taken  = time_taken,
-        )
+
+
+
 
         
 
+def report(request):
+    user = request.user
+    global score, student_state
+    if user.is_authenticated():
+        if request.method == 'GET':
+            student_state = CurrentActiveState.objects.filter(Q(user = user)).first()
+            count         = student_state.score_of_q
+            question_solved = QuestionResponse.objects.filter( question__counts__lte = count)
+            i  = j = wi = wc = 0 
+        
+
+            for a in question_solved:
+                if a.correct is True:
+                    i = i + 1
+                    wc = wc + int(a.question.difficulty)
+                else:
+                    j = j + 1
+                    wi = wi + int(a.question.difficulty)
+
+            score =  (wc / (wc + wi)) * 100
+            duration     = timezone.now() - student_state.timestamp
+            days, seconds = duration.days, duration.seconds
+            time_taken = days * 24 + seconds // 3600
+
+            if score >= 50:
+
+
+                a = CompletedState.objects.create(
+                    user        = user,
+                    state       = student_state.state,
+                    success     = 1,
+                    correct     = i,
+                    incorrect   = j,
+                    time_taken  = time_taken,
+                )
+            else:
+                PreviousState.objects.create(
+                    user            = user,
+                    state           = state,
+                    score_of_i      = student_state.score_of_i,
+                    score_of_q      = student_state.score_of_q, 
+
+                )
+
+                a = None
+
+            
+        # back_ = u.outer_fringe(chapter, active_node)
+    
+
+            context = {
+                'question_solved' : question_solved,
+                'state'           : student_state.state,
+                'time'            : student_state.timestamp,
+                'result'          : a,
+                'score'           : score,
+
+            }
+
+        if request.method == 'POST':
+            state_list = []
+            if score >= 50:
+                upgrade = True
+                states =  upgrade_state(request)
+                for state in states:
+                    state_ = State.objects.filter(id = state)
+                    state_list.append(state_)
 
 
 
-       
+
+                print(state_list, states)
+                
+
+
+            else:
+                upgrade = False
+
+
+                states =  downgrade_state(request)
+                for state in states:
+                    state_ = State.objects.filter(id = state)
+                    state_list.append(state_)
+
+            context = {
+            'states' : state_list,
+            'state'  : student_state.state,
+            'upgrade': upgrade
+                  }
+
+
+
+
+  
+
+    return render(request, 'content/report.html', context)
+
+
+
+def downgrade_state(request):
+    user = request.user
+    if user.is_authenticated():
+        student_state = CurrentActiveState.objects.filter(user = user).first()
+        topic = student_state.state.topic
+        chapter = Topic.objects.filter(title = topic).first().chapter
+        chapter = Chapter.objects.filter(title = chapter).first()
+
+        active_node  = CurrentActiveNode.objects.filter(user = user).first().node
+        back = u.inner_fringe_id(chapter, active_node)
+
+        list_student_know = []
+        topics_to_learn = []
+        list_ready_toknow = []
+
+        for a in active_node.state_node.all():
+            list_student_know.append(a.id)
+
+        for index in back:
+
+            a = Node.objects.filter(id=index).first()
+
+            for n in a.state_node.all():
+                list_ready_toknow.append(n.id)
+            
+            topics_to_learn  = list (set(topics_to_learn + Diff(list_student_know, list_ready_toknow)))
+        print(topics_to_learn)
+
+        if len(topics_to_learn) != 0:
+            return topics_to_learn
+        else:
+            return None
+
+
+def upgrade_state(request):
+    user = request.user
+    if user.is_authenticated():
+        student_state = CurrentActiveState.objects.filter(user = user).first()
+        topic = student_state.state.topic
+        chapter = Topic.objects.filter(title = topic).first().chapter
+        chapter = Chapter.objects.filter(title = chapter).first()
+
+        active_node  = CurrentActiveNode.objects.filter(user = user).first().node
+        back = u.outer_fringe_id(chapter, active_node)
+
+        list_student_know = []
+        topics_to_learn = []
+        list_ready_toknow = []
+
+        for a in active_node.state_node.all():
+            list_student_know.append(a.id)
+
+        for index in back:
+
+            a = Node.objects.filter(id=index).first()
+
+            for n in a.state_node.all():
+                list_ready_toknow.append(n.id)
+            
+            topics_to_learn  = list (set(topics_to_learn + Diff(list_ready_toknow, list_student_know)))
+        print(topics_to_learn)
+
+        if len(topics_to_learn) != 0:
+            return topics_to_learn
+        else:
+            return None
+
+
 
 
 
