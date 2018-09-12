@@ -26,9 +26,9 @@ previous_submissions_status = 0
 value is 1 if only last submission is correct, "-1" if ONLY last one was wrong and "-2" if both last two submissions are wrong
  and value 0 if no information present yet'''
 
-kstr= 0
 num_quiz_questions=0
 domain_count=0
+domain_node=0
 chapter=0
 qset_chapters= Chapter.objects.filter(standard=11)
 curr_knowledge=0
@@ -69,7 +69,7 @@ def index(request):
 def beginquiz(request, user_obj, chapter_from_url, fr):
 
 	global previous_submissions_status,  end_quiz, curr_knowledge
-	global domain_count, kstr, num_quiz_questions, current_question, successor_state ,iteration
+	global domain_count,domain_node, num_quiz_questions, current_question, successor_state ,iteration
 	global chapter, qset_chaters
 	global index_next_chapter
 	previous_submissions_status=1
@@ -83,13 +83,9 @@ def beginquiz(request, user_obj, chapter_from_url, fr):
 	nodes= Node.objects.all().filter(state_node__topic__chapter= chapter_from_url) #querying out all nodes of chapter in which assessment to be taken
 	if nodes.count()==0:
 		return 1
-	# storing the knowledge structure
-	#print(nodes)
-	kstr= utility_kst.nodes2kstructure(nodes)
 
-	#print(kstr)
 	# no of states in domain node(gives us a count of no of steps from {} to Q)
-	domain_count= utility_kst.num_items_in_domain(kstr)
+	(domain_node, domain_count)= utility_kst.domain_kstate(chapter)
 
 	print('domain count is', domain_count)
  # stores the number of questions of assessment test while making sure that number of node levels is not too small than we can work with
@@ -135,7 +131,7 @@ def beginquiz(request, user_obj, chapter_from_url, fr):
 		#going to crawl_node function 
 		#####################________________________________CRAWL NODE_______________________________________####################
 
-		next_node= crawl_node(domain_count, previous_submissions_status, temp.node, kstr, chapter_from_url)
+		next_node= crawl_node(domain_count, previous_submissions_status, temp.node)
 
 		#####################________________________________CRAWL NODE DONE_______________________________________####################
 
@@ -143,7 +139,7 @@ def beginquiz(request, user_obj, chapter_from_url, fr):
 			messages.error(request, 'next node to be traversed couldnt be obtained. Check utility code and aux functions')
 			return render(request, 'mdisplay.html')
 
-		successor_state = State.objects.get(id= utility_kst.surplus_state(temp.node, next_node))
+		successor_state = utility_kst.surplus_state(temp.node, next_node)
 
 
 
@@ -182,7 +178,7 @@ def quiz(request, chapter_title, node_id):
 		usr = User.objects.get(username=request.user)
 
 		global previous_submissions_status,  end_quiz, curr_knowledge
-		global domain_count, kstr, num_quiz_questions, current_question, successor_state ,iteration
+		global domain_count, num_quiz_questions, current_question, successor_state ,iteration
 		global chapter, qset_chaters
 		global index_next_chapter
 
@@ -268,18 +264,20 @@ def quiz(request, chapter_title, node_id):
 			else:
 				previous_submissions_status= max(previous_submissions_status-1, -3)
 
-# iteration holds the number of question already evaluated corresponding to user answer
+		# iteration holds the number of question already evaluated corresponding to user answer
 		iteration = iteration + 1   
 
 		if(iteration==num_quiz_questions):
 
 			if UserCurrentNode.objects.filter(user=usr, chapter=chapter).exists():
-				UserCurrentNode.objects.filter(user=usr, chapter=chapter).delete()
+				useless=UserCurrentNode.objects.filter(user=usr, chapter=chapter)
+				for ucn in useless:
+					ucn.delete()
 
 			UserCurrentNode.objects.create(user=usr, chapter=chapter, node=crawler_node)
 
 			print("NORMAL")
-	 ###############################
+			###############################
 
 			try:
 				next_chapter= qset_chapters[index_next_chapter]
@@ -296,13 +294,16 @@ def quiz(request, chapter_title, node_id):
 
 
 
-		next_node= crawl_node(domain_count, previous_submissions_status, crawler_node, kstr, chapter_title)
+		next_node= crawl_node(domain_count, previous_submissions_status, crawler_node)
 
 
 		if next_node == "nothing":
 			nl= Node.objects.get_or_create(description='empty')
 			if UserCurrentNode.objects.filter(user=usr, chapter=chapter).exists():
-				UserCurrentNode.objects.filter(user=usr, chapter=chapter).delete()
+				useless=UserCurrentNode.objects.filter(user=usr, chapter=chapter)
+				for ucn in useless:
+					ucn.delete()
+
 			UserCurrentNode.objects.create(user=usr, chapter=chapter, node=nl)
 			print("NOTHING") ###############################
 
@@ -317,11 +318,13 @@ def quiz(request, chapter_title, node_id):
 
 
 		elif next_node == "everything":
-			domain_node= utility_kst.domain_kstate(kstr)
 			print("domain node is "+str(domain_node)) ############################################################
 
 			if UserCurrentNode.objects.filter(user=usr, chapter=chapter).exists():
-				UserCurrentNode.objects.filter(user=usr, chapter=chapter).delete()
+				useless=UserCurrentNode.objects.filter(user=usr, chapter=chapter)
+				for ucn in useless:
+					ucn.delete()
+
 			UserCurrentNode.objects.create(user=usr, chapter=chapter, node=crawler_node)
 			print("EVERYTHING") ###############################
 
@@ -335,9 +338,8 @@ def quiz(request, chapter_title, node_id):
 				return render(request, 'end.html')
 
 
-		ssid= utility_kst.surplus_state(crawler_node, next_node)
 
-		successor_state = State.objects.get(id= ssid)
+		successor_state = utility_kst.surplus_state(crawler_node, next_node)
 		all_questions = Question.objects.filter(state=successor_state)
 		current_question = all_questions[randint(0, all_questions.count() - 1)] #selecting a random question from selected state
 
@@ -371,7 +373,7 @@ def quiz(request, chapter_title, node_id):
 
 #lc is previous_submission_status
 #qlevel is domain_count
-def crawl_node(qlevel, lc, node, kstruct, chapter):
+def crawl_node(qlevel, lc, node):
 	curr_level= node.state_node.all().count()
 	stride=1
 	node_crawler= node
@@ -382,7 +384,7 @@ def crawl_node(qlevel, lc, node, kstruct, chapter):
 		'''
 		if curr_level + stride < qlevel:
 			for i in range(stride):
-				kfringe_outer= utility_kst.outer_fringe(chapter, node)
+				kfringe_outer= utility_kst.outer_fringe(node)
 				node_crawler= choice(kfringe_outer)
 		else:
 			#node_crawler= utility_kst.domain_kstate(kstruct)
@@ -394,23 +396,13 @@ def crawl_node(qlevel, lc, node, kstruct, chapter):
 	'''
 		if curr_level - stride > 0:
 			for i in range(stride):
-				kfringe_inner= utility_kst.inner_fringe(chapter, node)
+				kfringe_inner= utility_kst.inner_fringe(node)
 				print("inside crawl node function") #############################
 				print(kfringe_inner)
 				node_crawler= choice(kfringe_inner)
 		else:
 			return "nothing"
 
-			'''min_node=None
-			min_count=qlevel
-			for state in node.state_node.all():
-				nd= utility_kst.atom(kstruct, state)
-				print("*************") ############################
-				print(nd)
-				if nd.state_node.all().count() < min_count:
-					min_node= nd
-					min_count= nd.state_node.all().count()
-			node_crawler= min_node'''
 	return node_crawler
 
 
