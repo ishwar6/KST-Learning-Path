@@ -1,0 +1,105 @@
+
+<h1>You are in {{state}}</h1>
+
+
+{% if score and question_solved %}
+
+
+<h1>Score {{score}} %</h1>
+
+<h3>You have taken {{time|timesince}} for this state</h3>
+
+<p> You started on {{time}}</p>
+<ul>
+{% for a in question_solved  %}
+
+<li>
+<p>Question: {{a.question}}  </p>
+
+<p> Answer Given by you:
+   {% if a.op1 %}
+     A
+   {% endif %}
+
+
+   {% if a.op2 %}
+   B
+ {% endif %}
+
+ {% if a.op3 %}
+ C
+{% endif %}
+
+{% if a.op4 %}
+D
+{% endif %}
+
+{% if a.integer_type_submission %}
+{{a.integer_type_submission}}
+
+{% endif %}
+
+</p>
+
+<p>
+{% if a.correct %}
+Your answer for this was Correct
+{% else %}
+
+Your answer was incorrect
+
+{% endif %}
+</p>
+</li>
+{% endfor %}
+
+</ul>
+
+<h1>Your Report for this state:</h1>
+Correct Questions : {{result.correct}} <br>
+Inorrect Questions : {{result.incorrect}}<br>
+Practice Questions Solved : {{result.practice}}
+
+
+
+<form method="POST" action = {% url 'content:report' %}>
+{% csrf_token %}
+    <input type="submit">
+</form>
+
+
+{% endif %}
+
+
+
+
+{% if states %}
+
+{% if upgrade %}
+
+<h3> Congrts! your states are upgraded. Please select any one of the state with which you want to continue further. </h3>
+
+{% else %}
+
+<h3>
+    Your score was below average. Please try again in previous states. Select any one from these and beat the flow.
+</h3>
+
+{% endif %}
+
+
+{% for a in states %}
+
+        {% for b in a %}
+
+                        <a href="{% url 'content:start' b.id %}"> {{b}} </a> <br>
+
+        {% endfor  %}
+
+
+
+
+
+{% endfor  %}
+
+{% endif %}

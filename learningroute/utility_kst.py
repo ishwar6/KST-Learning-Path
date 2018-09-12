@@ -94,7 +94,7 @@ def outer_fringe_id(chap, node):  # gives outer fringe in consumable format
                 if st_matches== 0:
                     a_match=0
             if a_match ==1:
-                fringe_outer.append( nd.id)
+                fringe_outer.append(nd.id)
 
     
     return fringe_outer
@@ -106,7 +106,8 @@ def inner_fringe(chap, node):  #gives the inner fringe in a consumable format
     print("node is "+str(node)) #################################################
     size= node.state_node.all().count()
     fringe_inner= list()
-    ch_nodes= Node.objects.filter(state_node__topic__chapter__title=chap).distinct()  # take all nodes E chapter
+    ch_nodes= Node.objects.filter(state_node__topic__chapter__title=chap).distinct()
+      # take all nodes E chapter
     for nd in ch_nodes:
         if nd.state_node.all().count()== size-1:  # select ony those whos state count is one more than curr nodes state count
             a_match=1
@@ -119,15 +120,32 @@ def inner_fringe(chap, node):  #gives the inner fringe in a consumable format
                     a_match=0
             if a_match ==1:
                 fringe_inner.append(nd)
-    print(fringe_inner) ###############################################################
-    '''kstate= node2kstate(node)
-    for padosi in kst.kneighbourhood(kstr, r.set(kstate)):
-        num_sett=0
-        for sett in padosi:
-            num_sett= num_sett+ 1
-        if num_sett < size:
-            fringe_inner.append(kstate_to_node(padosi))
-    '''
+    ###############################################################
+   
+    return fringe_inner
+
+
+def inner_fringe_id(chap, node):  #gives the inner fringe in a consumable format
+    r.sets_options('quote', False)
+    print("node is "+str(node)) #################################################
+    size= node.state_node.all().count()
+    fringe_inner= list()
+    ch_nodes= Node.objects.filter(state_node__topic__chapter__title=chap).distinct()
+      # take all nodes E chapter
+    for nd in ch_nodes:
+        if nd.state_node.all().count()== size-1:  # select ony those whos state count is one more than curr nodes state count
+            a_match=1
+            for st_next in nd.state_node.all():     # check whether every state E curr_node in potential next_node
+                st_matches=0
+                for st_curr in node.state_node.all():
+                    if st_curr.id == st_next.id:
+                        st_matches=1
+                if st_matches== 0:
+                    a_match=0
+            if a_match ==1:
+                fringe_inner.append(nd.id)
+    ###############################################################
+   
     return fringe_inner
 
 def kstate_to_node(kstate): # set(db state) -> db node
@@ -154,3 +172,10 @@ def domain_kstate(kstr): # takes a knowledge structure as i/p and returns its do
 
 def atom(kstr, st):     #takes a k struct and an item(state) and gives its atom
     return kstate_to_node(kst.katoms(kstr, r.set(st.id)))
+
+
+
+
+
+
+
