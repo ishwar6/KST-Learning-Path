@@ -93,15 +93,14 @@ Practice Questions Solved : {{result.practice}}
 {% endif %}
 
 
-{% for a in states %}
+{% for b in states %}
 
-        {% for b in a %}
 
                         <a href="{% url 'content:assign' b.id success %}"> {{b}} </a> <br>
 
 
                     
-        {% endfor  %}
+      
 
 
 

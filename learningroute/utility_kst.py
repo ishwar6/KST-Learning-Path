@@ -88,15 +88,17 @@ def outer_fringe_states(node):   # gives a list of states from current node to g
     fringe= outer_fringe(node)
     state_list= []
     for nd in fringe:
-        state_list.append(node, nd)
+        state_list.append(surplus_state(node, nd))
     
     return state_list
 
 
 def inner_fringe_states(node): # gives a list of states from current node to go backward to
     fringe= inner_fringe(node)
+    print(fringe)
     state_list= []
     for nd in fringe:
         state_list.append(surplus_state(node, nd))
+    print(state_list)
     
     return state_list

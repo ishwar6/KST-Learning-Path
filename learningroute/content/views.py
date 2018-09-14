@@ -69,9 +69,6 @@ def assignstate(request, id, s):
             s = int(s)
             id = int(id)
             student_state = student_state_.first()
-            topic = student_state.state.topic
-            chapter = Topic.objects.filter(title = topic).first().chapter
-            chapter = Chapter.objects.filter(title = chapter).first()
             active_node = CurrentActiveNode.objects.filter(user = user)
             if active_node.exists():
                 active_node = active_node.first()
@@ -84,7 +81,7 @@ def assignstate(request, id, s):
 
 
             if s == 0:
-                back = u.inner_fringe(chapter, active_node)
+                back = u.inner_fringe(active_node)
                 new_state = State.objects.filter(id = id).first()
                 if len(back)==0:
                     fav_node = active_old
@@ -113,7 +110,7 @@ def assignstate(request, id, s):
                             )
 
             if s == 1:
-                forward = u.outer_fringe(chapter, active_node)
+                forward = u.outer_fringe(active_node)
                 new_state = State.objects.filter(id = id).first()
 
                 for node in forward:
@@ -127,7 +124,7 @@ def assignstate(request, id, s):
                         node = active_node
                     )
                     
-                    CurrentActiveNode.objects.filter(user = user)
+                    CurrentActiveNode.objects.filter(user = user).delete()
                     CurrentActiveNode.objects.create(
                         user = user,
                         node = fav_node
@@ -381,10 +378,10 @@ def show_questions(request):
                 'currentquestion' : current_question,
                 'message'         : message,
                 'per_remaining'   : percentage_remaining,
-                #'questions'       : questions, 
+                'questions'       : questions, 
 
             }
-                return JsonResponse(context)
+                return render(request, 'content/ques.html', context)
                         
 
 
@@ -483,37 +480,43 @@ def report(request):
             print(context)
 
         if request.method == 'POST':
+            active_node  = CurrentActiveNode.objects.filter(user = user).first().node
             
             state_list = []
             if score >= 50:
                 upgrade = True
                 success = 1
-                states =  upgrade_state(request)
+                states =  u.outer_fringe_states(active_node)
+                print(states)
+
                 if states is None:
                     messages.error(request, 'No outer fringe found. Make a new suitable node')
                     print("No outer fringe found. Make a new suitable node")
                     return redirect("content:problem")
-                for state in states:
-                    state_ = State.objects.filter(id = state)
-                    state_list.append(state_)
-                print(state_list, states)
+                
                 
             else:
                 upgrade = False
                 success = 0
 
-                states =  downgrade_state(request)
+                states =  u.inner_fringe_states(active_node)
+                if len(states)==0:
+                    list_student_know = []
+                    for a in active_node.state_node.all():
+                        list_student_know.append(a.id)
+                    states = list_student_know
+                    
 
-                for state in states:
-                    state_ = State.objects.filter(id = state)
-                    state_list.append(state_)
+
+                
 
             context = {
-            'states' : state_list,
+            'states' : states,
             'state'  : student_state.state,
             'upgrade': upgrade,
             'success' : success,
-                  }
+                }
+            print(context)
 
     return render(request, 'content/report.html', context)
 
