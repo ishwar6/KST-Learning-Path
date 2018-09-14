@@ -6,7 +6,9 @@ from states.models import State, Node
 import utility_kst as u
 from django.utils import timezone
 from django.contrib import messages
+from django.db import transaction
 from questions.models import Question, QuestionResponse
+from django.http import JsonResponse
 from content.models import (    Content,
                                 Illustration, 
                              
@@ -23,6 +25,10 @@ from content.models import (    Content,
 
 def Diff(li1, li2): 
     return (list(set(li1) - set(li2)))
+
+
+def problem(request):
+    return render(request, 'content/error.html', {})
 
 
 # this function shows all possible states to cover for a particular user. 
@@ -54,31 +60,108 @@ def show_list_of_states(request, chapter = None):
     return None
 
 
-def showcontent(request, id):
+def assignstate(request, id, s):
     user = request.user
     if user.is_authenticated():
-        student_state  = CurrentActiveState.objects.filter(user= user)
+        student_state_  = CurrentActiveState.objects.filter(user= user)
         
+        if student_state_.exists():
+            s = int(s)
+            id = int(id)
+            student_state = student_state_.first()
+            topic = student_state.state.topic
+            chapter = Topic.objects.filter(title = topic).first().chapter
+            chapter = Chapter.objects.filter(title = chapter).first()
+            active_node = CurrentActiveNode.objects.filter(user = user)
+            if active_node.exists():
+                active_node = active_node.first()
+                active_node = active_node.node
+
+          
+
+            active_old = active_node
+            
+
+
+            if s == 0:
+                back = u.inner_fringe(chapter, active_node)
+                new_state = State.objects.filter(id = id).first()
+                if len(back)==0:
+                    fav_node = active_old
+                else:
+
+                    for node in back:
+                        if new_state in node.state_node.all():
+                            fav_node = node 
+                            break
+                with transaction.atomic():
+
+                    PreviousActiveNode.objects.create(
+                        user = user,
+                        node = active_node
+                    )
+                    
+                    CurrentActiveNode.objects.filter(user = user).delete()
+                    CurrentActiveNode.objects.create(
+                        user = user,
+                        node = fav_node
+                    )
+                    student_state_.delete()
+                    CurrentActiveState.objects.create(
+                        user = user,
+                        state = new_state,
+                            )
+
+            if s == 1:
+                forward = u.outer_fringe(chapter, active_node)
+                new_state = State.objects.filter(id = id).first()
+
+                for node in forward:
+                    if new_state in node.state_node.all():
+                        fav_node = node
+                        break
+                with transaction.atomic():
+
+                    PreviousActiveNode.objects.create(
+                        user = user,
+                        node = active_node
+                    )
+                    
+                    CurrentActiveNode.objects.filter(user = user)
+                    CurrentActiveNode.objects.create(
+                        user = user,
+                        node = fav_node
+                    )
+                    student_state_.delete()
+                    CurrentActiveState.objects.create(
+                        user = user,
+                        state = new_state,
+                        
+                    )
+    return redirect('content:show-content')
+
+
+def showcontent(request):
+    user = request.user
+    context = {}
+    if user.is_authenticated():
+        student_state  = CurrentActiveState.objects.filter(user= user)
         if student_state.exists():
             student_state = student_state.first()
-        # else:
-        #     student_state = CurrentActiveState.objects.create(
-        #         user = user,  theory= 0
-        #     )
-        
+            content = Content.objects.filter(state = student_state.state)
+
+            context = {
+                'state'  : student_state.state,
+                'content': content
+            }
+
+    return render(request, 'content/page.html' , context)
 
 
-        content  =  Content.objects.filter(state = state)
-        if content.exists():
-            content  = content.first()
 
-        context = {
-            'content' : content,
-            'state'   : state,
+      
 
-        }
-
-    return render(request, 'content/page.html', context)
+    
 
 
 
@@ -151,6 +234,9 @@ def show_illustrations(request, content = None):
 
 
 
+
+
+
 def show_questions(request):
     user = request.user
     message = ''
@@ -173,6 +259,8 @@ def show_questions(request):
 
                 questions_to_render = []
 
+                #### ADD FURTHER COUNTS HERE   # # # ## # ## # ## # # # # # # #  ### # #  # # # #  # #  #######
+
                 while(student_ques_point < score_of_ques_needed):
                     print(student_ques_point, score_of_ques_needed)
                     ques_now              = questions.filter(counts = count)
@@ -189,7 +277,8 @@ def show_questions(request):
                         # render very first question by GET request
                 number_of_questions     = len(questions_to_render)
                 if number_of_questions == 0:
-                    return redirect('content:start')
+                    print('No question found for this state in datebase')
+                    return redirect('content:problem')
                 current_question        = questions_to_render[0]
                 questions_to_render     = questions_to_render[ 1::1]
 
@@ -245,6 +334,10 @@ def show_questions(request):
                 
 
                 if len(questions_to_render) == 0:
+                    previous_response = QuestionResponse.objects.filter(Q(user = user) & Q(question = current_question))
+                    if previous_response.exists():
+                        previous_response.first().delete()
+
                     QuestionResponse.objects.create(
                                 user     = user,
                                 question = current_question,
@@ -262,7 +355,9 @@ def show_questions(request):
                     return redirect('content:report')
 
               
-                
+                previous_response = QuestionResponse.objects.filter(Q(user = user) & Q(question = current_question))
+                if previous_response.exists():
+                    previous_response.first().delete()
 
                 QuestionResponse.objects.create(
                                 user     = user,
@@ -286,12 +381,19 @@ def show_questions(request):
                 'currentquestion' : current_question,
                 'message'         : message,
                 'per_remaining'   : percentage_remaining,
-                'questions'       : questions, 
+                #'questions'       : questions, 
 
             }
-                return render(request, 'content/ques.html', context)
-
+                return JsonResponse(context)
                         
+
+
+
+
+
+
+
+
 
 
 
@@ -319,7 +421,7 @@ def report(request):
         if request.method == 'GET':
             student_state = CurrentActiveState.objects.filter(Q(user = user)).first()
             count         = student_state.score_of_q
-            question_solved = QuestionResponse.objects.filter( question__counts__lte = count)
+            question_solved = QuestionResponse.objects.filter(Q(question__counts__lte = count) & Q( question__state = student_state.state ) )
             i  = j = wi = wc = 0 
         
 
@@ -337,6 +439,10 @@ def report(request):
             time_taken = days * 24 + seconds // 3600
 
             if score >= 50:
+                if_old = CompletedState.objects.filter(Q(user = user) & Q(state = student_state.state))
+                if if_old.exists():
+                    if_old = if_old.first()
+                    if_old.delete()
 
 
                 a = CompletedState.objects.create(
@@ -348,14 +454,18 @@ def report(request):
                     time_taken  = time_taken,
                 )
             else:
+                if_old = PreviousState.objects.filter(Q(user = user) & Q(state = student_state.state))
+                if if_old.exists():
+                    if_old = if_old.first()
+                    if_old.delete()
+
                 PreviousState.objects.create(
                     user            = user,
-                    state           = state,
+                    state           = student_state.state,
                     score_of_i      = student_state.score_of_i,
                     score_of_q      = student_state.score_of_q, 
 
                 )
-
                 a = None
 
             
@@ -370,28 +480,30 @@ def report(request):
                 'score'           : score,
 
             }
+            print(context)
 
         if request.method == 'POST':
+            
             state_list = []
             if score >= 50:
                 upgrade = True
+                success = 1
                 states =  upgrade_state(request)
+                if states is None:
+                    messages.error(request, 'No outer fringe found. Make a new suitable node')
+                    print("No outer fringe found. Make a new suitable node")
+                    return redirect("content:problem")
                 for state in states:
                     state_ = State.objects.filter(id = state)
                     state_list.append(state_)
-
-
-
-
                 print(state_list, states)
                 
-
-
             else:
                 upgrade = False
-
+                success = 0
 
                 states =  downgrade_state(request)
+
                 for state in states:
                     state_ = State.objects.filter(id = state)
                     state_list.append(state_)
@@ -399,13 +511,9 @@ def report(request):
             context = {
             'states' : state_list,
             'state'  : student_state.state,
-            'upgrade': upgrade
+            'upgrade': upgrade,
+            'success' : success,
                   }
-
-
-
-
-  
 
     return render(request, 'content/report.html', context)
 
@@ -428,6 +536,11 @@ def downgrade_state(request):
 
         for a in active_node.state_node.all():
             list_student_know.append(a.id)
+        print(list_student_know)
+
+        if len(list_student_know)==0 or len(list_student_know)==1:
+            print('only one node. NO inner fringe possible')
+            return list_student_know
 
         for index in back:
 
@@ -437,7 +550,6 @@ def downgrade_state(request):
                 list_ready_toknow.append(n.id)
             
             topics_to_learn  = list (set(topics_to_learn + Diff(list_student_know, list_ready_toknow)))
-        print(topics_to_learn)
 
         if len(topics_to_learn) != 0:
             return topics_to_learn
@@ -471,7 +583,6 @@ def upgrade_state(request):
                 list_ready_toknow.append(n.id)
             
             topics_to_learn  = list (set(topics_to_learn + Diff(list_ready_toknow, list_student_know)))
-        print(topics_to_learn)
 
         if len(topics_to_learn) != 0:
             return topics_to_learn

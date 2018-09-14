@@ -115,7 +115,7 @@ class PreviousState(models.Model):
 
 class CurrentActiveState(models.Model):
     user         = models.OneToOneField(User, on_delete= models.CASCADE)
-    state        = models.OneToOneField(State, on_delete= models.CASCADE)
+    state        = models.ForeignKey(State, on_delete= models.CASCADE)
     theory       = models.BooleanField(default = 0)
     score_of_i   = models.IntegerField(default=0, help_text='Will increase as the student will solve illustrations')
     score_of_q   = models.IntegerField(default=0, help_text='Will increase as the student will solve Questions')
@@ -147,7 +147,7 @@ class CompletedState(models.Model):
 
 class CurrentActiveNode(models.Model):
     user        = models.OneToOneField(User, on_delete=models.CASCADE)
-    node        = models.OneToOneField(Node, on_delete = models.CASCADE, default = None, blank=True)
+    node        = models.ForeignKey(Node, on_delete = models.CASCADE, default = None, blank=True)
     timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
 
     def __str__(self):

@@ -56,10 +56,15 @@ Your answer was incorrect
 </ul>
 
 <h1>Your Report for this state:</h1>
+{% if result %}
 Correct Questions : {{result.correct}} <br>
 Inorrect Questions : {{result.incorrect}}<br>
 Practice Questions Solved : {{result.practice}}
+{% else %}
 
+<p>State not cleared.</p>
+
+{% endif %}
 
 
 <form method="POST" action = {% url 'content:report' %}>
@@ -92,8 +97,10 @@ Practice Questions Solved : {{result.practice}}
 
         {% for b in a %}
 
-                        <a href="{% url 'content:start' b.id %}"> {{b}} </a> <br>
+                        <a href="{% url 'content:assign' b.id success %}"> {{b}} </a> <br>
 
+
+                    
         {% endfor  %}
 
 
