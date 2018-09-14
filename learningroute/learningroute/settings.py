@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     ####### External  Packages###########
-    'rpy2',
+
     ########### Self Added Apps #######
     'states',
     'content',
