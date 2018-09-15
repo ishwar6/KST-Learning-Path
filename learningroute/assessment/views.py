@@ -16,7 +16,7 @@ from assessment.models import TestsTaken, User_submission
 from states.models import State, Node
 from questions.models import Question
 from chapters.models import Topic, Chapter
-from userstates.models import TempActiveNode, UserCurrentNode, Proficiency
+from userstates.models import TempActiveNode, UserCurrentNode
 from django.db.models import Q
 from itertools import *
 import datetime
@@ -54,8 +54,8 @@ def number_optimum(num):
 def index(request):
 	global counter, score
 	if request.user.is_authenticated:
-		user_obj = User.objects.get(username=request.user)
-		all_chapters=Chapter.objects.filter(standard=11)
+		user_obj = request.user
+		all_chapters=Chapter.objects.filter(standard=9)
 		try:
 			return render(request, 'index.html', {'first_chapter':all_chapters[0], 'profile':user_obj})
 		except:
@@ -150,7 +150,6 @@ def beginquiz(request, user_obj, chapter_from_url, fr):
 		if not all_questions:
 			messages.error(request, 'Question with given state', successor_state, 'not found')
 			return render(request, 'mdisplay.html')
-		print(all_questions)
 	except:
 		messages.error(request, 'error retreiving Question with given state', successor_state)			
 
@@ -167,7 +166,6 @@ def beginquiz(request, user_obj, chapter_from_url, fr):
 		'node_id':next_node.id,
 		'currentquestion':current_question
 	}
-	print(context)
 	return context
 
 
@@ -175,7 +173,7 @@ def beginquiz(request, user_obj, chapter_from_url, fr):
 def quiz(request, chapter_title, node_id):
 	if request.user.is_authenticated:
 
-		usr = User.objects.get(username=request.user)
+		usr = request.user
 
 		global previous_submissions_status,  end_quiz, curr_knowledge
 		global domain_count, num_quiz_questions, current_question, successor_state ,iteration
@@ -426,20 +424,13 @@ class IntroductoryResponse(View):
 			}
 		for the_chapter in self.the_chapters :
 			the_node = None
-			if Proficiency.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).exists():
-				Proficiency.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).delete()
-
-			ind_number= "imp-of-"+ str(the_chapter.id)
 			ind_select= "level-of-"+ str(the_chapter.id)
 
 			if request.POST.get(ind_select):
 				level = request.POST.get(ind_select)
 			else:
 				level = None
-			if request.POST.get(ind_number):
-				significance= request.POST.get(ind_number)
-			else:
-				significance = None
+			
 
 			dont_know_var = False
 		
@@ -471,13 +462,7 @@ class IntroductoryResponse(View):
 						list_of_nodes.append(n)
 						the_node= choice(list_of_nodes)
 			
-			Proficiency.objects.create(
-				user=self.request.user,
-				chapter=the_chapter,
-				level = level,
-				significance = significance,
-				dont_know_switch= dont_know_var
-			)
+			
 			if TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).exists():
 				TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).delete()
 

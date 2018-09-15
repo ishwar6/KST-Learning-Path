@@ -5,7 +5,7 @@ from django.shortcuts import render,redirect
 from django.core.urlresolvers import reverse_lazy
 from chapters.models import Chapter
 from django.views.generic import View
-from .models import Proficiency, TempActiveNode
+from .models import TempActiveNode
 from states.models import Node, State
 from django.db.models import Q
 
@@ -19,26 +19,16 @@ class IntroductoryResponse(View):
     def post(self, request):
         for the_chapter in self.the_chapters:
             the_node = None
-            if Proficiency.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).exists():
-                Proficiency.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).delete()
+         
 
-            ind_number= "imp-of-"+ str(the_chapter.id)
             ind_select= "level-of-"+ str(the_chapter.id)
 
             if request.POST.get(ind_select):
                 level = request.POST.get(ind_select)
             else:
                 level = None
-            if request.POST.get(ind_number):
-                significance= request.POST.get(ind_number)
-            else:
-                significance = None
-            Proficiency.objects.create(
-                user=self.request.user,
-                chapter=the_chapter,
-                level = level,
-                significance = significance
-            )
+            
+        
 
             LEVEL_REF= {
                 'beginer':1, 'Benginer':1,

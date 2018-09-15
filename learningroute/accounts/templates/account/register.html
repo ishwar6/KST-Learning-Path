@@ -1,4 +1,22 @@
 <form method='post'>
-        {% csrf_token %} {{form.phone}} {{form.otp}}
+       
+    {% csrf_token %} 
+
+        <br>
+        Phone: 
+        {{form.phone}} 
+        <br>
+        
+        <br>
+
+
+
+
+
+        OTP:         
+        {{form.otp}}
+
+        <br>
+        <br>
         <input type="submit+">
     </form>

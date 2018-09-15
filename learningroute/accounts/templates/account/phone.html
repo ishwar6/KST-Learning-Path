@@ -1,9 +1,20 @@
 <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
     crossorigin="anonymous"></script>
 
-<form method="POST" data-validate-user-otp="{% url 'account:validate-otp' %}" data-validate-username-url="{% url 'account:validate-phone' %}">
+<h1>Start your own Learning Route</h1>
 
-    {{form.phone}} {{form.otp}} {% csrf_token %}
+<form method="POST" data-validate-user-otp="{% url 'account:validate-otp' %}" data-validate-username-url="{% url 'account:validate-phone' %}">
+Phone:
+
+    {{form.phone}} 
+    
+    <br><br>
+    OTP: 
+    
+    {{form.otp}}
+    <br>
+    <p>You will receive otp after entering your number in a while</p>
+     {% csrf_token %}
 
     <input type="submit">
 

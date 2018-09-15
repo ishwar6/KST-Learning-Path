@@ -20,16 +20,31 @@ from django.contrib.auth.forms import PasswordChangeForm
 from rest_framework import viewsets, response, permissions
 from django.views.decorators.csrf import csrf_exempt
 
+
+
 class RegisterView(CreateView):
     form_class = RegisterForm
     template_name = 'account/register.html'
     success_url = '/'
+
+    def get(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated():
+            return redirect('account:profile')
+        return super(RegisterView, self).get(request, *args, **kwargs)
+
+
+
 
 
 class LoginView(FormView):
     form_class = LoginForm
     success_url = '\hah'
     template_name = 'account/login.html'
+
+    def get(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated():
+            return redirect('account:profile')
+        return super(LoginView, self).get(request, *args, **kwargs)
 
     def form_valid(self, form):
         request = self.request
@@ -61,6 +76,8 @@ class LoginView(FormView):
 #         return super(TempRegisterView, self).form_valid(form)
 @csrf_exempt
 def send_otp(request):
+    if request.user.is_authenticated():
+        return redirect('account:profile')
     if request.method == 'POST':
         form = TempRegisterForm(request.POST or None)
         if form.is_valid():
@@ -159,6 +176,8 @@ def profile(request):
 
 
 def send_otp_password_reset(request):
+    if request.user.is_authenticated():
+        return redirect('account:profile')
     if request.method == 'POST':
         form = TempRegisterForm(request.POST or None)
         if form.is_valid():
@@ -225,6 +244,8 @@ def validate_otp_reset(request):
 
 
 def reset_password(request):
+    if request.user.is_authenticated():
+        return redirect('account:profile')
     token = request.session.get('token', None)
     phone = request.session.get('phone_reset', None)
     if phone and token:

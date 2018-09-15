@@ -477,6 +477,9 @@ def report(request):
                     score_of_i_old = if_old.score_of_i
                     score_of_q_old = if_old.score_of_q
                     if_old.delete()
+                else:
+                    score_of_i_old = 0
+                    score_of_q_old = 0
 
                 PreviousState.objects.create(
                     user            = user,
