@@ -5,7 +5,8 @@ from django.db.models.signals import pre_save,post_save
 from django.core.validators import MinValueValidator , MaxValueValidator
 from chapters.models import Chapter
 from django.contrib.auth import get_user_model
-
+import random
+import os
 User = get_user_model()
 
 def upload_image_path_content(instance, filename):

@@ -2,7 +2,8 @@ from django.db import models
 from states.models import State
 from django.db.models.signals import pre_save,post_save
 from django.contrib.auth.models import User
-
+import random
+import os
 
 def upload_image_path_questions(instance, filename):
     new_filename = random.randint(1,9996666666)

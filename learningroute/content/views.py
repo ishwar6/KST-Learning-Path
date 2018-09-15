@@ -180,18 +180,28 @@ def show_illustrations(request, content = None):
         state = student_state.state
         content = Content.objects.filter(state = state)
 
-        student_illus_point    = student_state.score_of_i
+        student_illus_point   = illus_pt_this_state = student_state.score_of_i
         score_of_illus_needed  = state.score_of_i()
+        print(student_illus_point)
 
-        percentage_remaining   = ( student_illus_point / score_of_illus_needed ) * 100
+
+        previous_state = PreviousState.objects.filter(Q(user = user) & Q(state = state))
+        print(previous_state)
+        if previous_state.exists():
+            previous_state = previous_state.first()
+            student_illus_point = student_illus_point + previous_state.score_of_i 
+        print(student_illus_point)
+
+        percentage_remaining   = ( illus_pt_this_state / score_of_illus_needed ) * 100
         illustration           = Illustration.objects.filter(content = content)
 
         illustrations_to_render = []
-        while(student_illus_point < score_of_illus_needed):
+        while(illus_pt_this_state < score_of_illus_needed):
             student_illus_point    = student_illus_point + 1
+            illus_pt_this_state     = illus_pt_this_state + 1
             illus_now        = illustration.filter(counts = student_illus_point)
             if illus_now.exists():
-                illustrations_to_render.append(illus_now)
+                illustrations_to_render.append(illus_now.first())
                 student_illus_point    = student_illus_point - 1
                 
             else:
@@ -199,7 +209,7 @@ def show_illustrations(request, content = None):
                 message = ' Our Fault: Sorry dear, no illustrations at this time. Please Move forward to Questions '
                 break
 
-        if student_illus_point >= score_of_illus_needed:
+        if illus_pt_this_state >= score_of_illus_needed:
             messages.error(request, 'hello, you have already completed your illustrations for this state')
 
         
@@ -255,12 +265,18 @@ def show_questions(request):
                     return redirect('content:active')
                 state         = student_state.state
 
-                student_ques_point  = q   = student_state.score_of_q
+                student_ques_point  = q = student_ques_point_overall  = student_state.score_of_q
                 score_of_ques_needed   = state.score_of_q()
 
                 percentage_remaining   = ( student_ques_point / score_of_ques_needed ) * 100
+                previous_state = PreviousState.objects.filter(Q(user = user) & Q(state = state))
+                if previous_state.exists():
+                    previous_state = previous_state.first()
+                    student_ques_point_overall = student_ques_point_overall + previous_state.score_of_q
+
+
                 questions              = Question.objects.filter(state = state)
-                count                  = q + 1
+                count                  = student_ques_point_overall + 1
 
                 questions_to_render = []
 
@@ -300,6 +316,7 @@ def show_questions(request):
 
 
         if request.method == 'POST':
+                student_state  = CurrentActiveState.objects.filter(user = user).first()
                 if student_state.active_part  != 3:
                     return redirect('content:active')
 
@@ -454,16 +471,19 @@ def report(request):
                 )
             else:
                 if_old = PreviousState.objects.filter(Q(user = user) & Q(state = student_state.state))
+
                 if if_old.exists():
                     if_old = if_old.first()
+                    score_of_i_old = if_old.score_of_i
+                    score_of_q_old = if_old.score_of_q
                     if_old.delete()
 
                 PreviousState.objects.create(
                     user            = user,
                     state           = student_state.state,
                     score           = score,
-                    score_of_i      = student_state.score_of_i,
-                    score_of_q      = student_state.score_of_q, 
+                    score_of_i      = student_state.score_of_i + score_of_i_old,
+                    score_of_q      = student_state.score_of_q + score_of_q_old, 
 
                 )
                 a = None
@@ -528,7 +548,6 @@ def report(request):
             print(context)
 
     return render(request, 'content/report.html', context)
-
 
 
 
