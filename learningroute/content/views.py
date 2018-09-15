@@ -553,6 +553,15 @@ def report(request):
 
 
 
+def select_chapter(request):
+    user = request.user
+    if user.is_authenticated():
+        if request.method == 'GET':
+            student_state = CurrentActiveState.objects.filter(user = user).first()
+            pass
+
+    
+
 
 
 

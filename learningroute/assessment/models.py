@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from chapters.models import Chapter
 from states.models import State
 from userstates.models import UserCurrentNode 
