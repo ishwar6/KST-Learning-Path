@@ -6,4 +6,12 @@
 
 
 
-<a href="{% url 'content:illustrations' %}">Go to illustrations for this chapter</a>
+
+
+
+<form method="POST" action="{% url 'content:show-content' %}">
+    {% csrf_token %}
+
+<input type="submit">
+
+</form>

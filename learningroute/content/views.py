@@ -31,54 +31,49 @@ def problem(request):
     return render(request, 'content/error.html', {})
 
 
-# this function shows all possible states to cover for a particular user. 
-def show_list_of_states(request, chapter = None):
+def active_part_redirect(request):
     user = request.user
-    if user.is_authenticated() and chapter is not None:
-        # list is storing the individual state id's a student knows in a particular chapter
-        user_active_node       = UserCurrentNode.objects.filter(Q(user = user) & Q(chapter = chapter)).first().node
-        ready_to_learn         = u.outer_fringe_id(chapter, user_active_node)
-        list_student_know = []
-        topics_to_learn = []
-        list_ready_toknow = []
-        for a in user_active_node.state_node.all():
-            list_student_know.append(a.id)
-
-        for index in ready_to_learn:
-
-            a = Node.objects.filter(id=index).first()
-
-            for n in a.state_node.all():
-                list_ready_toknow.append(n.id)
+    if user.is_authenticated():
+        student_state_  = CurrentActiveState.objects.filter(user= user)
+        if student_state_.exists():
+            student_state = student_state_.first()
+            if student_state.active_part == 1:
+                return redirect('content:show-content')
+            elif student_state.active_part == 2:
+                return redirect('content:illustrations')
+            elif student_state.active_part == 3:
+                return redirect('content:questions')
+            elif student_state.active_part ==4:
+                return redirect('content:report')
+            else:
+                return redirect('content:problem')
             
-            topics_to_learn  = list (set(topics_to_learn + Diff(list_ready_toknow, list_student_know)))
+            
 
-        if len(topics_to_learn) != 0:
-            return topics_to_learn
-        else:
-             return None
-    return None
+
+
 
 
 def assignstate(request, id, s):
     user = request.user
     if user.is_authenticated():
         student_state_  = CurrentActiveState.objects.filter(user= user)
+
         
         if student_state_.exists():
             s = int(s)
             id = int(id)
             student_state = student_state_.first()
+            if student_state.active_part != 5:
+                return redirect('content:active')
+
+            
             active_node = CurrentActiveNode.objects.filter(user = user)
             if active_node.exists():
                 active_node = active_node.first()
                 active_node = active_node.node
 
-          
-
             active_old = active_node
-            
-
 
             if s == 0:
                 back = u.inner_fringe(active_node)
@@ -145,12 +140,21 @@ def showcontent(request):
         student_state  = CurrentActiveState.objects.filter(user= user)
         if student_state.exists():
             student_state = student_state.first()
+            if student_state.active_part !=1:
+                return redirect('content:active')
             content = Content.objects.filter(state = student_state.state)
 
             context = {
                 'state'  : student_state.state,
                 'content': content
             }
+
+        if request.method == 'POST':
+            student_state.active_part = 2
+            student_state.save()
+            return redirect('content:illustrations')
+
+
 
     return render(request, 'content/page.html' , context)
 
@@ -167,12 +171,12 @@ def show_illustrations(request, content = None):
     message = ''
     if user.is_authenticated():
         student_state  = CurrentActiveState.objects.filter(user = user)
-        if student_state.exists():
-            student_state = student_state.first()
-        else:
-            student_state = CurrentActiveState.objects.create(
-                user = user, state = state, theory= 0
-            )
+       
+        student_state = student_state.first()
+        if student_state.active_part  != 2:
+            return redirect('content:active')
+        
+        
         state = student_state.state
         content = Content.objects.filter(state = state)
 
@@ -188,9 +192,9 @@ def show_illustrations(request, content = None):
             illus_now        = illustration.filter(counts = student_illus_point)
             if illus_now.exists():
                 illustrations_to_render.append(illus_now)
+                student_illus_point    = student_illus_point - 1
                 
             else:
-                student_illus_point    = student_illus_point - 1
 
                 message = ' Our Fault: Sorry dear, no illustrations at this time. Please Move forward to Questions '
                 break
@@ -211,6 +215,8 @@ def show_illustrations(request, content = None):
    #  If student submits because he has completed the illustrations 
         if request.method == 'POST':
             student_state.score_of_i = student_illus_point
+            #now active part is 3 for this student 
+            student_state.active_part = 3
             student_state.save()
             return redirect('content:questions')
 
@@ -245,6 +251,8 @@ def show_questions(request):
             student_state  = CurrentActiveState.objects.filter(Q(user = user))
             if student_state.exists():
                 student_state = student_state.first()
+                if student_state.active_part  != 3:
+                    return redirect('content:active')
                 state         = student_state.state
 
                 student_ques_point  = q   = student_state.score_of_q
@@ -292,6 +300,9 @@ def show_questions(request):
 
 
         if request.method == 'POST':
+                if student_state.active_part  != 3:
+                    return redirect('content:active')
+
                 op1 = op2 =  op3 =  op4 = 0
                 integer_type_submission=""
                 this_q = 0
@@ -347,9 +358,12 @@ def show_questions(request):
                              )
                     q  =  q + 1 
                     student_state.score_of_q = q
+
+                    # Now active part is 4 for this student for this state
+                    student_state.active_part = 4
                     student_state.save()
                     messages.error(request, 'Congrulations!, you have successfully completed this state.')
-                    return redirect('content:report')
+                    return JsonResponse({'empty' : True})
 
               
                 previous_response = QuestionResponse.objects.filter(Q(user = user) & Q(question = current_question))
@@ -368,42 +382,27 @@ def show_questions(request):
                                                   )
 
                 current_question       = questions_to_render[0]
+                ques_ = Question.objects.filter(id = current_question.pk).values()
                 questions_to_render  = questions_to_render[ 1::1]
                 q  =  q + 1 
+                print('q is inthis', q)
                 student_state.score_of_q = q
                 student_state.save()
                 percentage_remaining   = ( q / number_of_questions ) * 100
 
-                context = {
-                'currentquestion' : current_question,
-                'message'         : message,
-                'per_remaining'   : percentage_remaining,
-                'questions'       : questions, 
+                json_context = {
+                    'question' : 'this is the question',
+                    'percentage': percentage_remaining,
+                    'message': message,
+                    'empty' : False,
+                    
+                   
+                    'question_image' : list(ques_)
 
-            }
-                return render(request, 'content/ques.html', context)
+                }
+                print(json_context)
+                return JsonResponse(json_context)
                         
-
-
-
-
-
-
-
-
-
-
-
-
-def assign_new_state(request, correct= 0, incorrect = 0, success = 0):
-    user = request.user
-    if user.is_authenticated():
-        student_state  = CurrentActiveState.objects.filter(Q(user = user)).first()
-
-        # calculate time taken by student in hours
-        duration     = timezone.now() - student_state.timestamp
-        days, seconds = duration.days, duration.seconds
-        time_taken = days * 24 + seconds // 3600
 
 
 
@@ -417,6 +416,8 @@ def report(request):
     if user.is_authenticated():
         if request.method == 'GET':
             student_state = CurrentActiveState.objects.filter(Q(user = user)).first()
+            if student_state.active_part  != 4:
+                return redirect('content:active')
             count         = student_state.score_of_q
             question_solved = QuestionResponse.objects.filter(Q(question__counts__lte = count) & Q( question__state = student_state.state ) )
             i  = j = wi = wc = 0 
@@ -449,6 +450,7 @@ def report(request):
                     correct     = i,
                     incorrect   = j,
                     time_taken  = time_taken,
+                    score       = score,
                 )
             else:
                 if_old = PreviousState.objects.filter(Q(user = user) & Q(state = student_state.state))
@@ -459,6 +461,7 @@ def report(request):
                 PreviousState.objects.create(
                     user            = user,
                     state           = student_state.state,
+                    score           = score,
                     score_of_i      = student_state.score_of_i,
                     score_of_q      = student_state.score_of_q, 
 
@@ -480,7 +483,13 @@ def report(request):
             print(context)
 
         if request.method == 'POST':
+            if student_state.active_part!=4:
+                return redirect('content:active')
+            student_state = CurrentActiveState.objects.filter(user = user).first()
+            student_state.active_part = 5
+            student_state.save()
             active_node  = CurrentActiveNode.objects.filter(user = user).first().node
+            score        = student_state.score
             
             state_list = []
             if score >= 50:
@@ -503,7 +512,7 @@ def report(request):
                 if len(states)==0:
                     list_student_know = []
                     for a in active_node.state_node.all():
-                        list_student_know.append(a.id)
+                        list_student_know.append(a)
                     states = list_student_know
                     
 
@@ -533,3 +542,7 @@ def report(request):
     
 
    
+
+
+
+
