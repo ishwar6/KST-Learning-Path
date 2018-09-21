@@ -3,14 +3,14 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 from chapters.models import Chapter
 from states.models import State
-from userstates.models import UserCurrentNode 
+
 # Create your models here.
 
 
 class TestsTaken(models.Model):
 	user= models.ForeignKey(User, on_delete=models.CASCADE)
 	chapter= models.ForeignKey(Chapter, on_delete=models.CASCADE)
-	resultant_node= models.ForeignKey(UserCurrentNode, on_delete=models.CASCADE, null=True)
+	#resultant_node= models.ForeignKey(UserCurrentNode, on_delete=models.CASCADE, null=True)
 	def __str__(self):
 		return str(self.user)+str(self.chapter)
 

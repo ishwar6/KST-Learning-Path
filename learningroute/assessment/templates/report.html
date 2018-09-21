@@ -1,0 +1,76 @@
+<h1>Your assessment has been done</h1>
+
+
+<p>Select which chapter you want to learn</p>
+
+
+{{chapters}}<br>
+
+{{node}}
+
+{% for c, value in old.items %}
+
+{{c}} - {{value}} 
+{% for ch, nod in  node.items %}
+
+{% if ch == c %}
+
+
+
+{% if value %}
+
+<form action="{% url 'assess:assign' %}" method="POST">
+    {% csrf_token %}
+
+<input name = 'state' type = 'hidden' value = '{{value}}'>
+<input name = 'chapter' type = 'hidden' value = '{{c}}'>
+<input name = 'node' type = 'hidden' value = '{{nod}}'>
+
+<input type="submit">
+
+
+</form>
+
+{% endif %}
+
+
+{% endif %}
+
+{% endfor %}
+
+
+
+{% endfor %}
+<h1>
+        Start From Beginning    
+    </h1>
+    
+
+{% for c, value in new.items %}
+
+{{c}} - {{value}} 
+{% if value %}
+
+<form action="{% url 'assess:assign' %}" method="POST">
+        {% csrf_token %}
+        <input name = 'state' type = 'hidden' value = '{{value}}'>
+        <input name = 'chapter' type = 'hidden' value ='{{c}}' >
+        <input type="submit">
+        
+        
+        </form>
+
+{% endif %}
+
+{% endfor %}
+
+<h1>
+    Available for practice
+</h1>
+
+<p>Chapters whose basics you already know</p>
+
+{% for a in done %}
+
+  - {{a}}
+{% endfor %}

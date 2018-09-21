@@ -59,6 +59,7 @@ class User(AbstractBaseUser):
     active = models.BooleanField(default=True)
     staff = models.BooleanField(default=False)
     admin = models.BooleanField(default=False)
+    standard = models.IntegerField(default=10)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = 'phone'

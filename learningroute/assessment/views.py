@@ -1,42 +1,22 @@
 from __future__ import unicode_literals
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.generic import View
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from django.core.urlresolvers import reverse_lazy
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-import hashlib
-import datetime
-import smtplib
-import utility_kst
-from random import choice
-from random import randint
 
+import utility_kst
+import random 
 from django.contrib import messages
 from assessment.models import TestsTaken, User_submission
 from states.models import State, Node
 from questions.models import Question
 from chapters.models import Topic, Chapter
-from userstates.models import TempActiveNode, UserCurrentNode
+from userstates.models import TempActiveNode, PracticeChapter, UserState	
 from django.db.models import Q
-from itertools import *
-import datetime
 
-previous_submissions_status = 0
-'''previous_two_submissions_status : if last two user submissions are correct value is 2,
-value is 1 if only last submission is correct, "-1" if ONLY last one was wrong and "-2" if both last two submissions are wrong
- and value 0 if no information present yet'''
-
-num_quiz_questions=0
-domain_count=0
-domain_node=0
-chapter=0
-qset_chapters= Chapter.objects.filter(standard=11)
-curr_knowledge=0
-current_question=0
-successor_state=0
-iteration=0
-index_next_chapter=0
-end_quiz=0
+from content.models import CurrentActiveNode, CurrentActiveState
 
 def number_optimum(num):
 	if num<=20:
@@ -44,438 +24,450 @@ def number_optimum(num):
 	elif num in range(20,30):
 		return num//4
 	elif num in range(30,50):
-		return num//6
+		return num//5
 	elif num>50 & num<100:
-		return num//10
+		return num//6
 	elif num>100:
 		return min(num//15, 30)
 
 
-def index(request):
-	global counter, score
-	if request.user.is_authenticated:
-		user_obj = request.user
-		all_chapters=Chapter.objects.filter(standard=9)
-		try:
-			return render(request, 'index.html', {'first_chapter':all_chapters[0], 'profile':user_obj})
-		except:
-			return render(request, 'index.html', {'first_chapter':all_chapters, 'profile':user_obj})
-
-	else:
-		return redirect('/auth/login/')
-
-# fr stands for first_run in arguments
-# helper function for assigning glob-vars with appropriate values before quiz from a new chapter begins
-def beginquiz(request, user_obj, chapter_from_url, fr):
-
-	global previous_submissions_status,  end_quiz, curr_knowledge
-	global domain_count,domain_node, num_quiz_questions, current_question, successor_state ,iteration
-	global chapter, qset_chaters
-	global index_next_chapter
-	previous_submissions_status=1
-
-	iteration = 0
-
-	index_next_chapter= index_next_chapter + 1
-	chapter_from_url= Chapter.objects.get(title= chapter_from_url)
-	chapter= Chapter.objects.get(title=chapter_from_url)
-	print(" quiz on : ",chapter.title)
-	nodes= Node.objects.all().filter(state_node__topic__chapter= chapter_from_url) #querying out all nodes of chapter in which assessment to be taken
-	if nodes.count()==0:
-		return 1
-
-	# no of states in domain node(gives us a count of no of steps from {} to Q)
-	(domain_node, domain_count)= utility_kst.domain_kstate(chapter)
-
-	print('domain count is', domain_count)
- # stores the number of questions of assessment test while making sure that number of node levels is not too small than we can work with
-
- #number_optimal returns number of questions to be asked in assessment on the basis of domain count
-	num_quiz_questions= number_optimum(domain_count)  
-
-	# num_quiz_questions would be zero if n(States in chapter) < 4 Avoid that from happening even during testing 
-
-	if num_quiz_questions==0:                           
-		messages.error(request, 'Number of states in chapter is too less. Not even permissible in development env ')
-		return 1
-
-	print("the total number of questions is "+str(num_quiz_questions))##########################################
-	#num_quiz_questions=4
-
-	temp= TempActiveNode.objects.get(user=user_obj, chapter=chapter_from_url)
-	if not temp:
-		messages.error(request, 'the temporary knowledge state of user has not been collected from previous introcudtory response step. Please proceed again')
-		return render(request, 'mdisplay.html')
 
 
+def first_assessment(request):
+	user = request.user
+	global correct, incorrect, question_to_render, current_question, temp_states
+	#context = {}
+	global chapter_for_assessment 
 
-	next_node=None
-	successor_state=None
+	if user.is_authenticated():
+		if request.method == 'GET':
+			student_state_ = UserState.objects.filter(user = user)
+			if student_state_.exists():
+				student_state = student_state_.first()
+				if student_state.active_part!=1:
+					return redirect('assess:active')
+			correct = incorrect = 0
+			temp_states = TempActiveNode.objects.filter(user = user)
+			chapters    = Chapter.objects.filter(standard = 9)
+			chapter_for_assessment = []
+
+			for c in chapters:
+				temp_state = temp_states.filter(chapter = c)
+				print(temp_state)
+				if temp_state.exists():
+					dont_know = temp_state.first().dont_know_switch
+					node      = temp_state.first().node
+					if dont_know is True or node is None :
+						continue
+					else:
+						chapter_for_assessment.append(c)
+			a = 1
+			print(chapter_for_assessment)
+			
+			while( len(chapter_for_assessment) != 0 ):
+				print('chapter here is ', a)
+				chapter_for_assessment = random.sample(chapter_for_assessment, len(chapter_for_assessment))  
+				question, current_node             = choose_question(request, temp_states, chapter_for_assessment, 1)
+				a = a+1
+				print('This question is', question)
+
+				if question is None:
+					if len(chapter_for_assessment)==0:
+						break
+					else:
+						chapter_for_assessment = chapter_for_assessment[1::1]
+				else:
+					break
+					
+					
+				
+			chapter_for_assessment = chapter_for_assessment
+			print( 'chapter of assessment here in get is',  chapter_for_assessment)
+			current_question = question.last()
+			
+					
+			
+				
+			
+			
+			
+
+			context = {
+						'currentquestion' : current_question,
+					}
+			return render(request, 'assement_ques.html', context)
+
+		if request.method == 'POST':
+			print('current_question is', current_question)
+			print('here chapter of assessment',  chapter_for_assessment)
+			op1 = op2 =  op3 =  op4 = 0
+			integer_type_submission=""
+			this_q = 0
+			if request.POST.get('rad', False)=="1":
+				op1=1
+			if request.POST.get('rad', False)=="2":
+				op2=1
+			if request.POST.get('rad', False)=="3":
+				op3=1
+			if request.POST.get('rad', False)=="4":
+				op4=1
+
+			if request.POST.get('one', False)=="1":
+				op1=1
+			if request.POST.get('two', False)=="1":
+				op2=1
+			if request.POST.get('three', False)=="1":
+				op3=1
+			if request.POST.get('four', False)=="1":
+				op4=1
+
+			if current_question.integer_type:
+				integer_type_submission=str(request.POST.get('integertype', False))
+				print('answer submitted is', integer_type_submission)
+			correct_answer_submission=0
+			if op1==current_question.op1 and op2==current_question.op2 and op3==current_question.op3 and op4==current_question.op4 and integer_type_submission==current_question.integeral_answer:
+				correct_answer_submission = 1
+
+			
+
+			
+			if len(chapter_for_assessment) ==0:
+				print('chapter ends! Done')
+				return redirect('content:problem') 
+			chapter = chapter_for_assessment[0]
+			
+			
+			
+				
+
+			if correct_answer_submission==1:
+				correct = correct + 1
+				this_q = 1
+				message = ' Correct Answer, Nice!! '
+				(question, current_node) = choose_question(request, temp_states, chapter_for_assessment, 1)
+				print('this time node is', current_node)
+
+				if len(chapter_for_assessment) == 0:
+						print("Quiz ends")
+						student_state_ = UserState.objects.filter(user = user)
+						if student_state_.exists():
+							student_state = student_state_.first()
+							student_state.active_part = 2
+							student_state.save()
+						return JsonResponse({'empty' : True})
+
+				previous_node = TempActiveNode.objects.filter( Q(user = user) & Q(chapter = chapter_for_assessment[0]))
+				if previous_node.exists():
+					previous_node.delete()
+					print('deleting previous node')
+				print(current_node)
+				current_node = current_node[0]
+					
+			
+				TempActiveNode.objects.create(
+					user = user,
+					chapter = chapter_for_assessment[0],
+					node = current_node
+				)
+				print('New node created for', chapter_for_assessment[0])
+				# assessment for this chapter is done: Move to next chapter
+				print('This was correct, no outer fringe, moving to next chapter')
+				chapter_for_assessment = chapter_for_assessment[1::1]
+				(question, current_node) = choose_question(request, temp_states, chapter_for_assessment, 1)
+				
+
+			else:
+				incorrect  = incorrect + 1
+				this_q = 0
+				(question, current_node)= choose_question(request, temp_states, chapter_for_assessment, 0)
+				if question is None:
+					previous_node = TempActiveNode.objects.filter( Q(user = user) & Q(chapter = chapter_for_assessment[0]))
+					if previous_node.exists():
+						print('deleting previous node incorrect')
+						previous_node.delete()
+					current_node = current_node
+					print(current_node)
 
 
-	if temp.dont_know_switch:            # if the user has selected that he doesnt know chapter then he knows nothing
+					TempActiveNode.objects.create(
+						user 	= user,
+						chapter = chapter_for_assessment[0],
+						node 	= current_node
+						)
+					print('new node created for chapter')
+
+
+					# create a temp state
+					if len(chapter_for_assessment) == 0:
+						print("Quiz ends")
+						student_state_ = UserState.objects.filter(user = user)
+						if student_state_.exists():
+							student_state = student_state_.first()
+							student_state.active_part = 2
+							student_state.save()
+								
+						return JsonResponse({'empty' : True})
+					# assessment for this chapter is done: Move to next chapter
+					print('This was incorrect, moving to next chapter')
+					chapter_for_assessment = chapter_for_assessment[1::1]
+					(question, current_node) = choose_question(request, temp_states, chapter_for_assessment, 1)
+
+
+
+			if question is None:
+				# if new chapter do not have any question
+				if len(chapter_for_assessment) == 0:
+						print("Quiz ends")
+						student_state_ = UserState.objects.filter(user = user)
+						if student_state_.exists():
+							student_state = student_state_.first()
+							student_state.active_part = 2
+							student_state.save()
+						return JsonResponse({'empty' : True})
+					# assessment for this chapter is done: Move to next chapter
+				chapter_for_assessment = chapter_for_assessment[1::1]
+				(question, current_node) = choose_question(request, temp_states, chapter_for_assessment, 1)
+				print(question, current_node)
+
+				if question is None:
+					print('Add more question please')
+					student_state_ = UserState.objects.filter(user = user)
+					if student_state_.exists():
+							student_state = student_state_.first()
+							student_state.active_part = 2
+							student_state.save()
+					return JsonResponse({'empty' : True})
+
+
+
+			print('question  here is', question)
+			pk = question.last().pk
+			question_ = Question.objects.filter(pk = pk)
+			current_question = question_.first()
+			question  = question_.values()
+
+
 		
-		# to get all the nodes with 1 state in them
-		unity_nodes= []
-		for nd in nodes:
-			if nd.state_node.all().count()==1:
-				unity_nodes.append(nd)
-		next_node= choice(unity_nodes)
-		
-		first_question_state= [st for st in next_node.state_node.all()]
-		successor_state= first_question_state[0]
+
+
+			json_context = {
+				'question_image' : list(question),
+				'empty'          : False
+
+			}
+			
+
+			
+
+			return JsonResponse(json_context)
+
+							
+def choose_question(request, temp_states, chapter_for_assessment, next):
+	if len(chapter_for_assessment) == 0:
+		print('No more chapter')
+		return None, None
+	chapter                      = chapter_for_assessment[0]
+	print('Current active chapter is ', chapter)
+	(domain_node, domain_count)  = utility_kst.domain_kstate(chapter)
+	num_quiz_questions			 = number_optimum(domain_count)  
+
+	temp_node 			 		 = temp_states.filter(chapter = chapter).first().node
+
+	if next==1:   # if previous question submission is correct
+		outer_fringe_state   = utility_kst.outer_fringe_states(temp_node)
+		present_node         = utility_kst.outer_fringe(temp_node)
+		print(outer_fringe_state)
+		if len(outer_fringe_state) == 0:
+			print('do something if no outer fringe is there')
+
+			return None, temp_node
+		else:
+			state_to_ask     = outer_fringe_state[0]
+			print('state to ask :', state_to_ask)
+			questions        = Question.objects.filter(state = state_to_ask)
+			print(questions)
+			if questions.exists():
+				return questions, present_node
+			else:
+				return None, present_node
+
+	else:   # if previous question submission is incorrect
+		outer_fringe_state   = utility_kst.inner_fringe_states(temp_node)
+		present_node         = utility_kst.inner_fringe(temp_node)
+		print(outer_fringe_state)
+		if len(outer_fringe_state) == 0:
+			print('do something if no inner fringe is there')
+			return None, temp_node
+		else:
+			state_to_ask     = outer_fringe_state[0]
+			questions        = Question.objects.filter(state = state_to_ask)
+			if questions.exists():
+				return questions, present_node
+			else:
+				return None, present_node
+
+
 
 	
-	else:     # if user has selected proficency other than 'dont know' then node is called from temp active node
 
-		#going to crawl_node function 
-		#####################________________________________CRAWL NODE_______________________________________####################
+def assessment_report(request):
+	user = request.user
+	if user.is_authenticated():
+		student_state_ = UserState.objects.filter(user = user)
+		if student_state_.exists():
+			student_state = student_state_.first()
+			if student_state.active_part!=2:
+				return redirect('assess:active')
+		new_chapter    		= []
+		know_chapter   		= []
+		ready_to_learn 		= {}
+		practice_chapter 	= []
+		next_ready 			= {}
+		next_ready_node 	= {}
 
-		next_node= crawl_node(domain_count, previous_submissions_status, temp.node)
+		temp_nodes = TempActiveNode.objects.filter(user = user)
+		chapters    = Chapter.objects.filter(standard = 9)   # SET STANDARDD
 
-		#####################________________________________CRAWL NODE DONE_______________________________________####################
+		for chapter in temp_nodes:
+			if chapter.node is None or chapter.dont_know_switch==1:
+				new_chapter.append(chapter.chapter)
+			else:
+				node      = utility_kst.outer_fringe_id(chapter.node)
+				new_nodes = utility_kst.outer_fringe_states(chapter.node)
 
-		if next_node is None:
-			messages.error(request, 'next node to be traversed couldnt be obtained. Check utility code and aux functions')
-			return render(request, 'mdisplay.html')
-
-		successor_state = utility_kst.surplus_state(temp.node, next_node)
-
-
-
-	print("starting with this state :", successor_state)
-	# at this point we have the dest node and also the state from which question to be given.
-	try:
-		all_questions = Question.objects.filter(state=successor_state)
-		if not all_questions:
-			messages.error(request, 'Question with given state', successor_state, 'not found')
-			return render(request, 'mdisplay.html')
-	except:
-		messages.error(request, 'error retreiving Question with given state', successor_state)			
-
-
-
- #selecting a random question from selected state
-
-	current_question = all_questions[randint(0, all_questions.count() - 1)]
-
-
-	context = {
-		'firstrun':fr,
-		'chapter_title':chapter_from_url,
-		'node_id':next_node.id,
-		'currentquestion':current_question
-	}
-	return context
+				if len(node)!=0:
+					next_ready_node[chapter.chapter] = node[0]
+				if len(new_nodes) !=0:
+					next_ready[chapter.chapter] = new_nodes[0]
+				else:
+					practice_chapter.append(chapter.chapter)
 
 
-
-def quiz(request, chapter_title, node_id):
-	if request.user.is_authenticated:
-
-		usr = request.user
-
-		global previous_submissions_status,  end_quiz, curr_knowledge
-		global domain_count, num_quiz_questions, current_question, successor_state ,iteration
-		global chapter, qset_chaters
-		global index_next_chapter
+				
+				know_chapter.append(chapter.chapter)
 
 
-		#############################################  FIRST QUESTION TURN   ################
+		for new in new_chapter:
+			ch_nodes= Node.objects.filter(state_node__topic__chapter=new).distinct()
+			for nd in ch_nodes:
+				if nd.state_node.all().count()== 1:
+					ready_to_learn[new.title] = nd
 
-		if node_id == "begin":
-			index_next_chapter=0
-			print(chapter_title)
-			#first_run =1 
-			context = beginquiz(request, usr, chapter_title, 1)
-			print(context)
-			
-			# Iterate over all of the other chapters while context is one
-			# qset_chapters is a queryset that returns chapters whith given standard; declared in above variables
-			#In case kstructure is not in a chapter
-			while(context==1):
-				context = beginquiz(request, usr, qset_chapters[index_next_chapter].title, 0)
-			return render(request, 'quiz.html',context)
+		for p in practice_chapter:
 
+			if PracticeChapter.objects.filter( Q(user = user) & Q(chapter = p)).exists():
+				continue
+			else:
 
-
-			# from hereon the code runs when usersubmission is made.
-
-
+				PracticeChapter.objects.create(
+					user = user,
+					chapter = p
+				)
 		
-		# this is the node from which state from which question has just been answered. 
-		# Quiz is now formally at this node
-		crawler_node= Node.objects.get(id=node_id)  
-
-		op1=0
-		op2=0
-		op3=0
-		op4=0
-		integer_type_submission=""
-
-		if request.POST.get('rad', False)=="1":
-			op1=1
-		if request.POST.get('rad', False)=="2":
-			op2=1
-		if request.POST.get('rad', False)=="3":
-			op3=1
-		if request.POST.get('rad', False)=="4":
-			op4=1
-
-		if request.POST.get('one', False)=="1":
-			op1=1
-		if request.POST.get('two', False)=="1":
-			op2=1
-		if request.POST.get('three', False)=="1":
-			op3=1
-		if request.POST.get('four', False)=="1":
-			op4=1
-
-		if current_question.integer_type:
-			integer_type_submission=str(request.POST.get('integertype', False))
-
-		correct_answer_submission=0
-
-		if op1==current_question.op1 and op2==current_question.op2 and op3==current_question.op3 and op4==current_question.op4 and integer_type_submission==current_question.integeral_answer:
-			correct_answer_submission = 1
 
 
+		context ={
 
-#setting previous_submissions_status 1,2,-1,-2 or 0 on the basis of current and previous_status values
+			'old' : next_ready,
+			'new': ready_to_learn,
+			'done' : practice_chapter,
+			'node' : next_ready_node,
 
-		if correct_answer_submission==1:
-
-			print("Correct!!")
-
-			if previous_submissions_status<=0:
-				previous_submissions_status=1
-
-			else:
-				previous_submissions_status= min(previous_submissions_status+1, 3)
-
-		elif correct_answer_submission==0:
-
-			print("Wrong!!")
-
-			if previous_submissions_status>=0:
-				previous_submissions_status=-1
-			else:
-				previous_submissions_status= max(previous_submissions_status-1, -3)
-
-		# iteration holds the number of question already evaluated corresponding to user answer
-		iteration = iteration + 1   
-
-		if(iteration==num_quiz_questions):
-
-			if UserCurrentNode.objects.filter(user=usr, chapter=chapter).exists():
-				useless=UserCurrentNode.objects.filter(user=usr, chapter=chapter)
-				for ucn in useless:
-					ucn.delete()
-
-			UserCurrentNode.objects.create(user=usr, chapter=chapter, node=crawler_node)
-
-			print("NORMAL")
-			###############################
-
-			try:
-				next_chapter= qset_chapters[index_next_chapter]
-				context= beginquiz(request, usr, next_chapter.title,0)
-
-				while(context==1):
-					context= beginquiz(request, usr, qset_chapters[index_next_chapter].title,0)
-
-				return render(request, 'quiz.html', context)
-
-			except:
-				return render(request, 'end.html')
-
-
-
-
-		next_node= crawl_node(domain_count, previous_submissions_status, crawler_node)
-
-
-		if next_node == "nothing":
-			nl= Node.objects.get_or_create(description='empty')
-			if UserCurrentNode.objects.filter(user=usr, chapter=chapter).exists():
-				useless=UserCurrentNode.objects.filter(user=usr, chapter=chapter)
-				for ucn in useless:
-					ucn.delete()
-
-			UserCurrentNode.objects.create(user=usr, chapter=chapter, node=nl)
-			print("NOTHING") ###############################
-
-			try:
-				next_chapter= qset_chapters[index_next_chapter]
-				context= beginquiz(request, usr, next_chapter.title, 0)
-				while(context==1):
-					context= beginquiz(request, usr, qset_chapters[index_next_chapter].title,0)
-				return render(request, 'quiz.html', context)
-			except:
-				return render(request, 'end.html')
-
-
-		elif next_node == "everything":
-			print("domain node is "+str(domain_node)) ############################################################
-
-			if UserCurrentNode.objects.filter(user=usr, chapter=chapter).exists():
-				useless=UserCurrentNode.objects.filter(user=usr, chapter=chapter)
-				for ucn in useless:
-					ucn.delete()
-
-			UserCurrentNode.objects.create(user=usr, chapter=chapter, node=crawler_node)
-			print("EVERYTHING") ###############################
-
-			try:
-				next_chapter= qset_chapters[index_next_chapter]
-				context= beginquiz(request, usr, next_chapter.title,0)
-				while(context==1):
-					context= beginquiz(request ,usr, qset_chapters[index_next_chapter].title)
-				return render(request, 'quiz.html', context)
-			except:
-				return render(request, 'end.html')
-
-
-
-		successor_state = utility_kst.surplus_state(crawler_node, next_node)
-		all_questions = Question.objects.filter(state=successor_state)
-		current_question = all_questions[randint(0, all_questions.count() - 1)] #selecting a random question from selected state
-
-
-		context = {
-		'chapter_title':chapter_title,
-		'node_id':next_node.id,
-		'currentquestion':current_question
 		}
 
-		return render(request, 'quiz.html',context)
+
+
+	return render(request, 'report.html', context )
 
 
 
+				
 
 
 
-	else:
-		return redirect('/auth/login/')
+def start_chapter(request):
+	user = request.user
+
+	if user.is_authenticated():
+		state_	 = request.POST.get('state', None)
+		chapter_ = request.POST.get('chapter', None)
+		node_    = request.POST.get('node', None)
+
+		if state_ and chapter_ and node_:
+			node_    = int(node_)
+			node 	 = Node.objects.get(id = node_)
+			state    = State.objects.filter(title = state_).first()
+
+			current  = CurrentActiveNode.objects.filter(user = user)
 
 
 
+			if current.exists():
+				current.first().delete()
 
+			current_state = CurrentActiveState.objects.filter(user = user)
 
+			if current_state.exists():
+				current_state.first().delete()
 
-
-
-# This function takes the number of levels of nodes and 
-# the no of continuous correct or wrong as i/p and gives the node to be
-# crawled to based on previous response if available as o/p
-
-#lc is previous_submission_status
-#qlevel is domain_count
-def crawl_node(qlevel, lc, node):
-	curr_level= node.state_node.all().count()
-	stride=1
-	node_crawler= node
-	if lc > 0:    #satisfied when current evaluation answer is correct
-		'''if lc==1: stride=1
-		elif lc==2: stride=3
-		elif lc==3: stride=6
-		'''
-		if curr_level + stride < qlevel:
-			for i in range(stride):
-				kfringe_outer= utility_kst.outer_fringe(node)
-				node_crawler= choice(kfringe_outer)
-		else:
-			#node_crawler= utility_kst.domain_kstate(kstruct)
-			return "everything"
-	elif lc < 0:   # satisfied when current evaluated answer is wrong
-		'''if lc==1: stride=1
-		elif lc==2: stride=2
-		elif lc==3: stride=3
-	'''
-		if curr_level - stride > 0:
-			for i in range(stride):
-				kfringe_inner= utility_kst.inner_fringe(node)
-				print("inside crawl node function") #############################
-				print(kfringe_inner)
-				node_crawler= choice(kfringe_inner)
-		else:
-			return "nothing"
-
-	return node_crawler
-
-
-
-class IntroductoryResponse(View):
-	the_chapters= Chapter.objects.filter(standard=11)
-
-	def get(self, request):
-		return render(request, 'userstates/initialresponse_form.html', {'chapters': self.the_chapters})
-	
-	def post(self, request):
-		LEVEL_REF={
-			'beginer':1,
-			'Benginer':1,
-			'intermediate':2,
-			'Intermediate':2,
-			'advanced':3,
-			'Advanced':3,
-			'dont know':0,
-			'Dont Know':0
-			}
-		for the_chapter in self.the_chapters :
-			the_node = None
-			ind_select= "level-of-"+ str(the_chapter.id)
-
-			if request.POST.get(ind_select):
-				level = request.POST.get(ind_select)
-			else:
-				level = None
-			
-
-			dont_know_var = False
-		
-			if LEVEL_REF[level]== 0:
-				dont_know_var=True
-			else:	
-				nodes= Node.objects.filter(state_node__topic__chapter=the_chapter).distinct()
-
-				num_states_in_domain = 0
-				if nodes is None:
-					break
-				for n in nodes:
-					print('queryset of node is', n)
-					num_mem= n.state_node.all().count()
-					num_states_in_domain= max(num_states_in_domain, num_mem)
-				print('max number of states in CHAPTER_PROFIENCY node', num_states_in_domain)
-
-				list_of_nodes=[]
-				a = (num_states_in_domain//4)*LEVEL_REF[level]
-				if a==0 & LEVEL_REF[level]==1:
-					a = a + 1
-				if a==0 & (LEVEL_REF[level]==2 or LEVEL_REF[level]==3):
-					a = a+2
-
-				for n in nodes:
-					q = n.state_node.all().count()
-					print( 'q is ', q , 'and a is', a )
-					if q==a or  ( q > a and q < a +  2): #If |Q|=20 node with |Q|/4 = 5 states is assigned to beginer, 10 to interm and so on
-						list_of_nodes.append(n)
-						the_node= choice(list_of_nodes)
-			
-			
-			if TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).exists():
-				TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).delete()
-
-			TempActiveNode.objects.create(
-				user= self.request.user,
-				chapter= the_chapter,
-				node= the_node,
-				dont_know_switch= dont_know_var
+			CurrentActiveNode.objects.create(
+				user    = user,
+				node    = node,
 			)
+			CurrentActiveState.objects.create(
+				user    = user,
+				state   = state
+			)
+
+			student_state_ = UserState.objects.filter(user = user)
+			if student_state_.exists():
+				student_state = student_state_.first()
+				student_state.active_part = 4
+				student_state.save()
+		else:
+			print('Problem is that assessment, please try again')
+			student_state_ = UserState.objects.filter(user = user)
+			if student_state_.exists():
+				student_state = student_state_.first()
+				student_state.active_part = 0
+				student_state.save()
+
+		return redirect('assess:active')
+
 		
-		return redirect('assessment:index')
+   
+	
+def active_state(request):
+	user = request.user
+	if user.is_authenticated():
+		student_state_ = UserState.objects.filter(user = user)
+		if student_state_.exists():
+			student_state = student_state_.first()
+			if student_state.active_part == 0:
+				return redirect('userstates:initial-assess')
+			elif student_state.active_part == 1:
+				return redirect('assess:first')
+			elif student_state.active_part == 2:
+				return redirect('assess:report')
+			elif student_state.active_part ==3:
+				return redirect('assess:assign')
+			elif student_state.active_part ==4:
+				return redirect('content:show-content')
+			else:
+				return redirect('content:problem')
+
+
+	
 
 
 
-def endview(request):
-	return render(request, 'mdisplay.html', {})
+
+
+
+
+
+
+
+			
+
+

@@ -25,6 +25,28 @@ def outer_fringe(node):  # gives outer fringe in consumable format
 
 
 
+def outer_fringe_id(node):  # gives outer fringe in consumable format
+    
+    ch= Chapter.objects.get(topic__state=node.state_node.all()[0])
+    size= node.state_node.all().count()
+    
+    fringe_outer= list()
+    ch_nodes= Node.objects.filter(state_node__topic__chapter=ch).distinct()  # take all nodes E chapter
+    for nd in ch_nodes:
+        if nd.state_node.all().count()== size+1:  # select ony those whos state count is one more than curr nodes state count
+            a_match=1
+            for st_curr in node.state_node.all():     # check whether every state E curr_node in potential next_node
+                st_matches=0
+                for st_next in nd.state_node.all():
+                    if st_curr.id == st_next.id:
+                        st_matches=1
+                if st_matches== 0:
+                    a_match=0
+            if a_match ==1:
+                fringe_outer.append(nd.pk)
+
+    return fringe_outer
+
 
 
 
@@ -46,7 +68,7 @@ def inner_fringe(node):  #gives the inner fringe in a consumable format
                     a_match=0
             if a_match ==1:
                 fringe_inner.append(nd)
-    print(fringe_inner) #********************************************************
+    #********************************************************
     return fringe_inner
 
 
@@ -75,6 +97,7 @@ def domain_kstate(chapter,  standard=11): # takes a chapter and returns the doma
     largest_node=None
     node_len=0
     for node in nodes:
+       
         curr_len= node.state_node.all().count()
         if curr_len > node_len:
             node_len= curr_len

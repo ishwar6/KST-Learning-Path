@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from .views import myview, nodes, stateadmin, stateedit, selectchapter, selecttopic, nodeadmin, nodeedit, addnode, edgeadmin, edgeedit, addedge
+from .views import myview,  stateadmin, stateedit, selectchapter, selecttopic, nodeadmin, nodeedit, addnode, edgeadmin, edgeedit, addedge
 
 urlpatterns = [
     url(r'^$', myview, name ='myview'  ),
@@ -16,5 +16,5 @@ urlpatterns = [
     url(r'^admin/topic/(?P<title>.+)/', selecttopic , name='selecttopic' ), 
     url(r'^admin/(?P<title>.+)/(?P<topic>.+)/', stateedit , name='stateedit' ),
    
-    url(r'^nodes$', nodes  )
+   
 ]

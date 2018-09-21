@@ -17,26 +17,35 @@ class TempActiveNode(models.Model):
     chapter             = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE)
     node                = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None, null=True, blank=True)
     dont_know_switch    = models.BooleanField(default = 0)
+   
 
     def __str__(self):
         return str(self.user) + ' - ' + str(self.node) + ' - for the chapter ' + str(self.chapter)
 
-class UserCurrentNode(models.Model):
+class PracticeChapter(models.Model):
     user            = models.ForeignKey(User, on_delete=models.CASCADE)
-    node            = models.ForeignKey('states.Node', on_delete = models.CASCADE, default = None, blank=True, null=True)
     chapter         = models.ForeignKey('chapters.Chapter', on_delete = models.CASCADE, default=None)
-    incorrect       = models.IntegerField(default = 0)
     timedate        = models.DateTimeField(auto_now_add = True, blank = True, null = True)
 
     def __str__(self):
-        return str(self.user) + ' - ' +str(self.node)
+        return str(self.user) + ' - ' +str(self.chapter)
 
 
 
+class UserState(models.Model):
+    user                = models.OneToOneField(User, on_delete=models.CASCADE)
+    active_part        = models.IntegerField(default=0, help_text='It is 0 for entering detail stage, 1 for assessment, 2 for report and 3 to begin learning and ending of assessment' )
+    
+
+    def __str__(self):
+        return str(self.user) + str(self.active_part)
 
 
 
-
+def user_created_receiver(sender, instance, created, *args, **kwargs):
+    if created:
+        UserState.objects.get_or_create(user = instance)
+post_save.connect(user_created_receiver, sender = User)
 
 '''
 Functions to be created:

@@ -1,14 +1,13 @@
 from django.shortcuts import render, redirect
-import rpy2
-import rpy2.robjects as robjects
-from rpy2.robjects.packages import importr
-from django.contrib.auth.models import User
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 import utility_kst
 from .import forms
 
-kst = importr('kst')
+
 
 
 from .models import State, Node, Edge, Topic
@@ -19,31 +18,10 @@ def myview(request):
   return render(request, 'states/states.html', {'q': State.objects.all() })
 
 
-def nodes(request):
-    edges= Edge.objects.all()
-    n = Node.objects.all()
-    
-    kstr= utility_kst.nodes2kstructure(n) #modification to test the new utility_kst package
-
-    ksp = kst.kspace(kstr)
-    lp = kst.lpath(kstr)
-    list = kst.lpath_is_gradation(lp)
-
-
-
-    context = {     'q': n,
-                    'e': edges,
-                    'lp': lp,
-                    'ksp': ksp
-              }
-
-    return render(request, 'states/states.html', context)
-
-
 
 def stateadmin(request):
     if request.user.is_authenticated:
-        user_obj = User.objects.get(username=request.user)
+        user_obj = request.user
         chapters=Chapter.objects.all() 
         topics=Topic.objects.all()
         states=State.objects.all()        
@@ -71,7 +49,7 @@ def stateadmin(request):
 
 def stateedit(request, title, topic):
     if request.user.is_authenticated:
-        user_obj = User.objects.get(username=request.user)
+        user_obj = request.user
         
         if request.POST.get('delete',False):
                 t=Topic.objects.get(title=topic)
@@ -128,7 +106,7 @@ def stateedit(request, title, topic):
 
 def selectchapter(request,title):
      if request.user.is_authenticated:
-        user_obj = User.objects.get(username=request.user)
+        user_obj = request.user
         chapter=Chapter.objects.get(title=title)
         topics=Topic.objects.filter(chapter=chapter)
         print(topics)
@@ -139,7 +117,7 @@ def selectchapter(request,title):
 
 def selecttopic(request,title):
      if request.user.is_authenticated:
-        user_obj = User.objects.get(username=request.user)
+        user_obj = request.user
         topic=Topic.objects.get(title=title)
 
         if request.POST.get('add',False):
@@ -182,7 +160,7 @@ def selecttopic(request,title):
 
 def nodeadmin(request):
         if request.user.is_authenticated:
-            user_obj = User.objects.get(username=request.user)
+            user_obj = request.user
             nodes=Node.objects.all()
             chapters= Chapter.objects.all()
 
@@ -207,7 +185,7 @@ def nodeadmin(request):
 
 def nodeedit(request, nodeid):
     if request.user.is_authenticated:
-        user_obj = User.objects.get(username=request.user)
+        user_obj = request.user
         node=Node.objects.get(id=nodeid)
 
         if request.POST.get('delete',False):
@@ -249,7 +227,7 @@ def nodeedit(request, nodeid):
 def addnode(request,chapid):
     if request.user.is_authenticated:
         if request.POST.get('addnode',False):
-            user_obj = User.objects.get(username=request.user)
+            user_obj = request.user
 
             node_form = forms.node_form(request.POST)
             if node_form.is_valid():
@@ -267,7 +245,7 @@ def addnode(request,chapid):
                     if list(i.state_node.all()) == selected_states:
                         c=Chapter.objects.get(id=chapid)
                         states= State.objects.filter(topic__chapter=c)
-                        user_obj = User.objects.get(username=request.user)
+                        user_obj = request.user
 
                         node_form = forms.node_form()
 
@@ -302,7 +280,7 @@ def addnode(request,chapid):
         states=list() 
         c=Chapter.objects.get(id=chapid)
         states= State.objects.filter(topic__chapter=c)
-        user_obj = User.objects.get(username=request.user)
+        user_obj = request.user
 
         node_form = forms.node_form()
         return render(request, 'states/addnode.html', {'node_form':node_form,'chapter':c,'states':states, 'profile':user_obj})
@@ -313,7 +291,7 @@ def addnode(request,chapid):
  
 def edgeadmin(request):
     if request.user.is_authenticated:
-            user_obj = User.objects.get(username=request.user)
+            user_obj = request.user
             edges=Edge.objects.all()
             chapters= Chapter.objects.all()
 
@@ -336,7 +314,7 @@ def edgeadmin(request):
 
 def edgeedit(request, edgeid):
     if request.user.is_authenticated:
-        user_obj = User.objects.get(username=request.user)
+        user_obj = request.user
         edge=Edge.objects.get(id=edgeid)
 
         if request.POST.get('delete',False):
@@ -366,7 +344,7 @@ def edgeedit(request, edgeid):
 
 def addedge(request,chapid):
     if request.user.is_authenticated:
-        user_obj = User.objects.get(username=request.user)
+        user_obj = request.user
         if request.POST.get('addedge',False):
             edge_form = forms.edge_form(request.POST)
             if edge_form.is_valid():

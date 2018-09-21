@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.db.models import Q, Count
 from chapters.models import Chapter, Topic
-from userstates.models import UserCurrentNode, TempActiveNode
+from userstates.models import PracticeChapter, TempActiveNode
 from states.models import State, Node
 import utility_kst as u
 from django.utils import timezone
@@ -74,18 +74,21 @@ def assignstate(request, id, s):
                 active_node = active_node.node
 
             active_old = active_node
+            fav_node = None
 
             if s == 0:
                 back = u.inner_fringe(active_node)
+                print(back)
                 new_state = State.objects.filter(id = id).first()
                 if len(back)==0:
                     fav_node = active_old
                 else:
-
                     for node in back:
                         if new_state in node.state_node.all():
-                            fav_node = node 
-                            break
+                            fav_node = node
+                            continue
+                if fav_node is None:
+                    fav_node = active_node
                 with transaction.atomic():
 
                     PreviousActiveNode.objects.create(
@@ -506,6 +509,7 @@ def report(request):
             print(context)
 
         if request.method == 'POST':
+            student_state = CurrentActiveState.objects.filter(Q(user = user)).first()
             if student_state.active_part!=4:
                 return redirect('content:active')
             student_state = CurrentActiveState.objects.filter(user = user).first()
@@ -556,14 +560,15 @@ def report(request):
 
 
 
-def select_chapter(request):
-    user = request.user
-    if user.is_authenticated():
-        if request.method == 'GET':
-            student_state = CurrentActiveState.objects.filter(user = user).first()
-            pass
+
+    # create current active node and current active state
+    
 
     
+       
+
+		
+
 
 
 
