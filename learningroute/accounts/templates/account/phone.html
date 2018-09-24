@@ -1,4 +1,134 @@
-<script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+<!DOCTYPE html>
+<html>
+
+<head>
+    {% load static %}
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Blissed Maths | Focused Learning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'account/css/base.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'account/css/signUp.css' %}" />
+    <link rel="icon" href="{% static 'account/assets/logo.png' %}">
+    <meta name="theme-color" content="#2a323f" />
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:700" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+
+
+        <div class="signUp-logo">
+            <img src="{% static 'account/assets/logo bm normal.png' %}" alt="">
+
+            <h1>Blissed Maths</h1>
+        </div>
+        <h3 class="register-msg">Register at Blissed Maths</h3>
+        <div class="signUp-body">
+            <form method="POST" data-validate-user-otp="/myaccount/ajax/validate_otp/" data-validate-username-url="/myaccount/ajax/validate_phone/"
+                class="normalForm">
+                <div class="otpSendedPhone">
+
+                </div>
+                <div class="inputNum" id="enterPhoneContainer">
+                    <div class="inputNum-a">
+                        <label for="inputPhone">Phone Number</label>
+                        <input type="tel" name="phone" required id="inputPhone" maxlength="10">
+                    </div>
+                    <div class="inputNum-msg" id="inputNum-msg">
+
+                    </div>
+                </div>
+                <button id="sendOtp" type="button" class="sendOtp">
+                    Send otp
+                </button>
+                <div class="inputNum">
+                    <div class="inputNum-a">
+                        <label for="inputOtp">Enter otp</label>
+                        <input class="inputOtp" type="tel" required name="otp" id="inputOtp">
+                    </div>
+                    <div class="inputNum-msg">
+
+                    </div>
+                </div>
+                <button id="submitBtn" type="submit" class="submit">
+                    Submit
+                </button>
+            </form>
+        </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script>
+        let enterPhoneContainer = document.getElementById("enterPhoneContainer");
+        let sendOtp = document.getElementById("sendOtp")
+        let phoneNumber = null;
+        let phoneError = document.getElementById("inputNum-msg");
+        $("#sendOtp").click(function () {
+            phoneNumber = document.getElementById("inputPhone").value;
+            if (phoneNumber.length === 10) {
+
+
+                var form = $(this).closest("form");
+                $.ajax({
+                    url: form.attr("data-validate-username-url"),
+                    data: form.serialize(),
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.is_taken) {
+                            console.log(data);
+                            phoneError.innerHTML = `<p>Account with this phone number already exist</p>`;
+
+                        }
+                        else {
+                            console.log(data)
+                            enterPhoneContainer.style.display = 'none'
+                            sendOtp.style.display = 'none'
+                            document.querySelector(".otpSendedPhone").style.display = 'block'
+                            document.querySelector(".otpSendedPhone").innerHTML =
+                                ` <div class="otpSendedPhone-a">
+                        <p>Phone: ${phoneNumber}</p><button type="button" onclick="resetPhoneBtnFunc()" id="resetPhoneBtn">X</button>
+                    </div>
+                    <h4>Otp has been sent successfully</h4>`
+                        }
+                    }
+                });
+            } else {
+                phoneError.innerHTML = `<p>Enter correct phone number</p>`
+            }
+        });
+
+        function resetPhoneBtnFunc() {
+            document.querySelector(".otpSendedPhone").style.display = 'none'
+            enterPhoneContainer.style.display = 'flex'
+            sendOtp.style.display = 'block'
+        }
+
+        $("#submitBtn").click(function () {
+            var form = $(this).closest("form");
+            $.ajax({
+                url: form.attr("data-validate-user-otp"),
+                data: form.serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    if (data.matches) {
+                        console.log('match')
+                    }
+                    else {
+                        console.log(data)
+                        console.log('unmatch otp')
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
+
+
+<!-- <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
     crossorigin="anonymous"></script>
 
 <h1>Start your own Learning Route</h1>
@@ -67,4 +197,4 @@ Phone:
     </div>
     {% endfor %}
 </div>
-{% endif %}
+{% endif %} -->

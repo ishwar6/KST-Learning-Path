@@ -1,4 +1,148 @@
-<form method="post">{% csrf_token %}
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Blissed Maths | Focused Learning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/account/css/base.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/account/css/signUp.css" />
+    <link rel="icon" href="/static/account/assets/logo.png">
+    <meta name="theme-color" content="#2a323f" />
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:700" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+
+
+        <div class="signUp-logo">
+            <img src="/static/account/assets/logo%20bm%20normal.png" alt="">
+            <h1>Blissed Maths</h1>
+        </div>
+        <h3 class="register-msg">Enter Basic Details</h3>
+        <div class="signUp-body">
+            <form method='post' class="normalForm" id="form">
+                {% csrf_token %}
+                <div class="inputNum">
+                    <div class="inputNum-a">
+                        <label for="inputName">Enter Name</label>
+                        <input type="text" name="name" maxlength="120" id="inputName">
+                    </div>
+                    <div class="inputNum-msg" id="nameError">
+
+                    </div>
+                </div>
+                <div class="inputNum">
+                    <div class="inputNum-a">
+                        <label for="inputClass">Choose Class</label>
+                        <div class="radio-btns">
+
+                            <p> <input type="radio" name="standard" value="6">
+                                6 <sup>th</sup></p>
+                            <p> <input type="radio" name="standard" value="7">
+                                7 <sup>th</sup></p>
+                            <p> <input type="radio" name="standard" value="8">
+                                8 <sup>th</sup></p>
+
+                            <p> <input type="radio" name="standard" value="9">
+                                9 <sup>th</sup></p>
+                            <p> <input type="radio" name="standard" value="10">
+                                10 <sup>th</sup></p>
+                            <p> <input type="radio" name="standard" value="11">
+                                11 <sup>th</sup></p>
+                            <p> <input type="radio" name="standard" value="12">
+                                12 <sup>th</sup></p>
+
+                        </div>
+                    </div>
+                    <div class="inputNum-msg" id="classError">
+
+                    </div>
+                    <div class="note-class">
+
+                        <p>Note:Choosen class cannot be changed from settings</p>
+                        <p>To change class in future contact support.</p>
+                    </div>
+                </div>
+                <div class="inputNum">
+                    <div class="inputNum-a">
+                        <label for="inputEmail">Enter Email</label>
+                        <input type="email" name="email" maxlength="120" id="inputEmail">
+
+                    </div>
+                    <div class="inputNum-msg" id="emailError">
+
+                    </div>
+                </div>
+                <div class="inputNum">
+                    <div class="inputNum-a">
+                        <label for="inputCity">Enter City</label>
+                        <input type="text" name="city" maxlength="120" id="inputCity">
+                    </div>
+                    <div class="inputNum-msg" id="cityError">
+
+                    </div>
+                </div>
+                <button type="button" id="submitBtn" class="submit">
+                    Save Details
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let nameError = document.getElementById("nameError");
+        let emailError = document.getElementById("emailError");
+        let classError = document.getElementById("classError");
+        let cityError = document.getElementById("cityError");
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        document.getElementById("submitBtn").addEventListener("click", () => {
+            let name = document.getElementById('inputName').value;
+            let email = document.getElementById('inputEmail').value;
+            let city = document.getElementById('inputCity').value;
+            let standard = -1;
+
+
+            document.querySelectorAll('input[type=radio]').forEach(btn => {
+                if (btn.checked) {
+                    standard = btn.value;
+                }
+            })
+
+            if (name.length < 2) {
+                nameError.innerHTML = `<p>Enter your name</p>`
+            } else {
+                nameError.innerHTML = ``
+                if (standard < 6 || standard > 12) {
+                    classError.innerHTML = `<p>Choose your class</p>`
+                } else {
+                    classError.innerHTML = ``
+                    if (!re.test(String(email).toLowerCase())) {
+                        emailError.innerHTML = `<p>Enter your email</p>`
+                    } else {
+                        emailError.innerHTML = ``
+                        if (city.length < 2) {
+                            cityError.innerHTML = `<p>Enter your city</p>`
+                        } else {
+                            cityError.innerHTML = ``
+                            document.getElementById('form').submit()
+                        }
+                    }
+                }
+            }
+        })
+
+    </script>
+
+</body>
+
+</html>
+
+<!-- <form method="post">{% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Update">
-</form>
+</form> -->

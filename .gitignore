@@ -1,5 +1,5 @@
 # Created by https://www.gitignore.io
-
+/m
 ### OSX ###
 .DS_Store
 .AppleDouble
@@ -82,6 +82,7 @@ target/
 *.log
 *.pot
 *.pyc
+*.py
 __pycache__/
 local_settings.py
 /migrations
