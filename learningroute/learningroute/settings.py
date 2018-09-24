@@ -34,11 +34,12 @@ INSTALLED_APPS = [
     'states',
     'content',
     'questions',
-    'authentication',
+
     'chapters',
     'userstates',
-    'assessment',
+    
     'accounts',
+    'profiles',
 ]
 
 MIDDLEWARE = [

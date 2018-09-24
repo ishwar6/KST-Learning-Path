@@ -10,7 +10,7 @@ from .import forms
 
 
 
-from .models import State, Node, Edge, Topic
+from .models import State, Node
 from chapters.models import Chapter
 
 
@@ -158,260 +158,132 @@ def selecttopic(request,title):
         return redirect('/auth/login/')
 
 
-def nodeadmin(request):
-        if request.user.is_authenticated:
-            user_obj = request.user
-            nodes=Node.objects.all()
-            chapters= Chapter.objects.all()
+# def nodeadmin(request):
+#         if request.user.is_authenticated:
+#             user_obj = request.user
+#             nodes=Node.objects.all()
+#             chapters= Chapter.objects.all()
 
 
-            if request.POST.get('standard',False):
-                standard=request.POST.get('standard',False)
-                chapters=Chapter.objects.filter(standard=standard)
+#             if request.POST.get('standard',False):
+#                 standard=request.POST.get('standard',False)
+#                 chapters=Chapter.objects.filter(standard=standard)
 
-                context= {'chapter_select':1,
-                'chapters':chapters,
-                'nodes':nodes, 
-                'profile':user_obj}
+#                 context= {'chapter_select':1,
+#                 'chapters':chapters,
+#                 'nodes':nodes, 
+#                 'profile':user_obj}
 
-                return render(request, 'states/nodeadmin.html', context)
-
-
-
-            return render(request, 'states/nodeadmin.html', {'chapters':chapters,'nodes':nodes, 'profile':user_obj})
-        else:
-            return redirect('/auth/login/')
-
-
-def nodeedit(request, nodeid):
-    if request.user.is_authenticated:
-        user_obj = request.user
-        node=Node.objects.get(id=nodeid)
-
-        if request.POST.get('delete',False):
-            node.delete()
-            nodes=Node.objects.all()
-            chapters= Chapter.objects.all()
-
-            context = {'node_deleted':1,
-            'chapters':chapters,
-            'nodes':nodes, 
-            'profile':user_obj}
-
-            return render(request, 'states/nodeadmin.html', context)
-
-        if request.POST.get('update',False):
-            node_form = forms.node_form(request.POST,instance=node)
-            if node_form.is_valid():
-                node_form.save()                
-                return redirect('/states/admin/node/'+str(node.id)+'/')
-
-            else:
-                node_form = forms.node_form(instance=node)
-
-                context = {'node_update_error':1,
-                'node_form':node_form,
-                'node':node, 
-                'profile':user_obj}
-
-                return render(request, 'states/nodeedit.html', context)
-
-
-        node_form = forms.node_form(instance=node)
-        return render(request, 'states/nodeedit.html', {'node_form':node_form,'node':node, 'profile':user_obj})
-    else:
-        return redirect('/auth/login/')
+#                 return render(request, 'states/nodeadmin.html', context)
 
 
 
-def addnode(request,chapid):
-    if request.user.is_authenticated:
-        if request.POST.get('addnode',False):
-            user_obj = request.user
+#             return render(request, 'states/nodeadmin.html', {'chapters':chapters,'nodes':nodes, 'profile':user_obj})
+#         else:
+#             return redirect('/auth/login/')
 
-            node_form = forms.node_form(request.POST)
-            if node_form.is_valid():
-                description=node_form.cleaned_data['description']
-                credit=node_form.cleaned_data['credit']
-                selected_states=list()
-                states=State.objects.all()
+
+# def nodeedit(request, nodeid):
+#     if request.user.is_authenticated:
+#         user_obj = request.user
+#         node=Node.objects.get(id=nodeid)
+
+#         if request.POST.get('delete',False):
+#             node.delete()
+#             nodes=Node.objects.all()
+#             chapters= Chapter.objects.all()
+
+#             context = {'node_deleted':1,
+#             'chapters':chapters,
+#             'nodes':nodes, 
+#             'profile':user_obj}
+
+#             return render(request, 'states/nodeadmin.html', context)
+
+#         if request.POST.get('update',False):
+#             node_form = forms.node_form(request.POST,instance=node)
+#             if node_form.is_valid():
+#                 node_form.save()                
+#                 return redirect('/states/admin/node/'+str(node.id)+'/')
+
+#             else:
+#                 node_form = forms.node_form(instance=node)
+
+#                 context = {'node_update_error':1,
+#                 'node_form':node_form,
+#                 'node':node, 
+#                 'profile':user_obj}
+
+#                 return render(request, 'states/nodeedit.html', context)
+
+
+#         node_form = forms.node_form(instance=node)
+#         return render(request, 'states/nodeedit.html', {'node_form':node_form,'node':node, 'profile':user_obj})
+#     else:
+#         return redirect('/auth/login/')
+
+
+
+# def addnode(request,chapid):
+#     if request.user.is_authenticated:
+#         if request.POST.get('addnode',False):
+#             user_obj = request.user
+
+#             node_form = forms.node_form(request.POST)
+#             if node_form.is_valid():
+#                 description=node_form.cleaned_data['description']
+#                 credit=node_form.cleaned_data['credit']
+#                 selected_states=list()
+#                 states=State.objects.all()
             
-                for i in states:
-                    if request.POST.get(str(i.id)):
-                        selected_states.append(i)
+#                 for i in states:
+#                     if request.POST.get(str(i.id)):
+#                         selected_states.append(i)
 
-                nodes=Node.objects.all()
-                for i in nodes:
-                    if list(i.state_node.all()) == selected_states:
-                        c=Chapter.objects.get(id=chapid)
-                        states= State.objects.filter(topic__chapter=c)
-                        user_obj = request.user
+#                 nodes=Node.objects.all()
+#                 for i in nodes:
+#                     if list(i.state_node.all()) == selected_states:
+#                         c=Chapter.objects.get(id=chapid)
+#                         states= State.objects.filter(topic__chapter=c)
+#                         user_obj = request.user
 
-                        node_form = forms.node_form()
+#                         node_form = forms.node_form()
 
-                        context = {'node_exists_error':1,
-                        'node_form':node_form,
-                        'chapter':c,
-                        'states':states, 
-                        'profile':user_obj}
+#                         context = {'node_exists_error':1,
+#                         'node_form':node_form,
+#                         'chapter':c,
+#                         'states':states, 
+#                         'profile':user_obj}
 
-                        return render(request, 'states/addnode.html', context)
+#                         return render(request, 'states/addnode.html', context)
 
 
-                newnode= Node()
-                newnode.description=description
-                newnode.credit=credit
-                newnode.save()
+#                 newnode= Node()
+#                 newnode.description=description
+#                 newnode.credit=credit
+#                 newnode.save()
 
-                for i in selected_states:
-                    newnode.state_node.add(i)
-                    print(newnode.state_node.all())
+#                 for i in selected_states:
+#                     newnode.state_node.add(i)
+#                     print(newnode.state_node.all())
 
-                nodes=Node.objects.all()
-                chapters= Chapter.objects.all()
+#                 nodes=Node.objects.all()
+#                 chapters= Chapter.objects.all()
                 
-                context = {'node_added':1,
-                'chapters':chapters,
-                'nodes':nodes, 
-                'profile':user_obj}
+#                 context = {'node_added':1,
+#                 'chapters':chapters,
+#                 'nodes':nodes, 
+#                 'profile':user_obj}
 
-                return render(request, 'states/nodeadmin.html', context)     
+#                 return render(request, 'states/nodeadmin.html', context)     
 
-        states=list() 
-        c=Chapter.objects.get(id=chapid)
-        states= State.objects.filter(topic__chapter=c)
-        user_obj = request.user
+#         states=list() 
+#         c=Chapter.objects.get(id=chapid)
+#         states= State.objects.filter(topic__chapter=c)
+#         user_obj = request.user
 
-        node_form = forms.node_form()
-        return render(request, 'states/addnode.html', {'node_form':node_form,'chapter':c,'states':states, 'profile':user_obj})
-    else:
-        return redirect('/auth/login/')
+#         node_form = forms.node_form()
+#         return render(request, 'states/addnode.html', {'node_form':node_form,'chapter':c,'states':states, 'profile':user_obj})
+#     else:
+#         return redirect('/auth/login/')
 
-
- 
-def edgeadmin(request):
-    if request.user.is_authenticated:
-            user_obj = request.user
-            edges=Edge.objects.all()
-            chapters= Chapter.objects.all()
-
-            if request.POST.get('standard',False):
-                standard=request.POST.get('standard',False)
-                chapters=Chapter.objects.filter(standard=standard)
-
-                context = {'chapter_select':1,
-                'chapters':chapters,
-                'edges':edges, 
-                'profile':user_obj}
-
-                return render(request, 'states/edgeadmin.html', context)
-
-
-            return render(request, 'states/edgeadmin.html', {'chapters':chapters,'edges':edges, 'profile':user_obj})
-    else:
-        return redirect('/auth/login/')
-
-
-def edgeedit(request, edgeid):
-    if request.user.is_authenticated:
-        user_obj = request.user
-        edge=Edge.objects.get(id=edgeid)
-
-        if request.POST.get('delete',False):
-            edge.delete()
-            edges=Edge.objects.all()
-            chapters= Chapter.objects.all()
-
-            context = {'edge_deleted':1,
-            'chapters':chapters,
-            'edges':edges, 
-            'profile':user_obj}
-
-            return render(request, 'states/edgeadmin.html', context)
-
-        if request.POST.get('update',False):
-            edge_form = forms.edge_form(request.POST,instance=edge)
-            if edge_form.is_valid():
-                edge_form.save()                          
-                return redirect('/states/admin/edge/'+str(edge.id)+'/')
-
-        edge_form = forms.edge_form(instance=edge)
-        return render(request, 'states/edgeedit.html', {'edge_form':edge_form,'edge':edge, 'profile':user_obj})
-    else:
-        return redirect('/auth/login/')
-
-
-
-def addedge(request,chapid):
-    if request.user.is_authenticated:
-        user_obj = request.user
-        if request.POST.get('addedge',False):
-            edge_form = forms.edge_form(request.POST)
-            if edge_form.is_valid():
-                weight=edge_form.cleaned_data['weight']
-                time=edge_form.cleaned_data['time']
-
-                addnodes=list()
-                nodes=Node.objects.all()
-                for i in nodes:
-                    if request.POST.get(str(i.id)):
-                        addnodes.append(i)
-
-                if len(addnodes)!=2:
-                    c=Chapter.objects.get(id=chapid)
-                    chapter_nodes=list()
-                    chapter_nodes = nodes= Node.objects.filter(state_node__topic__chapter=c).distinct()
-                    edge_form = forms.edge_form()
-
-                    context = {'two_nodes_needed_error':1,
-                    'edge_form':edge_form,
-                    'chapter':c,
-                    'nodes':chapter_nodes, 
-                    'profile':user_obj}
-
-                    return render(request, 'states/addedge.html', context)
-
-
-
-                n1=addnodes[0]
-                n2=addnodes[1]
-
-                all_edges=Edge.objects.all()
-                for i in all_edges:
-                    if (i.first==n1 and i.second==n2) or (i.first==n2 and i.second==n1):
-                        c=Chapter.objects.get(id=chapid)
-                        chapter_nodes=list()
-                        chapter_nodes = nodes= Node.objects.filter(state_node__topic__chapter=c).distinct()
-                        edge_form = forms.edge_form()
-
-                        context = {'edge_exists_error':1,
-                        'edge_form':edge_form,
-                        'chapter':c,
-                        'nodes':chapter_nodes, 
-                        'profile':user_obj}
-
-                        return render(request, 'states/addedge.html', context)
-
-
-
-                print(n1,n2)
-                Edge.objects.create(first=n1,second=n2,weight=weight, time=time)
-           
-                edges=Edge.objects.all()
-                chapters= Chapter.objects.all()
-
-                context = {'edge_added':1,
-                'chapters':chapters,
-                'edges':edges, 
-                'profile':user_obj}
-
-                return render(request, 'states/edgeadmin.html', context)     
-        
-        c=Chapter.objects.get(id=chapid)
-        chapter_nodes=list()
-        chapter_nodes = nodes= Node.objects.filter(state_node__topic__chapter=c).distinct()
-        edge_form = forms.edge_form()
-        return render(request, 'states/addedge.html', {'edge_form':edge_form,'chapter':c,'nodes':chapter_nodes, 'profile':user_obj})
-
-    else:
-        return redirect('/auth/login/')

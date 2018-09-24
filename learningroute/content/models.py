@@ -1,6 +1,6 @@
 from django.db import models
 from states.models import State, Node
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models.signals import pre_save,post_save
 from django.core.validators import MinValueValidator , MaxValueValidator
 from chapters.models import Chapter

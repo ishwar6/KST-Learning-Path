@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 from .views import (
-    RegisterView,
+logout_view,
     LoginView,
     set_password,
     send_otp,
@@ -18,6 +18,7 @@ app_name = 'account'
 urlpatterns = [
 
     url(r'^register/$', send_otp, name='register'),
+    url(r'^logout/$', logout_view, name='logout'),
     url(r'^password-reset/$', send_otp_password_reset, name='password-reset'),
     url(r'^profile/$', profile, name='profile'),
     url(r'^login/$', LoginView.as_view(), name='login'),

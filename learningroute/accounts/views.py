@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from django.views.generic import CreateView, FormView
 from .forms import (RegisterForm, LoginForm, VerifyForm,
                     TempRegisterForm, SetPasswordForm)
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -22,27 +22,21 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 
-class RegisterView(CreateView):
-    form_class = RegisterForm
-    template_name = 'account/register.html'
-    success_url = '/'
-
-    def get(self, request, *args, **kwargs):
-        if self.request.user.is_authenticated():
-            return redirect('account:profile')
-        return super(RegisterView, self).get(request, *args, **kwargs)
-
-
+def logout_view(request):
+    if request.user.is_authenticated:
+        logout(request)
+    return redirect('account:login')
+   
 
 
 
 class LoginView(FormView):
     form_class = LoginForm
-    success_url = '\hah'
+    success_url = reverse_lazy('account:profile')
     template_name = 'account/login.html'
 
     def get(self, request, *args, **kwargs):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             return redirect('account:profile')
         return super(LoginView, self).get(request, *args, **kwargs)
 
@@ -60,7 +54,7 @@ class LoginView(FormView):
                 return redirect(redirect_path)
 
             else:
-                return redirect('/')
+                return redirect('account:profile')
         return super(LoginView, self).form_invalid(form)
 
 
@@ -76,7 +70,7 @@ class LoginView(FormView):
 #         return super(TempRegisterView, self).form_valid(form)
 @csrf_exempt
 def send_otp(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         return redirect('account:profile')
     if request.method == 'POST':
         form = TempRegisterForm(request.POST or None)
@@ -90,6 +84,9 @@ def send_otp(request):
     else:
         form = TempRegisterForm()
     return render(request, 'account/phone.html', {'form': form})
+
+
+
 
 @csrf_exempt
 def validate_phone(request):
@@ -176,7 +173,7 @@ def profile(request):
 
 
 def send_otp_password_reset(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         return redirect('account:profile')
     if request.method == 'POST':
         form = TempRegisterForm(request.POST or None)
@@ -244,7 +241,7 @@ def validate_otp_reset(request):
 
 
 def reset_password(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         return redirect('account:profile')
     token = request.session.get('token', None)
     phone = request.session.get('phone_reset', None)

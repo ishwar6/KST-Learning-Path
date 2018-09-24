@@ -1,17 +1,13 @@
 from django.conf.urls import url
-from .views import myview,  stateadmin, stateedit, selectchapter, selecttopic, nodeadmin, nodeedit, addnode, edgeadmin, edgeedit, addedge
-
+from .views import myview,  stateadmin, stateedit, selectchapter, selecttopic
+app_name = 'states'
 urlpatterns = [
     url(r'^$', myview, name ='myview'  ),
     url(r'^admin/$', stateadmin, name='stateadmin'),
-    url(r'^admin/node/$', nodeadmin , name='nodeadmin' ), 
-    url(r'^admin/edge/$', edgeadmin , name='edgeadmin' ), 
+   
 
-    url(r'^admin/node/(?P<nodeid>(\d+))/', nodeedit , name='nodeedit' ),
-    url(r'^admin/edge/(?P<edgeid>(\d+))/', edgeedit , name='edgeedit' ), 
-    url(r'^admin/addedge/(?P<chapid>(\d+))/', addedge , name='addedge' ),
 
-    url(r'^admin/addnode/(?P<chapid>(\d+))/', addnode , name='addnode' ), 
+  
     url(r'^admin/chapter/(?P<title>.+)/', selectchapter , name='selectchapter' ), 
     url(r'^admin/topic/(?P<title>.+)/', selecttopic , name='selecttopic' ), 
     url(r'^admin/(?P<title>.+)/(?P<topic>.+)/', stateedit , name='stateedit' ),

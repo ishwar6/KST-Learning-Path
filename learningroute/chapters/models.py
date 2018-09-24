@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models.signals import pre_save,post_save
 from django.core.validators import MinValueValidator , MaxValueValidator
 from django.utils.text import slugify
@@ -113,7 +113,7 @@ pre_save.connect(rl_pre_save_receiver, sender= Chapter)
 
 class Topic(models.Model):
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
-    title = models.CharField(max_length = 80, blank = False, null = False)
+    title = models.CharField(max_length = 80, blank = True, null = True)
     content1 = models.TextField(max_length = 30000, blank = False)
     image1 = models.FileField(upload_to = upload_image_path_topics, null = True, blank = True)
     content2 = models.TextField(max_length = 30000, blank = True)

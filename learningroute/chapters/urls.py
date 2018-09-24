@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from .views import mainpage, editchapter, edittopic #, nodes, stateadmin, stateedit, selectchapter, selecttopic
-
+app_name = 'chapters'
 urlpatterns = [
     url(r'^$', mainpage , name='mainpage' ),
     url(r'^(?P<chapternumber>(\d+))/', editchapter , name='editchapter' ),

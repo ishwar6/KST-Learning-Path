@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from .models import State, Node, Edge
+from .models import State, Node
 from django.db.models.functions import Lower
 from chapters.models import Topic, Chapter 
 
@@ -16,7 +16,7 @@ class StateAdmin(admin.ModelAdmin):
         return chapter
 
     def get_ordering(self, request):
-        return [Lower('topic_id')]  # sort case insensitive
+        return [Lower('tag')]  # sort case insensitive
 
 
 
@@ -37,4 +37,4 @@ class NodeAdmin(admin.ModelAdmin):
 
 admin.site.register(Node, NodeAdmin)
 admin.site.register(State, StateAdmin)
-admin.site.register(Edge)
+

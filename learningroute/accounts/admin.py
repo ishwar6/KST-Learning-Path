@@ -8,6 +8,22 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .forms import UserAdminCreationForm, UserAdminChangeForm
 
+
+
+
+
+
+from profiles.models import Profile
+
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'Profile'
+    fk_name = 'user'
+
+
+        
+
 class UserAdmin(BaseUserAdmin):
     # The forms to add and change user instances
     form = UserAdminChangeForm
@@ -31,10 +47,19 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('phone', 'password1', 'password2')}
         ),
     )
+
+
     search_fields = ('phone',)
     ordering = ('phone',)
     filter_horizontal = ()
 
+
+    inlines = (ProfileInline, )
+
+    def get_inline_instances(self, request, obj=None):
+        if not obj:
+            return list()
+        return super(UserAdmin, self).get_inline_instances(request, obj)
 
 admin.site.register(User, UserAdmin)
 

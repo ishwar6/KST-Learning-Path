@@ -11,7 +11,7 @@ from .views import               (
                                 )
 
 
-
+app_name = 'content'
 
 urlpatterns= [
     url(r'^assign/newstate/student/change/pwjhfskjdfhkhkd/(?P<id>[0-9]+)/(?P<s>[0-9]+)/$', assignstate,  name='assign'),
