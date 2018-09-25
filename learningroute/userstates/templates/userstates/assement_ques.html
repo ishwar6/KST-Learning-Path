@@ -231,7 +231,7 @@
         function handleFormSuccess(data, textStatus, jqXHR){
     
             if(data.empty == true){
-                window.location.href = '/assess/report/';
+                window.location.href = '/userstates/report/';
                 }
     
     
@@ -240,7 +240,7 @@
              if(a.question_image != "") {
              qimage = '<img id ="image-question" src="media/ ' + a.question_image + ' " height="250px" width="250px">';
              $('#q-image').prepend(qimage)
-             }
+             }  
              else{
               $('#q-image').empty()
              }

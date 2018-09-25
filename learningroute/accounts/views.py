@@ -54,7 +54,7 @@ class LoginView(FormView):
                 return redirect(redirect_path)
 
             else:
-                return redirect('account:profile')
+                return redirect('profile:edit')
         return super(LoginView, self).form_invalid(form)
 
 
