@@ -3,6 +3,7 @@ from django.db.models.signals import post_save
 from django.contrib.auth import get_user_model
 import random
 import os
+from userstates.models import UserState
 User = get_user_model()
 
 def upload_image_path_profile(instance, filename):
@@ -38,12 +39,26 @@ class Profile(models.Model):
     image = models.ImageField(upload_to = upload_image_path_profile, default=None, null = True, blank = True)
     standard     =   models.IntegerField(choices=ROLE_CHOICES, default=10)
     city         =   models.CharField(max_length = 30, blank = True, null = True)
+    count        =   models.IntegerField(default=0)
 
 
     def __str__(self):
         return str(self.user) + '  ' + str(self.name)
 
+
+        
+
 def user_created_receiver(sender, instance, created, *args, **kwargs):
     if created:
         Profile.objects.get_or_create(user = instance)
 post_save.connect(user_created_receiver, sender = User)
+
+
+
+
+def user_created_receiver_for_userstates(sender, instance, created, *args, **kwargs):
+    if created:
+        UserState.objects.get_or_create(user = instance)
+post_save.connect(user_created_receiver_for_userstates, sender = User)
+
+

@@ -22,86 +22,102 @@ User = get_user_model()
 
 
 class IntroductoryResponse(View):
-	the_chapters= Chapter.objects.filter(standard=9)
+	
 
 	def get(self, request):
+		if not self.request.user.is_authenticated:
+			return redirect('account:login')
+		else:
 
-		student_state_ = UserState.objects.filter(user = self.request.user)
-		if student_state_.exists():
-			student_state = student_state_.first()
-			if student_state.active_part != 0:
-				return redirect('assess:active')
-		return render(request, 'userstates/initialresponse_form.html', {'chapters': self.the_chapters})
-	
+			standard    = self.request.user.standard
+			the_chapters= Chapter.objects.filter(standard=standard)
+			student_state_ = UserState.objects.filter(user = self.request.user)
+			if student_state_.exists():
+				student_state = student_state_.first()
+				print('s', student_state.active_part)
+				if student_state.active_part != 0:
+					return redirect('assess:active')
+			return render(request, 'userstates/initialresponse_form.html', {'chapters': the_chapters})
+		
 	def post(self, request):
-		LEVEL_REF={
-			'beginer':1,
-			'Benginer':1,
-			'intermediate':2,
-			'Intermediate':2,
-			'advanced':3,
-			'Advanced':3,
-			'dont know':0,
-			'Dont Know':0
-			}
-		for the_chapter in self.the_chapters :
-			the_node = None
-			ind_select= "level-of-"+ str(the_chapter.id)
+		if not self.request.user.is_authenticated:
+			return redirect('account:login')
+		else:
+			standard    = self.request.user.standard
+			the_chapters= Chapter.objects.filter(standard=standard)
+			LEVEL_REF={
+				'beginer':1,
+				'Benginer':1,
+				'intermediate':2,
+				'Intermediate':2,
+				'advanced':3,
+				'Advanced':3,
+				'dont know':0,
+				'Dont Know':0
+				}
+			for the_chapter in the_chapters :
+				the_node = None
+				ind_select= "level-of-"+ str(the_chapter.id)
 
-			if request.POST.get(ind_select):
-				level = request.POST.get(ind_select)
-			else:
-				level = None
+				if request.POST.get(ind_select):
+					level = request.POST.get(ind_select)
+				else:
+					level = None
+				
+
+				dont_know_var = False
+			
+				if LEVEL_REF[level]== 0:
+					dont_know_var=True
+				else:	
+					nodes= Node.objects.filter(state_node__topic__chapter=the_chapter).distinct()
+					print(nodes)
+
+
+					num_states_in_domain = 0
+					if nodes is None:
+						break
+					for n in nodes:
+						print('queryset of node is', n)
+						num_mem= n.state_node.all().count()
+						num_states_in_domain= max(num_states_in_domain, num_mem)
+					print('max number of states in CHAPTER_PROFIENCY node', num_states_in_domain)
+
+					list_of_nodes=[]
+					a = (num_states_in_domain//4)*LEVEL_REF[level]
+					if a==0 & LEVEL_REF[level]==1:
+						a = a + 1
+					if a==0 & (LEVEL_REF[level]==2 or LEVEL_REF[level]==3):
+						a = a+2
+
+					for n in nodes:
+						q = n.state_node.all().count()
+						print( 'q is ', q , 'and a is', a )
+						if q==a or  ( q > a and q < a +  2): #If |Q|=20 node with |Q|/4 = 5 states is assigned to beginer, 10 to interm and so on
+							print('ACTIVE NODE HERE IS' , n)
+							list_of_nodes.append(n)
+					the_node= random.choice(list_of_nodes)
+					print(list_of_nodes)
+					print(the_node	)
+				
+				
+				if TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).exists():
+					TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).delete()
+
+				TempActiveNode.objects.create(
+					user= self.request.user,
+					chapter= the_chapter,
+					node= the_node,
+					dont_know_switch= dont_know_var
+				)	
 			
 
-			dont_know_var = False
-		
-			if LEVEL_REF[level]== 0:
-				dont_know_var=True
-			else:	
-				nodes= Node.objects.filter(state_node__topic__chapter=the_chapter).distinct()
-
-				num_states_in_domain = 0
-				if nodes is None:
-					break
-				for n in nodes:
-					print('queryset of node is', n)
-					num_mem= n.state_node.all().count()
-					num_states_in_domain= max(num_states_in_domain, num_mem)
-				print('max number of states in CHAPTER_PROFIENCY node', num_states_in_domain)
-
-				list_of_nodes=[]
-				a = (num_states_in_domain//4)*LEVEL_REF[level]
-				if a==0 & LEVEL_REF[level]==1:
-					a = a + 1
-				if a==0 & (LEVEL_REF[level]==2 or LEVEL_REF[level]==3):
-					a = a+2
-
-				for n in nodes:
-					q = n.state_node.all().count()
-					print( 'q is ', q , 'and a is', a )
-					if q==a or  ( q > a and q < a +  2): #If |Q|=20 node with |Q|/4 = 5 states is assigned to beginer, 10 to interm and so on
-						list_of_nodes.append(n)
-						the_node= random.choice(list_of_nodes)
-			
-			
-			if TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).exists():
-				TempActiveNode.objects.filter(Q(user = self.request.user) & Q(chapter = the_chapter)).delete()
-
-			TempActiveNode.objects.create(
-				user= self.request.user,
-				chapter= the_chapter,
-				node= the_node,
-				dont_know_switch= dont_know_var
-			)
-		
-
-		student_state_ = UserState.objects.filter(user = self.request.user)
-		if student_state_.exists():
-			student_state = student_state_.first()
-			student_state.active_part = 1
-			student_state.save()
-		return redirect('assess:first')
+			student_state_ = UserState.objects.filter(user = self.request.user)
+			if student_state_.exists():
+				student_state = student_state_.first()
+				student_state.active_part = 1
+				student_state.save()
+			return redirect('assess:first')
 
 
 
@@ -120,7 +136,6 @@ def number_optimum(num):
 
 
 
-
 def first_assessment(request):
 	user = request.user
 	global correct, incorrect, question_to_render, current_question, temp_states
@@ -129,6 +144,7 @@ def first_assessment(request):
 
 	if user.is_authenticated:
 		if request.method == 'GET':
+			standard       = user.standard
 			student_state_ = UserState.objects.filter(user = user)
 			if student_state_.exists():
 				student_state = student_state_.first()
@@ -136,7 +152,7 @@ def first_assessment(request):
 					return redirect('assess:active')
 			correct = incorrect = 0
 			temp_states = TempActiveNode.objects.filter(user = user)
-			chapters    = Chapter.objects.filter(standard = 9)
+			chapters    = Chapter.objects.filter(standard = standard)
 			chapter_for_assessment = []
 
 			for c in chapters:
@@ -172,12 +188,6 @@ def first_assessment(request):
 			chapter_for_assessment = chapter_for_assessment
 			print( 'chapter of assessment here in get is',  chapter_for_assessment)
 			current_question = question.last()
-			
-					
-			
-				
-			
-			
 			
 
 			context = {
@@ -401,6 +411,7 @@ def choose_question(request, temp_states, chapter_for_assessment, next):
 def assessment_report(request):
 	user = request.user
 	if user.is_authenticated:
+		standard    = user.standard
 		student_state_ = UserState.objects.filter(user = user)
 		if student_state_.exists():
 			student_state = student_state_.first()
@@ -414,7 +425,7 @@ def assessment_report(request):
 		next_ready_node 	= {}
 
 		temp_nodes = TempActiveNode.objects.filter(user = user)
-		chapters    = Chapter.objects.filter(standard = 9)   # SET STANDARDD
+		chapters    = Chapter.objects.filter(standard = standard)   # SET STANDARDD
 
 		for chapter in temp_nodes:
 			if chapter.node is None or chapter.dont_know_switch==1:
@@ -480,11 +491,12 @@ def start_chapter(request):
 		state_	 = request.POST.get('state', None)
 		chapter_ = request.POST.get('chapter', None)
 		node_    = request.POST.get('node', None)
+		print(request.POST)
 
 		if state_ and chapter_ and node_:
 			node_    = int(node_)
 			node 	 = Node.objects.get(id = node_)
-			state    = State.objects.filter(title = state_).first()
+			state    = State.objects.filter(tag = state_).first()
 
 			current  = CurrentActiveNode.objects.filter(user = user)
 

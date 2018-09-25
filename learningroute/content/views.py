@@ -33,7 +33,7 @@ def problem(request):
 
 def active_part_redirect(request):
     user = request.user
-    if user.is_authenticated():
+    if user.is_authenticated:
         student_state_  = CurrentActiveState.objects.filter(user= user)
         if student_state_.exists():
             student_state = student_state_.first()
@@ -56,7 +56,7 @@ def active_part_redirect(request):
 
 def assignstate(request, id, s):
     user = request.user
-    if user.is_authenticated():
+    if user.is_authenticated:
         student_state_  = CurrentActiveState.objects.filter(user= user)
 
         
@@ -139,18 +139,21 @@ def assignstate(request, id, s):
 def showcontent(request):
     user = request.user
     context = {}
-    if user.is_authenticated():
+    if user.is_authenticated:
         student_state  = CurrentActiveState.objects.filter(user= user)
         if student_state.exists():
             student_state = student_state.first()
             if student_state.active_part !=1:
                 return redirect('content:active')
             content = Content.objects.filter(state = student_state.state)
+            if content.exists():
+                content = content.first()
 
             context = {
                 'state'  : student_state.state,
                 'content': content
             }
+
 
         if request.method == 'POST':
             student_state.active_part = 2
@@ -172,7 +175,7 @@ def showcontent(request):
 def show_illustrations(request, content = None):
     user = request.user
     message = ''
-    if user.is_authenticated():
+    if user.is_authenticated:
         student_state  = CurrentActiveState.objects.filter(user = user)
        
         student_state = student_state.first()
@@ -182,6 +185,11 @@ def show_illustrations(request, content = None):
         
         state = student_state.state
         content = Content.objects.filter(state = state)
+        print(content)
+        if content.exists():
+            content = content.first()
+        else:
+            print('Please add content first for state', state)
 
         student_illus_point   = illus_pt_this_state = student_state.score_of_i
         score_of_illus_needed  = state.score_of_i()
@@ -189,7 +197,7 @@ def show_illustrations(request, content = None):
 
 
         previous_state = PreviousState.objects.filter(Q(user = user) & Q(state = state))
-        print(previous_state)
+        print('previous state is', previous_state)
         if previous_state.exists():
             previous_state = previous_state.first()
             student_illus_point = student_illus_point + previous_state.score_of_i 
@@ -258,7 +266,7 @@ def show_questions(request):
     message = ''
     global questions, percentage_remaining, student_ques_point, score_of_ques_needed, questions_to_render, q, student_state, current_question, correct, incorrect
     global number_of_questions
-    if user.is_authenticated():
+    if user.is_authenticated:
         if request.method == 'GET':
             correct = incorrect = 0
             student_state  = CurrentActiveState.objects.filter(Q(user = user))
@@ -433,7 +441,7 @@ def show_questions(request):
 def report(request):
     user = request.user
     global score, student_state
-    if user.is_authenticated():
+    if user.is_authenticated:
         if request.method == 'GET':
             student_state = CurrentActiveState.objects.filter(Q(user = user)).first()
             if student_state.active_part  != 4:
