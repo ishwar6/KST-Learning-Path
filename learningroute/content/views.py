@@ -21,6 +21,23 @@ from content.models import (    Content,
                          )
 
 
+def dashboard(request):
+    if request.user.is_authenticated:
+        return render(request, 'content/dashboard.html', {})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def Diff(li1, li2): 
@@ -46,7 +63,7 @@ def active_part_redirect(request):
             elif student_state.active_part ==4:
                 return redirect('content:report')
             else:
-                return redirect('content:problem')
+                return redirect('content:report')
             
             
 
@@ -445,6 +462,9 @@ def report(request):
         if request.method == 'GET':
             student_state = CurrentActiveState.objects.filter(Q(user = user)).first()
             if student_state.active_part  != 4:
+                if student_state.active_part  == 5:
+                    student_state.active_part = 4
+                    student_state.save()
                 return redirect('content:active')
             count         = student_state.score_of_q
             question_solved = QuestionResponse.objects.filter(Q(question__counts__lte = count) & Q( question__state = student_state.state ) )
@@ -463,6 +483,8 @@ def report(request):
             duration     = timezone.now() - student_state.timestamp
             days, seconds = duration.days, duration.seconds
             time_taken = days * 24 + seconds // 3600
+            student_state.score = score
+            student_state.save()
 
             if score >= 50:
                 if_old = CompletedState.objects.filter(Q(user = user) & Q(state = student_state.state))

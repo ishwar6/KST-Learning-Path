@@ -28,7 +28,7 @@
         
         
         
-                    <form action="post" class="normalForm">
+                    <form method="post" class="normalForm">
                            {% csrf_token %}
         
                         <div class="inputNum">
@@ -44,13 +44,13 @@
                         <div class="inputNum">
                             <div class="inputNum-a">
                                 <label for="inputPin">Pin</label>
-                                <input type="password"   name="password"  pattern="[0-9]*" inputmode="numeric" name="Pin" id="inputPin" maxlength="12">
+                                <input type="password"   name="password"     inputmode="numeric" name="Pin" id="inputPin" maxlength="12">
                             </div>
                             <div class="inputNum-msg">
                                 <p>This is error message</p>
                             </div>
                         </div>
-                        <button type="button" class="submit">
+                        <button type="submit" class="submit">
                             Login
                         </button>
                     </form>

@@ -8,6 +8,7 @@ from .views import               (
                                   report,
                                   assignstate,
                                   problem,
+                                  dashboard
                                 )
 
 
@@ -23,6 +24,9 @@ urlpatterns= [
     url(r'^student/redirect/correctly/state/learn/$', active_part_redirect,  name='active'),
 
     url(r'^report/this/state/$', report,  name='report'),
+
+
+    url(r'^go/$', dashboard,  name='dashboard'),
 
 
 ]
