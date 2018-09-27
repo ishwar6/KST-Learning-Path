@@ -46,12 +46,34 @@ class Profile(models.Model):
         return str(self.user) + '  ' + str(self.name)
 
 
-        
+class LoginDetail(models.Model):
+    user            =    models.OneToOneField(User, on_delete=models.CASCADE)
+    first_count     =    models.IntegerField(default=0, help_text='It is 0, if the user is totally new and 1 if the user has saved his standard once' )
+    logged_in_count =    models.IntegerField(default=0, help_text='It will increase as user logs in')
+    time_spent      =    models.IntegerField(default=0, help_text='Time spent by student on website in minutes')
+
+
+    def __str__(self):
+        return str(self.user)
+
+
+
+
+
+
 
 def user_created_receiver(sender, instance, created, *args, **kwargs):
     if created:
         Profile.objects.get_or_create(user = instance)
 post_save.connect(user_created_receiver, sender = User)
+
+
+def user_created_receiver_(sender, instance, created, *args, **kwargs):
+    if created:
+        LoginDetail.objects.get_or_create(user = instance)
+post_save.connect(user_created_receiver_, sender = User)
+
+
 
 
 

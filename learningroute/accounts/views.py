@@ -20,7 +20,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from rest_framework import viewsets, response, permissions
 from django.views.decorators.csrf import csrf_exempt
 
-
+from profiles.models import LoginDetail
 
 def logout_view(request):
     if request.user.is_authenticated:
@@ -48,13 +48,22 @@ class LoginView(FormView):
         phone = form.cleaned_data.get('phone')
         password = form.cleaned_data.get('password')
         user = authenticate(request, username=phone, password=password)
+
         if user is not None:
             login(request, user)
+            login_detail = LoginDetail.objects.filter(user= request.user)
+            if login_detail.exists():
+                login_detail_obj                 = login_detail.first()
+                counts_                          = login_detail_obj.logged_in_count 
+                login_detail_obj.logged_in_count = counts_ + 1
+                login_detail_obj.save()
+                if login_detail_obj.first_count ==0:
+                    return redirect('profile:edit')
             if is_safe_url(redirect_path, request.get_host()):
                 return redirect(redirect_path)
 
             else:
-                return redirect('profile:edit')
+                return redirect('content:dashboard')
         return super(LoginView, self).form_invalid(form)
 
 
@@ -156,7 +165,7 @@ def set_password(request):
                         request, username=phone, password=password)
                     if user is not None:
                         login(request, user)
-                        return redirect('account:profile')
+                        return redirect('profile:edit')
                     else:
                         return redirect('account:register')
             else:
