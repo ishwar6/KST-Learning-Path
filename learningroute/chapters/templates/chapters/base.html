@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    {% load static %}
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Blissed Maths | Focused Learning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'chapters/css/base.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'chapters/css/main.css' %}" />
+    <link rel="icon" href="{% static 'chapters/assets/logo.png' %}">
+    <meta name="theme-color" content="#2a323f" />
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400" rel="stylesheet">
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="nav-logo">
+            <img src="{% static 'chapters/assets/logo bm normal.png' %}" alt="">
+            <h1>Blissed Maths</h1>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="nav-logged-in">
+            <a href="{% url 'account:logout' %}">Logout</a>
+        </div>
+        {% else %}
+        <div class="nav-login">
+            <a href="{% url 'account:register' %}">Register new account</a>
+            <a href="{% url 'account:login' %}">Login</a>
+        </div>
+        {% endif %}
+    </div>
+    <div class="nav-info">
+        <button class="viewProfileBtn" type="button">VIEW PROFILE</button>
+        <div class="nav-info-score">
+            <p>SCORE</p>
+            <p>Meter or 82 pts</p>
+        </div>
+
+    </div>
+    <div class="progress-meter"></div>
+    <!-- nav bar -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div>
+            <p {% if message.tags %} id='this' class="{{ message.tags }}" {% endif %}>{{ message }}</p>
+            <p class="messages-close">Close</p>
+        </div>
+        {% endfor %}
+    </div>
+    <!-- error messages -->
+    {% endif %}
+    {% block content %}
+    {% endblock %}
+
+    <div class="footer">
+        <div class="footer-a"></div>
+        <div class="footer-b">
+
+            <div class="f-navigation">
+                <div>
+                    <a href="">About us</a>
+                    <a href="">Resources &amp; Links</a>
+                    <a href="">Blog</a>
+                    <a href="">Careers</a>
+                </div>
+                <div>
+                    <a href="">Machine Learning</a>
+                    <a href="">Students Material</a>
+                    <a href="">Students Curriculum </a>
+                    <a href="">Ranking in NTSE/OLYMPIADS</a>
+                </div>
+            </div>
+            <div class="f-our-mission">
+
+                <p>Images are another chance to reinforce the brand. This is a good place to use an alternate version
+                    of your mark or use your logo in a different way.Searching for that perfect color has never been
+                    easier, use our HTML color picker to browse millions of colors and color harmonies</p>
+                <a href="">About us</a>
+            </div>
+        </div>
+        <div class="footer-c">
+            <div class="footer-lang">
+
+                <img src="{% static 'chapters/assets/india_flag.png' %}" alt="">
+                <p>IN/English</p>
+            </div>
+            <p class="footer-copyright">
+                Terms &amp; Conditions - Privacy Policy - Copyright 2018 Blissed Maths
+            </p>
+            <p class="parent-company">
+                A product of Wisfrags Education Pvt Ltd
+            </p>
+        </div>
+    </div>
+
+</body>
+
+</html>
