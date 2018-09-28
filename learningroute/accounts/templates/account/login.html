@@ -1,14 +1,15 @@
 <html>
 
 <head>
+        {% load static %}
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Blissed Maths | Focused Learning</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" type="text/css" media="screen" href="/static/account/css/base.css" />
-    <link rel="stylesheet" type="text/css" media="screen" href="/static/account/css/signUp.css" />
-    <link rel="icon" href="/static/account/assets/logo.png">
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'account/css/base.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'account/css/signUp.css' %}" />
+    <link rel="icon" href="{% static 'account/assets/logo.png' %}">
     <meta name="theme-color" content="#2a323f" />
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:700" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lora:700" rel="stylesheet">
@@ -19,7 +20,7 @@
 
 
         <div class="signUp-logo">
-            <img src="/static/account/assets/logo%20bm%20normal.png" alt="">
+            <img src="{% static 'account/assets/logo%20bm%20normal.png' %}" alt="">
             <h1>Blissed Maths</h1>
         </div>
         <h3 class="register-msg">Login to continue to Blissed Maths</h3>
@@ -65,8 +66,6 @@
 
         </div>
     </div>
-
-    <script src="/static/account/js/signUp.js"></script>
 
 </body>
 
