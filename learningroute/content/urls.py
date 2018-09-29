@@ -8,7 +8,8 @@ from .views import               (
                                   report,
                                   assignstate,
                                   problem,
-                                  dashboard
+                                  dashboard,
+                                  change_chapter
                                 )
 
 
@@ -26,6 +27,8 @@ urlpatterns= [
     url(r'^report/this/state/$', report,  name='report'),
 
 
+
+    url(r'^change/chapter/$', change_chapter,  name='change-chapter'),
     url(r'^go/$', dashboard,  name='dashboard'),
 
 

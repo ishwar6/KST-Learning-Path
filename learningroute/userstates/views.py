@@ -425,7 +425,7 @@ def assessment_report(request):
 		next_ready_node 	= {}
 
 		temp_nodes = TempActiveNode.objects.filter(user = user)
-		chapters    = Chapter.objects.filter(standard = standard)   # SET STANDARDD
+		chapters    = Chapter.objects.filter(standard = standard)   # SET STANDARD
 
 		for chapter in temp_nodes:
 			if chapter.node is None or chapter.dont_know_switch==1:

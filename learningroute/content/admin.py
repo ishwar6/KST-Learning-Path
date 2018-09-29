@@ -8,7 +8,9 @@ from .models import ( Content,
                     CurrentActiveState,
                     CompletedState,
                     CurrentActiveNode,
-                    PreviousActiveNode
+                    PreviousActiveNode,
+                    CompletedChapter
+
 
                     )
 admin.site.register(Content)
@@ -19,3 +21,4 @@ admin.site.register(CurrentActiveState)
 admin.site.register(CompletedState)
 admin.site.register(CurrentActiveNode)
 admin.site.register(PreviousActiveNode)
+admin.site.register(CompletedChapter)

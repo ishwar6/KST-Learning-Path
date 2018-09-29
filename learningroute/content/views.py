@@ -5,13 +5,14 @@ from userstates.models import PracticeChapter, TempActiveNode
 from states.models import State, Node
 import utility_kst as u
 from django.utils import timezone
+from chapters.models import Topic
 from django.contrib import messages
 from django.db import transaction
 from questions.models import Question, QuestionResponse
 from django.http import JsonResponse
 from content.models import (    Content,
                                 Illustration, 
-                             
+                                CompletedChapter,
                                 PreviousState, 
                                 CurrentActiveState,
                                 CompletedState,
@@ -21,22 +22,103 @@ from content.models import (    Content,
                          )
 
 
+
+
+
+
+
+
+
+
+
+
+def change_chapter(request):
+    user = request.user
+    if user.is_authenticated:
+        student_state_          = CurrentActiveState.objects.filter(user= user)
+        if student_state_.exists():
+            standard            = user.standard
+            student_state       = student_state_.first()
+
+
+# to get current chapter and to save it in completedchapter
+            state               = student_state.state.id
+            current_topic       = State.objects.filter(pk = state).first().topic
+            current_chapter_pk  = Topic.objects.filter(title = current_topic).first().chapter.id
+            current_chapter     = Chapter.objects.filter(pk = current_chapter_pk).first()
+            temp_active_node    = TempActiveNode.objects.filter(user = user)
+            practice_chapter    = PracticeChapter.objects.filter(user = user)
+            chapters            = Chapter.objects.filter(standard = standard) 
+            comp_chapters       = CompletedChapter.objects.filter(user = user)
+
+            list_of_chapters_incomp    = []
+            list_of_chapters_to_practice = []
+            list_of_chapters_done        = []
+            list_of_other_chapter        = []
+
+            for p in practice_chapter:
+                list_of_chapters_to_practice.append(p.chapter)
+
+            
+
+            for c in comp_chapters:
+                if c.node is None and c.done==1:
+                    list_of_chapters_done.append(c.chapter)
+                else:
+                    list_of_chapters_incomp.append(c.chapter)
+
+
+            for t in temp_active_node:
+                list_of_other_chapter.append(t.chapter)
+
+
+            a = list(set(list_of_other_chapter) - set(list_of_chapters_done) - set(list_of_chapters_incomp) - set(list_of_chapters_to_practice) )
+
+           
+
+
+            context  = {
+   
+
+                'completed_chapters' : list_of_chapters_done,
+                'incomplete_chapters': list_of_chapters_incomp,
+                'practice_chapters'  : list_of_chapters_to_practice,
+                'left_chapters'      : a,
+                'current_chapter'    : current_chapter,
+            }
+
+
+
+
+
+
+
+# save this in completed state model if completed
+
+
+
+
+            return render(request, 'content/chapter.html', context )
+
+
+
+
+            
+
+
+          
+
+
+
+
+
+
+
+
+
 def dashboard(request):
     if request.user.is_authenticated:
         return render(request, 'content/dashboard.html', {})
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
