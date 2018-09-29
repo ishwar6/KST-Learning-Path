@@ -2,13 +2,14 @@
 <html>
 
 <head>
+        {% load static %}
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Blissed Maths | Focused Learning</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" media="screen" href="../css/base.css" />
-    <link rel="stylesheet" type="text/css" media="screen" href="../css/signUp.css" />
-    <link rel="icon" href="../../assets/logo.png">
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'account/css/base.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'account/css/signUp.css' %}" />
+    <link rel="icon" href="{% static 'account/assets/logo.png' %}">
     <meta name="theme-color" content="#2a323f" />
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:700" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lora:700" rel="stylesheet">
@@ -19,17 +20,19 @@
 
 
         <div class="signUp-logo">
-            <img src="../../assets/logo bm normal.png" alt="">
+            <img src="{% static 'account/assets/logo bm normal.png' %}" alt="">
+
             <h1>Blissed Maths</h1>
         </div>
         <h3 class="register-msg">Register at Blissed Maths</h3>
         <div class="signUp-body">
-            <form action="" class="normalForm">
+            <form method="POST" data-validate-user-otp="/myaccount/ajax/validate_otp/" data-validate-username-url="/myaccount/ajax/validate_phone/"
+                class="normalForm">
 
                 <div class="inputNum">
                     <div class="inputNum-a">
                         <label for="inputPhone">Phone Number</label>
-                        <input type="tel" name="Phone Number" id="inputPhone" maxlength="10">
+                        <input type="tel" name="phone" required id="inputPhone" maxlength="10">
                     </div>
                     <div class="inputNum-msg">
                         <p>This is error message</p>
@@ -41,20 +44,58 @@
                 <div class="inputNum">
                     <div class="inputNum-a">
                         <label for="inputOtp">Enter otp</label>
-                        <input type="number" name="Otp" id="inputOtp">
+                        <input class="inputOtp" type="number" required name="otp" id="inputOtp">
                     </div>
                     <div class="inputNum-msg">
                         <p>This is error message</p>
                     </div>
                 </div>
-                <button type="button" class="submit">
+                <button type="submit" class="submit">
                     Submit
                 </button>
             </form>
         </div>
     </div>
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script>
+        $("#inputPhone").change(function () {
+            var form = $(this).closest("form");
+            $.ajax({
+                url: form.attr("data-validate-username-url"),
+                data: form.serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    if (data.is_taken) {
+                        console.log(data)
+                    }
+                    else {
+                        console.log(data)
+                        console.log("enter otp")
+                    }
+                }
+            });
+        });
 
-    <script src="../js/signUp.js"></script>
+
+        $("#inputOtp").change(function () {
+            var form = $(this).closest("form");
+            $.ajax({
+                url: form.attr("data-validate-user-otp"),
+                data: form.serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    if (data.matches) {
+                        console.log('match')
+                    }
+                    else {
+                        console.log(data)
+                        console.log('unmatch otp')
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

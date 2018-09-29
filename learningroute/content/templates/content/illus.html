@@ -1,21 +1,25 @@
-{{message}}  <br>
+{{message}} <br>
 <br>
-You have completed : 
+You have completed :
 {{per_remaining}} %
 
 <br>
-{{illus}}
 
 
+{% for i in illus %}
+{{i.content}} <br>
+{{i.text}} <br>
 
+{{i.answer}} <br>
 
+{{i.content}} <br><br><br>
+{% endfor %}
 
-
-<form method="POST" action = {% url 'content:illustrations' %} >
+<form method="POST" action={% url 'content:illustrations' %}>
 
     {% csrf_token %}
 
-    <input type="submit" > 
+    <input type="submit">
 </form>
 
 
@@ -23,7 +27,7 @@ You have completed :
 {% if messages %}
 <ul class="messages">
     {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
     {% endfor %}
 </ul>
 {% endif %}

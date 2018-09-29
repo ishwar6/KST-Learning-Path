@@ -1,0 +1,390 @@
+
+<html>
+    <body>
+   <h1>Welcome</h1>
+<h1>You are in assessment part </h1>
+
+
+
+<br>
+
+<div style='color:red' id='msg'>{{message}}</div>
+
+<div style='color:red' id='error'>
+
+
+</div>
+
+
+
+<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+ 
+
+<h5>you are currently attending evaluation on {{ chapter_title }}</h5><br><br>
+<div id='q-image'>
+{% if currentquestion.question_image  %}
+<img id ='image-question' src=" {{ currentquestion.question_image.url }}" height="250px" width="250px">
+{% endif %}
+</div>
+
+
+
+
+
+
+
+<h2 id="qstntitle" style="margin-bottom: 0px">
+{{currentquestion.id}}:-  {{currentquestion.text }} 
+</h2>
+
+
+<form class="my-question-form" method="POST" action = '{% url 'assess:first' %}'  data-url='{% url 'assess:first'  %}' enctype="multipart/form-data">
+{% csrf_token %}
+
+
+
+<br><br>
+        
+<div class="panel-primary" >
+<div id = 'integer_type'>
+  {% if currentquestion.integer_type %}
+  <input placeholder="" id="integertype" type="text" name="integertype" value="{{question_submission.integer_type_submission}}">
+    <label for="integertype">Enter answer</label><br><br><br>
+    
+    
+  {% endif %}</div>
+
+
+
+
+
+
+
+
+
+  
+  <div id = 'single-option-one'>
+  {% if currentquestion.single_option %}  
+
+
+    {% if question_submission.op1  %}
+      <input type="radio" id="person_a" name="rad" value="1" checked>
+      <label id='label1' for="person_a">{{ currentquestion.option1 }}</label>
+    {% endif %}
+    
+    {% if not question_submission.op1 %}
+      <input type="radio" id="person_a" name="rad" value="1">
+      <label id='label1' for="person_a">{{ currentquestion.option1 }}</label>
+    {% endif %}
+
+    {% if question_submission.op2  %}
+      <input type="radio" id="person_b " name="rad" value="2" checked>
+      <label id='label2' for="person_b ">{{ currentquestion.option2 }}</label>
+    {% endif %}
+
+    {% if not question_submission.op2 %}
+      <input type="radio" id="person_b " name="rad" value="2">
+      <label id='label2' for="person_b ">{{ currentquestion.option2 }}</label>
+    {% endif %}
+
+
+
+    {% if question_submission.op3  %}
+      <input type="radio" id="person_c " name="rad" value="3" checked>
+      <label id='label3' for="person_c">{{ currentquestion.option3 }}</label>
+    {% endif %}
+    
+    {% if not question_submission.op3 %}
+      <input type="radio" id="person_c " name="rad" value="3">
+      <label id='label3' for="person_c">{{ currentquestion.option3 }}</label>
+    {% endif %}
+
+
+
+    {% if question_submission.op4  %}
+      <input type="radio" id="person_d " name="rad" value="4" checked>
+      <label id='label4' for="person_d ">{{ currentquestion.option4 }}</label>
+    {% endif %}
+    
+    {% if not question_submission.op4 %}
+      <input type="radio" id="person_d " name="rad" value="4">
+      <label id='label4' for="person_d ">{{ currentquestion.option4 }}</label>
+    {% endif %}
+
+    <br><br><br>
+            
+  {% endif %}
+</div>
+
+
+  <div id = 'single-option-two'>
+
+  {% if not currentquestion.integer_type %}
+    
+    {% if not currentquestion.single_option %}
+
+    
+
+      {% if question_submission.op1  %}
+        <input type="checkbox" id="person_ " name="one" value="1" checked>
+        <label id='label1' for="person_ ">{{currentquestion.option1}}</label>
+      {% endif %}
+
+      {% if not question_submission.op1 %}
+        <input type="checkbox" id="person_ " name="one" value="1">
+        <label id='label1' for="person_ ">{{currentquestion.option1}}</label>
+      {% endif %}
+
+      {% if question_submission.op2  %}
+        <input type="checkbox" id="person_ " name="two" value="1" checked>
+        <label id='label2' for="person_ ">{{currentquestion.option2}}</label>
+      {% endif %}
+
+      {% if not question_submission.op2 %}
+        <input type="checkbox" id="person_ " name="two" value="1">
+        <label  id='label2' for="person_ ">{{currentquestion.option2}}</label>
+      {% endif %}
+
+      {% if question_submission.op3  %}
+        <input type="checkbox" id="person_ " name="three" value="1" checked>
+        <label id='label3' for="person_ ">{{currentquestion.option3}}</label>
+      {% endif %}
+
+      {% if not question_submission.op3 %}
+        <input type="checkbox" id="person_ " name="three" value="1">
+        <label id='label3' for="person_ ">{{currentquestion.option3}}</label>
+      {% endif %}
+
+      {% if question_submission.op4  %}
+        <input type="checkbox" id="person_ " name="four" value="1" checked=>
+        <label id='label4' for="person_ ">{{currentquestion.option4}}</label>
+      {% endif %}
+
+      {% if not question_submission.op4 %}
+        <input type="checkbox" id="person_ " name="four" value="1">
+        <label id='label4' for="person_ ">{{currentquestion.option4}}</label>
+      {% endif %}
+
+      
+            
+    {% endif %}
+  
+  {% endif %}
+</div>
+</div>
+<br><br><br>
+<div id="nexter">
+  <button id="submitter" class="btn" type="submit" style="margin-bottom: 2px">
+    Submit and Next
+  </button>
+</div>
+
+</form> 
+
+<br>
+
+
+{% if messages %}
+<ul class="message">
+  {% for message in messages %}
+      <li {% if message.tags %} class="message.tags" {% endif %}>{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+
+
+
+     
+</body>
+
+
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+
+
+  
+    {% block javascript %}
+    
+
+    <script>
+            $(document).ready(function(){
+                var myform = $('.my-question-form')
+                myform.submit(function(e){
+                    e.preventDefault()
+                    var formdata = $(this).serialize()
+                    console.log(formdata)
+
+        var $thisURL = myform.attr('data-url') 
+      
+
+        $.ajax({
+            method: "POST",
+            url: $thisURL,
+            data: formdata,
+            success: handleFormSuccess,
+            error: handleFormError,
+        })
+    })
+
+
+
+    function handleFormSuccess(data, textStatus, jqXHR){
+      console.log(data, textStatus, jqXHR)
+        if(data.empty == true){
+            window.location.href = '/userstates/report/';
+            }
+
+
+        console.log(data),
+         a = data.question_image[0];
+         if(a.question_image != "") {
+         qimage = '<img id ="image-question" src="media/ ' + a.question_image + ' " height="250px" width="250px">';
+         $('#q-image').prepend(qimage)
+         }  
+         else{
+          $('#q-image').empty()
+         }
+
+         $('#qstntitle').text(a.id +': -'+ a.text)
+         $('#percentage').text('you have completed '+ data.percentage + '%')
+         $('#msg').text(data.message)
+      
+
+
+
+
+         if (a.integer_type == false){
+            console.log(a.single_option)
+            if(a.single_option==true){
+
+  $('#single-option-one').empty()
+  $('#single-option-two').empty()
+  $('#integer_type').empty()
+      one =  '<input type="radio" id="person_a" name="rad" value="1" checked><label id="label1" for="person_a">' + a.option1 +'</label><br><br> '
+
+    
+   
+     two = ' <input type="radio" id="person_b" name="rad" value="2"><label id="label1" for="person_b">' + a.option2 +'</label> <br><br>'
+     three = ' <input type="radio" id="person_c" name="rad" value="3"><label id="label1" for="person_c">' + a.option3 +'</label> <br><br>'
+    
+     four = ' <input type="radio" id="person_d" name="rad" value="4"><label id="label1" for="person_d">' + a.option4 +'</label> <br><br>'
+            
+     
+     
+    
+     $('#single-option-one').prepend(four)
+     $('#single-option-one').prepend(three)
+     $('#single-option-one').prepend(two)
+
+     $('#single-option-one').prepend(one)
+     console.log('in single option one')
+
+     
+     
+
+             
+            } 
+         }
+
+
+
+
+
+         if (a.integer_type == false){
+      
+            if(a.single_option==false){
+
+
+
+                   $('#integer_type').empty()
+                   $('#single-option-one').empty()
+                   $('#single-option-two').empty()
+
+one =  '<input type="checkbox" id="person_a" name="one" value="1" checked><label id="label1" for="person_a">' + a.option1 +'</label><br><br>'
+
+    
+   
+two = '<input type="checkbox" id="person_b" name="two" value="1"><label id="label1" for="person_b">' + a.option2 +'</label><br><br>'
+three = '<input type="checkbox" id="person_c" name="three" value="1"><label id="label1" for="person_c">' + a.option3 +'</label><br><br>'
+
+four = '<input type="checkbox" id="person_d" name="four" value="1"><label id="label1" for="person_d">' + a.option4 +'</label><br><br>'
+   
+                        console.log(  $('#single-option-two').text())
+    
+    
+     
+     $('#single-option-two').prepend(four)
+     $('#single-option-two').prepend(three)
+     $('#single-option-two').prepend(two)
+     $('#single-option-two').prepend(one)   
+
+     console.log('in single option two')
+
+            } 
+         }
+
+
+
+
+         if (a.integer_type == true){
+           $('#integer_type').prepend('<input placeholder="" id="integertype" type="text" name="integertype"> ')
+$('#integer-type').prepend('<label for="integertype">Enter answer</label>')
+$('#single-option-one').empty()
+$('#single-option-two').empty()
+    
+   
+         }
+
+
+        
+        myform[0].reset(); // reset form data
+    }
+
+    function handleFormError(jqXHR, textStatus, errorThrown){
+        console.log(jqXHR)
+        console.log(textStatus)
+        console.log(errorThrown)
+        $('#error').empty()
+        $('#msg').text('')
+
+        $('#error').text('Please refresh this page or come back again later')
+    }
+})
+
+
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+var csrftoken = getCookie('csrftoken');
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+          </script>
+    
+    
+    {% endblock %}
+</html>

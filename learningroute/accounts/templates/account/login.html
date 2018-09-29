@@ -1,68 +1,72 @@
-
 <html>
 
-        <head>
-            <meta charset="utf-8" />
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <title>Blissed Maths | Focused Learning</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            
-            <link rel="stylesheet" type="text/css" media="screen"  href="/static/account/css/base.css" />
-            <link rel="stylesheet" type="text/css" media="screen"  href="/static/account/css/signUp.css" />
-            <link rel="icon" href="/static/account/assets/logo.png">
-            <meta name="theme-color" content="#2a323f" />
-            <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:700" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css?family=Lora:700" rel="stylesheet">
-        </head>
-        
-        <body>
-            <div class="container">
-        
-        
-                <div class="signUp-logo">
-                    <img src="/static/account/assets/logo%20bm%20normal.png" alt="">
-                    <h1>Blissed Maths</h1>
+<head>
+        {% load static %}
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Blissed Maths | Focused Learning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'account/css/base.css' %}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'account/css/signUp.css' %}" />
+    <link rel="icon" href="{% static 'account/assets/logo.png' %}">
+    <meta name="theme-color" content="#2a323f" />
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:700" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+
+
+        <div class="signUp-logo">
+            <img src="{% static 'account/assets/logo%20bm%20normal.png' %}" alt="">
+            <h1>Blissed Maths</h1>
+        </div>
+        <h3 class="register-msg">Login to continue to Blissed Maths</h3>
+        <div class="signUp-body">
+
+
+
+            <form method="post" class="normalForm">
+                {% csrf_token %}
+
+                <div class="inputNum">
+                    <div class="inputNum-a">
+                        <label for="inputPhone">Phone Number</label>
+                        <input type="tel" pattern="[0-9]*" inputmode="numeric" name="phone" id="inputPhone" maxlength="10">
+                    </div>
+                    <div class="inputNum-msg">
+
+                    </div>
                 </div>
-                <h3 class="register-msg">Login to continue to Blissed Maths</h3>
-                <div class="signUp-body">
-        
-        
-        
-                    <form method="post" class="normalForm">
-                           {% csrf_token %}
-        
-                        <div class="inputNum">
-                            <div class="inputNum-a">
-                                <label for="inputPhone">Phone Number</label>
-                                <input type="number" pattern="[0-9]*" inputmode="numeric" name="phone" id="inputPhone"
-                                    maxlength="10">
-                            </div>
-                            <div class="inputNum-msg">
-                                <p>This is error message</p>
-                            </div>
-                        </div>
-                        <div class="inputNum">
-                            <div class="inputNum-a">
-                                <label for="inputPin">Pin</label>
-                                <input type="password"   name="password"     inputmode="numeric" name="Pin" id="inputPin" maxlength="12">
-                            </div>
-                            <div class="inputNum-msg">
-                                <p>This is error message</p>
-                            </div>
-                        </div>
-                        <button type="submit" class="submit">
-                            Login
-                        </button>
-                    </form>
-        
-        
-        
-        
+                <div class="inputNum">
+                    <div class="inputNum-a">
+                        <label for="inputPin">Pin</label>
+                        <input type="password" name="password" pattern="[0-9]*" inputmode="numeric" name="Pin" id="inputPin"
+                            style="    -webkit-text-security: disc;
+                        letter-spacing: 13px;height: 30px;
+                        font-size: 48px;"
+                            maxlength="12">
+                    </div>
+                    <div class="inputNum-msg">
+
+                    </div>
                 </div>
-            </div>
-        
-            <script src="/static/account/js/signUp.js"></script>
-            <a href="/myaccount/password-reset/">Forgot Password?</a>
-        </body>
-        
-        </html>
+                <div class="forgotPasswordBtn">
+                    <a href="/myaccount/password-reset/">Forgot Password?</a>
+                </div>
+                <button type='submit' class="submit">
+                    Login
+                </button>
+            </form>
+
+
+
+
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,23 +1,70 @@
-<html>
-    <head>
-        <title> initial response collection</title>
-    </head>
-    <body>
-        <h5>Enter your proficiency in the following chapters so that we can assess you better</h4>
-        <form action="" method="post" role="form" enctype="multipart/form-data">
+{% extends 'chapters/base.html' %}
+{% block content %}
+
+{% load static %}
+<link rel="stylesheet" type="text/css" media="screen" href="{% static 'userstates/css/initialResponse.css' %}" />
+<div class="initialResponse">
+
+
+    <h5>Enter your proficiency in the following chapters so that we can assess you better</h4>
+        <form class="normalForm" action="" method="post" role="form" enctype="multipart/form-data">
             {% csrf_token %}
             {% for chapter in chapters %}
+            <div class="inputOptions">
                 <label for="level-of-{{ chapter.id }}">{{ chapter.title }} proficeny</label>
-                <select id="level-of-{{ chapter.id }}" name="level-of-{{ chapter.id }}">
-                    <option value="beginer">Beginer</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                    <option value="dont know">Dont Know</option>
-                </select><br><br>
-               
-
-            {% endfor %}<br>
-            <input type="submit" role="button" value="Submit" id="initial-response-submit">
+                <input type="text" class="inputText-response" value="" id="level-of-{{ chapter.id }}" name="level-of-{{ chapter.id }}">
+                <div>
+                    <button type="button" onclick="setOption('beginer','level-of-{{ chapter.id }}','a')" id="level-of-{{ chapter.id }}-a">Beginner</button>
+                    <button type="button" onclick="setOption('intermediate','level-of-{{ chapter.id }}','b')" id="level-of-{{ chapter.id }}-b">Intermediate</button>
+                    <button type="button" onclick="setOption('advanced','level-of-{{ chapter.id }}','c')" id="level-of-{{ chapter.id }}-c">Advanced</button>
+                    <button type="button" onclick="setOption('dont know','level-of-{{ chapter.id }}','d')" id="level-of-{{ chapter.id }}-d">Dont
+                        know</button>
+                </div>
+                <div class="optionError" id="level-of-{{ chapter.id }}-optionError"></div>
+            </div>
+            {% endfor %}
+            <button type="button" class="submit" onclick="submitForm()" value="Submit" id="initial-response-submit">Submit</button>
         </form>
-        </body>
-</html>
+        <script>
+            function setOption(value, btnId, type) {
+                console.log('called', document.getElementById(`${btnId}-${type}`))
+                document.getElementById(`${btnId}-a`).classList.remove('optionActive-yellow')
+                document.getElementById(`${btnId}-b`).classList.remove('optionActive-blue')
+                document.getElementById(`${btnId}-c`).classList.remove('optionActive-dark')
+                document.getElementById(`${btnId}-d`).classList.remove('optionActive-red')
+                document.getElementById(btnId).value = value;
+                if (type === 'a') {
+                    document.getElementById(`${btnId}-${type}`).classList.add('optionActive-yellow')
+                } else if (type === 'b') {
+                    document.getElementById(`${btnId}-${type}`).classList.add('optionActive-blue')
+
+                } else if (type === 'c') {
+                    document.getElementById(`${btnId}-${type}`).classList.add('optionActive-dark')
+
+                }
+                else {
+                    document.getElementById(`${btnId}-${type}`).classList.add('optionActive-red')
+
+                }
+            }
+            function submitForm() {
+                let inputFields = document.querySelectorAll('.inputText-response');
+                let fieldEmpty = false;
+                inputFields.forEach(field => {
+                    if (field.value.length === 0) {
+                        fieldEmpty = true;
+                        document.querySelector(`#${field.id}-optionError`).innerHTML = `<p>Choose one appropriate field</p>`
+                    } else {
+                        document.querySelector(`#${field.id}-optionError`).innerHTML = ``
+
+                    }
+                })
+                if (fieldEmpty === false) {
+                    document.querySelector
+                    document.querySelector('.normalForm').submit()
+                }
+            }
+        </script>
+</div>
+
+{% endblock %}
