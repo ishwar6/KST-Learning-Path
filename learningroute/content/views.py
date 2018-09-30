@@ -43,18 +43,31 @@ def change_chapter(request):
 
 # to get current chapter and to save it in completedchapter
             state               = student_state.state.id
+           
+
+    
             current_topic       = State.objects.filter(pk = state).first().topic
             current_chapter_pk  = Topic.objects.filter(title = current_topic).first().chapter.id
             current_chapter     = Chapter.objects.filter(pk = current_chapter_pk).first()
             temp_active_node    = TempActiveNode.objects.filter(user = user)
+
+
+                # to access practice chapter from userstates nodes
+
             practice_chapter    = PracticeChapter.objects.filter(user = user)
             chapters            = Chapter.objects.filter(standard = standard) 
             comp_chapters       = CompletedChapter.objects.filter(user = user)
+
+
+
 
             list_of_chapters_incomp    = []
             list_of_chapters_to_practice = []
             list_of_chapters_done        = []
             list_of_other_chapter        = []
+            list_of_current = []
+            list_of_current.append(current_chapter)
+           # dict_incomplete_chapter = {}
 
             for p in practice_chapter:
                 list_of_chapters_to_practice.append(p.chapter)
@@ -66,37 +79,28 @@ def change_chapter(request):
                     list_of_chapters_done.append(c.chapter)
                 else:
                     list_of_chapters_incomp.append(c.chapter)
+                  #  dict_incomplete_chapter[c.chapter] = c.node
 
 
             for t in temp_active_node:
                 list_of_other_chapter.append(t.chapter)
 
 
-            a = list(set(list_of_other_chapter) - set(list_of_chapters_done) - set(list_of_chapters_incomp) - set(list_of_chapters_to_practice) )
+            a = list(set(list_of_other_chapter) - set(list_of_chapters_done) - set(list_of_chapters_incomp) - set(list_of_chapters_to_practice) -set(list_of_current) )
 
            
 
 
             context  = {
-   
 
                 'completed_chapters' : list_of_chapters_done,
                 'incomplete_chapters': list_of_chapters_incomp,
                 'practice_chapters'  : list_of_chapters_to_practice,
                 'left_chapters'      : a,
                 'current_chapter'    : current_chapter,
+      
+              
             }
-
-
-
-
-
-
-
-# save this in completed state model if completed
-
-
-
 
             return render(request, 'content/chapter.html', context )
 
@@ -104,6 +108,176 @@ def change_chapter(request):
 
 
             
+def switch_chapter(request, id = None, s=0):
+    print('In switch chapter function')
+    id = int(id)
+    s = int(s)
+    print(id, s)
+    # if s=0 it is new chapter, it is 1 if it is incomplete, 2 if it is in practice
+    # for new (s=0) jump to outer fringe of user temp node else be in very same node ( if s= 1 or 2)
+
+    user = request.user 
+    chapter = Chapter.objects.filter(id=id).first()
+    if user.is_authenticated and id is not None:
+        active_node             = CurrentActiveNode.objects.filter(user = user)
+        if active_node.exists():
+            active_node         = active_node.first()
+            active_node         = active_node.node
+        else:
+            active_node = None
+        student_state_          = CurrentActiveState.objects.filter(user= user)
+        if student_state_.exists():
+            standard            = user.standard
+            student_state       = student_state_.first()
+        else:
+            student_state = None
+
+
+        if s==0:
+            
+            # jump to outer fringe of temp node
+            temp_node     = TempActiveNode.objects.filter( Q(user = user) & Q(chapter = chapter) ).first()
+            if temp_node.dont_know_switch ==1:
+                # if he don't know the chapter assign the very first state else go to outer fringe
+                
+                fav_state, fav_node = u.first_state_and_node(chapter)
+                chapter_save(request, id, 0, fav_node)
+                change_previous_state(request, student_state)
+                change_active_state(request, fav_state, fav_node , student_state, active_node)
+                return redirect('content:active')
+
+            else:
+                # if student knows something then goto tempstate directly as it is brand new chapter
+
+                fav_node  = temp_node.node
+                fav_state = fav_node.state_node.all().first()
+                chapter_save(request, id, 0, fav_node)
+                change_previous_state(request, student_state)
+                change_active_state(request, fav_state, fav_node , student_state, active_node)
+
+                print(fav_state)
+                print('this is new')
+                return redirect('content:active')
+
+        if s==1:
+            # now be in very same node
+            incomp_chapter = CompletedChapter.objects.filter( Q(user = user) & Q(chapter = chapter) ).first()
+            fav_node       = incomp_chapter.node
+            fav_state = fav_node.state_node.all().first()
+            chapter_save(request, id, 0, fav_node)
+            change_previous_state(request, student_state)
+            change_active_state(request, fav_state, fav_node , student_state, active_node)
+            return redirect('content:active')
+
+     
+
+
+
+        
+
+def chapter_save(request, id, s = 0,  fav_node=None):
+    '''To save chapter in incomplete state. If s is 1 then done is true. '''
+    user    = request.user
+    chapter = Chapter.objects.filter(id = id).first()
+    old_save = CompletedChapter.objects.filter( Q(user = user) & Q(chapter = chapter) )
+    if old_save.exists():
+        old_save.first().delete()
+    
+    if s==0:
+        CompletedChapter.objects.create(
+            user = user,
+            chapter = chapter,
+            node = fav_node
+
+        )
+    else:
+        CompletedChapter.objects.create(
+            user = user,
+            chapter = chapter,
+     
+            done = 1
+
+        )
+    print('Incomplete chapter added', chapter)
+    return True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def change_previous_state(request, student_state, score = 0):
+    '''It takes student_state instance and delete previous state if any,
+         for this state and creates a new previous state with
+            updated score and illustration points     '''
+
+
+    user = request.user
+    if_old = PreviousState.objects.filter(Q(user = user) & Q(state = student_state.state))
+
+    if if_old.exists():
+        if_old = if_old.first()
+        score_of_i_old = if_old.score_of_i
+        score_of_q_old = if_old.score_of_q
+        if_old.delete()
+    else:
+        score_of_i_old = 0
+        score_of_q_old = 0
+
+    PreviousState.objects.create(
+        user            = user,
+        state           = student_state.state,
+        score           = score,
+        score_of_i      = student_state.score_of_i + score_of_i_old,
+        score_of_q      = student_state.score_of_q + score_of_q_old, 
+
+    )
+    print('Previous state updated')
+    return True
+
+        
+def change_active_state(request, fav_state, fav_node, student_state = None ,   active_node = None):
+    '''It takes current active node, to make it previous active node. It takes
+    fav node  and fav_state to create a new active node and active state. It deletes previous student_state also. '''
+
+    user = request.user
+    with transaction.atomic():
+        if active_node is not None:
+
+            PreviousActiveNode.objects.create(  
+                user = user,
+                node = active_node
+            )
+        if student_state is not None:
+            student_state.delete()
+
+        current_active_node = CurrentActiveNode.objects.filter(user = user)
+
+
+        if current_active_node.exists():
+            current_active_node.first().delete()
+
+
+        CurrentActiveNode.objects.create(
+            user = user,
+            node = fav_node
+        )
+        print('current state and nodes activated and updated')
+       
+        CurrentActiveState.objects.create(
+            user = user,
+            state = fav_state,
+                )
+        
+    return True
 
 
           
@@ -188,9 +362,11 @@ def assignstate(request, id, s):
                             continue
                 if fav_node is None:
                     fav_node = active_node
-                with transaction.atomic():
 
-                    PreviousActiveNode.objects.create(
+
+
+                with transaction.atomic():
+                    PreviousActiveNode.objects.create(  
                         user = user,
                         node = active_node
                     )
@@ -208,6 +384,16 @@ def assignstate(request, id, s):
 
             if s == 1:
                 forward = u.outer_fringe(active_node)
+                chapter_id   = student_state.state.topic.chapter.id
+                
+               
+
+                if len(forward) == 0:
+                    chapter_save(request, chapter_id, 1, None)
+
+                    print('outer fringe empty for this chapter')
+                    return redirect('content:details-chapter')
+
                 new_state = State.objects.filter(id = id).first()
 
                 for node in forward:

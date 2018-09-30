@@ -9,7 +9,8 @@ from .views import               (
                                   assignstate,
                                   problem,
                                   dashboard,
-                                  change_chapter
+                                  change_chapter,
+                                  switch_chapter
                                 )
 
 
@@ -28,7 +29,8 @@ urlpatterns= [
 
 
 
-    url(r'^change/chapter/$', change_chapter,  name='change-chapter'),
+    url(r'^details/chapter/$', change_chapter,  name='details-chapter'),
+    url(r'^switch/udfhsdufihsdfhksifu/sdfsdfjhksdjfh/chapter/(?P<id>[0-9]+)/(?P<s>[0-9]+)$', switch_chapter,  name='switch-chapter'),
     url(r'^go/$', dashboard,  name='dashboard'),
 
 

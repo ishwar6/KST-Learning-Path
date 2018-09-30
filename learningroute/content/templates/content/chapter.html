@@ -1,40 +1,65 @@
 
+{{d}}
+
+<h1>Switch Your Chapters</h1>
 
 
 
 
+            All Chapters:        {{left_chapters}}<br><br>
+            Incomplete:    {{incomplete_chapters}}<br><br><br>
+
+            To practice:     {{practice_chapters}}<br><br>
             Completed:    {{completed_chapters}} <br><br><br>
 
 
-
-            incomplete:    {{incomplete_chapters}}<br><br>
-           To practice:     {{practice_chapters}}<br><br><br>
-         All Chapters:        {{left_chapters}}<br><br><br>
-
+       
             Current Active Chapter:                {{current_chapter}}<br>
 
 
 <hr>
 <br>
 
+<h3>Begin with a brand new chapter</h3>
 
 
 
             {%  for comp in left_chapters %}
 
+                <form method="post" action="{% url 'content:switch-chapter' comp.id 0 %}"> 
+                    {% csrf_token %}
+                    
+                        {{comp}}  
+                        <input type='submit' value = 'start learning' >
 
-                {{comp.chapter}}  <br>  
-                {{comp.node.state_node.all}}
+                </form>
 
-
-                                {% for a in comp.node.state_node.all  %}
-
-                                       States : {{a.title}} <br>
-
-
-                                {% endfor %}<br>
-
+                <br>
+            
              {% endfor %}
+
+
+
+
+
+
+
+<h3>Start again your incomplete chapters</h3>
+
+
+
+            {%  for comp in incomplete_chapters %}
+
+            <form method="post" action="{% url 'content:switch-chapter' comp.id 1 %}"> 
+                    {% csrf_token %}
+                    {{comp}}  
+                 <input type='submit' value = 'start learning' >
+
+            </form>
+
+            <br>
+          
+         {% endfor %}
 
 
 
