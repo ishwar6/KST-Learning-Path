@@ -4,13 +4,11 @@
 <p>Select which chapter you want to learn</p>
 
 
-{{chapters}}<br>
 
-{{node}}
 
 {% for c, value in old.items %}
 
-{{c}} - {{value}} 
+{{c}} -- with the state --> {{value}} 
 {% for ch, nod in  node.items %}
 
 {% if ch == c %}
@@ -48,7 +46,7 @@
 
 {% for c, value in new.items %}
 
-{{c}} - {{value}} 
+{{c}} -- with the state --> {{value}} 
 {% if value %}
 
 <form action="{% url 'assess:assign' %}" method="POST">

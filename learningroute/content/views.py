@@ -33,75 +33,51 @@ from content.models import (    Content,
 
 
 def change_chapter(request):
+    '''It returns chapter report of a student'''
     user = request.user
     if user.is_authenticated:
         student_state_          = CurrentActiveState.objects.filter(user= user)
         if student_state_.exists():
             standard            = user.standard
             student_state       = student_state_.first()
-
-
 # to get current chapter and to save it in completedchapter
             state               = student_state.state.id
-           
-
-    
             current_topic       = State.objects.filter(pk = state).first().topic
             current_chapter_pk  = Topic.objects.filter(title = current_topic).first().chapter.id
             current_chapter     = Chapter.objects.filter(pk = current_chapter_pk).first()
             temp_active_node    = TempActiveNode.objects.filter(user = user)
-
-
                 # to access practice chapter from userstates nodes
 
-            practice_chapter    = PracticeChapter.objects.filter(user = user)
-            chapters            = Chapter.objects.filter(standard = standard) 
-            comp_chapters       = CompletedChapter.objects.filter(user = user)
-
-
-
-
-            list_of_chapters_incomp    = []
+            practice_chapter             = PracticeChapter.objects.filter(user = user)
+            chapters                     = Chapter.objects.filter(standard = standard) 
+            comp_chapters                = CompletedChapter.objects.filter(user = user)
+            list_of_chapters_incomp      = []
             list_of_chapters_to_practice = []
             list_of_chapters_done        = []
             list_of_other_chapter        = []
-            list_of_current = []
+            list_of_current              = []
             list_of_current.append(current_chapter)
            # dict_incomplete_chapter = {}
 
             for p in practice_chapter:
                 list_of_chapters_to_practice.append(p.chapter)
-
-            
-
             for c in comp_chapters:
                 if c.node is None and c.done==1:
                     list_of_chapters_done.append(c.chapter)
                 else:
                     list_of_chapters_incomp.append(c.chapter)
                   #  dict_incomplete_chapter[c.chapter] = c.node
-
-
             for t in temp_active_node:
                 list_of_other_chapter.append(t.chapter)
-
-
             a = list(set(list_of_other_chapter) - set(list_of_chapters_done) - set(list_of_chapters_incomp) - set(list_of_chapters_to_practice) -set(list_of_current) )
-
-           
-
-
             context  = {
 
                 'completed_chapters' : list_of_chapters_done,
                 'incomplete_chapters': list_of_chapters_incomp,
                 'practice_chapters'  : list_of_chapters_to_practice,
                 'left_chapters'      : a,
-                'current_chapter'    : current_chapter,
-      
-              
+                'current_chapter'    : current_chapter, 
             }
-
             return render(request, 'content/chapter.html', context )
 
 
@@ -595,7 +571,16 @@ def show_questions(request):
                 number_of_questions     = len(questions_to_render)
                 if number_of_questions == 0:
                     print('No question found for this state in datebase')
-                    return redirect('content:problem')
+                    previous_state = PreviousState.objects.filter(Q(user = user) & Q(state = state))
+                    if previous_state.exists():
+                        previous_state              = previous_state.first()
+                        previous_state.score_of_q   = 0 
+                        previous_state.save()
+                        return redirect('content:active')
+
+
+
+                   
                 current_question        = questions_to_render[0]
                 questions_to_render     = questions_to_render[ 1::1]
 

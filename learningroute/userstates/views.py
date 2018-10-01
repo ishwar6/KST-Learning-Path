@@ -136,20 +136,49 @@ def number_optimum(num):
 
 
 
+def change_temp_state(request, chapter, new_node ):
+	''' It takes chapter for which new_node is to be updated in TempActiveNode
+	 for a particular request.user'''
+
+	user          = request.user
+	previous_node = TempActiveNode.objects.filter( Q(user = user) & Q(chapter = chapter))
+	if previous_node.exists():
+		print('deleting previous node incorrect')
+		previous_node.delete()
+	
+
+
+	TempActiveNode.objects.create(
+		user 	= user,
+		chapter = chapter_for_assessment[0],
+		node 	= new_node
+		)
+	print('new node created for chapter')
+
+	return True
+
+
+
+
 def first_assessment(request):
 	user = request.user
 	global correct, incorrect, question_to_render, current_question, temp_states
+	global number_of_question 
+	number_of_question = 0
 	#context = {}
 	global chapter_for_assessment 
 
 	if user.is_authenticated:
 		if request.method == 'GET':
 			standard       = user.standard
+
 			student_state_ = UserState.objects.filter(user = user)
 			if student_state_.exists():
 				student_state = student_state_.first()
 				if student_state.active_part!=1:
 					return redirect('assess:active')
+
+
 			correct = incorrect = 0
 			temp_states = TempActiveNode.objects.filter(user = user)
 			chapters    = Chapter.objects.filter(standard = standard)
@@ -157,25 +186,27 @@ def first_assessment(request):
 
 			for c in chapters:
 				temp_state = temp_states.filter(chapter = c)
-				print(temp_state)
+				print('this state is - -- - ', temp_state, 'for chapter - - - - ', c)
 				if temp_state.exists():
 					dont_know = temp_state.first().dont_know_switch
 					node      = temp_state.first().node
 					if dont_know is True or node is None :
+						print('Dont know chapter, move to next chapter')
 						continue
 					else:
 						chapter_for_assessment.append(c)
 			a = 1
-			print(chapter_for_assessment)
+			print('all list of chapter_for_assessment are', chapter_for_assessment)
 			
 			while( len(chapter_for_assessment) != 0 ):
-				print('chapter here is ', a)
+				print('assessment chapter here is ', a)
 				chapter_for_assessment = random.sample(chapter_for_assessment, len(chapter_for_assessment))  
 				question, current_node             = choose_question(request, temp_states, chapter_for_assessment, 1)
 				a = a+1
 				print('This question is', question)
 
 				if question is None:
+					print('question was none, shorting the list by one')
 					if len(chapter_for_assessment)==0:
 						break
 					else:
@@ -185,8 +216,8 @@ def first_assessment(request):
 					
 					
 				
-			chapter_for_assessment = chapter_for_assessment
-			print( 'chapter of assessment here in get is',  chapter_for_assessment)
+
+			print( 'very FIRST chapter of assessment here in get is',  chapter_for_assessment)
 			current_question = question.last()
 			
 
@@ -196,6 +227,7 @@ def first_assessment(request):
 			return render(request, 'userstates/assement_ques.html', context)
 
 		if request.method == 'POST':
+			number_of_question = number_of_question + 1
 			print('current_question is', current_question)
 			print('here chapter of assessment',  chapter_for_assessment)
 			op1 = op2 =  op3 =  op4 = 0
@@ -239,74 +271,59 @@ def first_assessment(request):
 				
 
 			if correct_answer_submission==1:
+				print('here number of question is', number_of_question)
+				
 				correct = correct + 1
 				this_q = 1
 				message = ' Correct Answer, Nice!! '
 				(question, current_node) = choose_question(request, temp_states, chapter_for_assessment, 1)
-				print('this time node is', current_node)
+				if question is None or number_of_question > 5:
+					print('this time node is', current_node)
 
-				if len(chapter_for_assessment) == 0:
-						print("Quiz ends")
-						student_state_ = UserState.objects.filter(user = user)
-						if student_state_.exists():
-							student_state = student_state_.first()
-							student_state.active_part = 2
-							student_state.save()
-						return JsonResponse({'empty' : True})
+					if len(chapter_for_assessment) == 0:
+							print("Quiz ends")
+							student_state_ = UserState.objects.filter(user = user)
+							if student_state_.exists():
+								student_state = student_state_.first()
+								student_state.active_part = 2
+								student_state.save()
+							return JsonResponse({'empty' : True})
+					change_temp_state(request, chapter_for_assessment[0], current_node)
+					number_of_question  = 0
 
-				previous_node = TempActiveNode.objects.filter( Q(user = user) & Q(chapter = chapter_for_assessment[0]))
-				if previous_node.exists():
-					previous_node.delete()
-					print('deleting previous node')
-				print(current_node)
-				current_node = current_node[0]
-					
-			
-				TempActiveNode.objects.create(
-					user = user,
-					chapter = chapter_for_assessment[0],
-					node = current_node
-				)
-				print('New node created for', chapter_for_assessment[0])
-				# assessment for this chapter is done: Move to next chapter
-				print('This was correct, no outer fringe, moving to next chapter')
-				chapter_for_assessment = chapter_for_assessment[1::1]
-				(question, current_node) = choose_question(request, temp_states, chapter_for_assessment, 1)
+					print('New node created for', chapter_for_assessment[0])
+					# assessment for this chapter is done: Move to next chapter
+					print('This was correct, no outer fringe, moving to next chapter')
+					chapter_for_assessment = chapter_for_assessment[1::1]
+					(question, current_node) = choose_question(request, temp_states, chapter_for_assessment, 1)
 				
 
 			else:
 				incorrect  = incorrect + 1
+				print('here number of question is', number_of_question)
+				
 				this_q = 0
 				(question, current_node)= choose_question(request, temp_states, chapter_for_assessment, 0)
-				if question is None:
-					previous_node = TempActiveNode.objects.filter( Q(user = user) & Q(chapter = chapter_for_assessment[0]))
-					if previous_node.exists():
-						print('deleting previous node incorrect')
-						previous_node.delete()
-					current_node = current_node
-					print(current_node)
+				if question is None or number_of_question > 5: 
 
-
-					TempActiveNode.objects.create(
-						user 	= user,
-						chapter = chapter_for_assessment[0],
-						node 	= current_node
-						)
+					change_temp_state(request, chapter_for_assessment[0], current_node)
 					print('new node created for chapter')
 
 
 					# create a temp state
 					if len(chapter_for_assessment) == 0:
 						print("Quiz ends")
-						student_state_ = UserState.objects.filter(user = user)
+						student_state_ 					= UserState.objects.filter(user = user)
 						if student_state_.exists():
-							student_state = student_state_.first()
-							student_state.active_part = 2
+							student_state 				= student_state_.first()
+							student_state.active_part 	= 2
 							student_state.save()
 								
 						return JsonResponse({'empty' : True})
 					# assessment for this chapter is done: Move to next chapter
 					print('This was incorrect, moving to next chapter')
+					number_of_question = 0
+					print('here number of question is', number_of_question)
 					chapter_for_assessment = chapter_for_assessment[1::1]
 					(question, current_node) = choose_question(request, temp_states, chapter_for_assessment, 1)
 
@@ -316,10 +333,10 @@ def first_assessment(request):
 				# if new chapter do not have any question
 				if len(chapter_for_assessment) == 0:
 						print("Quiz ends")
-						student_state_ = UserState.objects.filter(user = user)
+						student_state_ 					= UserState.objects.filter(user = user)
 						if student_state_.exists():
-							student_state = student_state_.first()
-							student_state.active_part = 2
+							student_state 				= student_state_.first()
+							student_state.active_part 	= 2
 							student_state.save()
 						return JsonResponse({'empty' : True})
 					# assessment for this chapter is done: Move to next chapter
@@ -329,20 +346,20 @@ def first_assessment(request):
 
 				if question is None:
 					print('Add more question please')
-					student_state_ = UserState.objects.filter(user = user)
+					student_state_ 						= UserState.objects.filter(user = user)
 					if student_state_.exists():
-							student_state = student_state_.first()
-							student_state.active_part = 2
+							student_state 				= student_state_.first()
+							student_state.active_part 	= 2
 							student_state.save()
 					return JsonResponse({'empty' : True})
 
 
 
 			print('question  here is', question)
-			pk = question.last().pk
-			question_ = Question.objects.filter(pk = pk)
-			current_question = question_.first()
-			question  = question_.values()
+			pk 					= question.last().pk
+			question_ 			= Question.objects.filter(pk = pk)
+			current_question 	= question_.first()
+			question  			= question_.values()
 
 
 		
@@ -351,7 +368,6 @@ def first_assessment(request):
 			json_context = {
 				'question_image' : list(question),
 				'empty'          : False
-
 			}
 			
 
@@ -376,11 +392,13 @@ def choose_question(request, temp_states, chapter_for_assessment, next):
 		present_node         = utility_kst.outer_fringe(temp_node)
 		print(outer_fringe_state)
 		if len(outer_fringe_state) == 0:
-			print('do something if no outer fringe is there')
+			print('do something as no outer fringe is here for node', temp_node)
 
 			return None, temp_node
 		else:
 			state_to_ask     = outer_fringe_state[0]
+			change_temp_state(request, chapter, present_node[0])
+			print('this has changed the temp node outer fringe to', present_node, outer_fringe_state)
 			print('state to ask :', state_to_ask)
 			questions        = Question.objects.filter(state = state_to_ask)
 			print(questions)
@@ -394,11 +412,16 @@ def choose_question(request, temp_states, chapter_for_assessment, next):
 		present_node         = utility_kst.inner_fringe(temp_node)
 		print(outer_fringe_state)
 		if len(outer_fringe_state) == 0:
-			print('do something if no inner fringe is there')
+			print('do something as no inner fringe is here for node', temp_node)
 			return None, temp_node
 		else:
+			print('current node is', temp_node)
+			print('')
+			print('inner fringe here is', outer_fringe_state)
 			state_to_ask     = outer_fringe_state[0]
 			questions        = Question.objects.filter(state = state_to_ask)
+			change_temp_state(request, chapter, present_node[0])
+			print('this has changed the temp node to', present_node, outer_fringe_state)
 			if questions.exists():
 				return questions, present_node
 			else:
