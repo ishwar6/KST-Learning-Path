@@ -81,6 +81,40 @@ def change_chapter(request):
             return render(request, 'content/chapter.html', context )
 
 
+# import Checksum
+# import requests
+# import base64
+# import json
+
+
+# def change_chapter(request):
+#         MERCHANT_KEY = '1ZcaXo_Ih2zGM1@@';
+#         data_dict = {
+#         'MID':'HOMETA49432079784489',
+#         'ORDER_ID':'dddgfgfjhjgjwerr324235523dsfeeed',
+#         # 'TXN_AMOUNT':'1.00',
+#         # 'CUST_ID':'iisudrj26@gmail.com',
+#         # 'INDUSTRY_TYPE_ID':'Retail',
+#         # 'WEBSITE':'WEBSTAGING',
+#         # 'CHANNEL_ID':'WEB',
+#         #'CALLBACK_URL':'http://localhost/pythonKit/response.cgi',
+#         }
+
+
+#         param_dict = data_dict 
+#         param_dict['CHECKSUMHASH'] =Checksum.generate_checksum(data_dict, MERCHANT_KEY)
+
+#         context = {
+#             'data' : param_dict
+#         }
+
+     
+
+#         return render(request, 'content/chapter.html', context )
+
+
+
+
 
 
             

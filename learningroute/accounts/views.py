@@ -35,10 +35,12 @@ class LoginView(FormView):
     success_url = reverse_lazy('account:profile')
     template_name = 'account/login.html'
 
-    def get(self, request, *args, **kwargs):
+    def dispatch(self, *args, **kwargs):
         if self.request.user.is_authenticated:
-            return redirect('account:profile')
-        return super(LoginView, self).get(request, *args, **kwargs)
+            return redirect('assess:initial-assess')
+        return super().dispatch(*args, **kwargs)
+
+
 
     def form_valid(self, form):
         request = self.request
