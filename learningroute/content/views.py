@@ -883,6 +883,20 @@ def report(request):
 
     
        
+def previous_content(request):
+    user = request.user
+    if user.is_authenticated:
+        active_node = CurrentActiveNode.objects.filter(user = user)
+        for node in active_node:
+            a = node.node
+
+        for state in a.state_node.all():
+            print(state.title, state.topic)
+
+    return True
+
+       
+       
 
 		
 

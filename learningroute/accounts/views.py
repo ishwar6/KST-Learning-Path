@@ -19,7 +19,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from rest_framework import viewsets, response, permissions
 from django.views.decorators.csrf import csrf_exempt
-
+from .models import OTP
 from profiles.models import LoginDetail
 
 def logout_view(request):
@@ -83,12 +83,20 @@ class LoginView(FormView):
 def send_otp(request):
     if request.user.is_authenticated:
         return redirect('account:profile')
+    
     if request.method == 'POST':
+        token = 0
+        phone = request.session.get('phone', '6666')
+        otp_given_ = OTP.objects.filter(phone = phone)
+        print(otp_given_)
+        if otp_given_.exists():
+            otp_given = otp_given_.first()
+            token     = otp_given.match 
+        print(token)
         form = TempRegisterForm(request.POST or None)
         if form.is_valid():
-            token = request.session.get('token', None)
-            if token:
-                messages.error(request, 'Please set password for this account')
+            if token == 1:
+                print('here token is 0ne')
                 return redirect('account:set-password')
         else:
             return redirect('account:register')
@@ -119,40 +127,62 @@ def validate_phone(request):
 def send_activation(request, phone):
     phone = request.session.get('phone', '6666')
     key = random.randint(1, 999999)
+    previous = OTP.objects.filter(phone = phone)
+    if previous.exists():
+        previous.first.delete()
+
+    OTP.objects.create(
+        phone = phone,
+        otp = key
+    )
+    print('step 1')
     request.session['key'] = key
     phone = str(phone)
     key = str(key)
-    link = 'https://2factor.in/API/R1/?module=TRANS_SMS&apikey=26183928-e9fe-11e7-a328-0200cd936042&to=' + \
-        phone+'&from=HTadka&templatename=Firstlogin&var1='+key
-    print(link)
-    result = requests.get(link)
-    end = len(result.text)
-    return result.ok
+    # link = 'https://2factor.in/API/R1/?module=TRANS_SMS&apikey=26183928-e9fe-11e7-a328-0200cd936042&to=' + \
+    #     phone+'&from=HTadka&templatename=Firstlogin&var1='+key
+    print(key)
+    # result = requests.get(link)
+    # end = len(result.text)
+    # return result.ok
+    return True
+
 
 
 def validate_otp(request):
+    phone = request.session.get('phone', '6666')
     otp = int(request.GET.get('otp', None))
-    otp_given = int(request.session.get('key', '6666'))
+    otp_given_ = OTP.objects.filter(phone = phone)
+    if otp_given_.exists():
+        otp_given = otp_given_.first().otp
+
     data = {
         'matches': False
     }
-    request.session['token'] = False
     if otp == otp_given:
-        request.session['token'] = True
+        otp_given_ = OTP.objects.filter(phone = phone)
+        if otp_given_.exists():
+            otp_given = otp_given_.first()
+            otp_given.match = 1
+            otp_given.save()
+            print('saved 2', otp_given)
         data = {
             'matches': True
         }
     if not data['matches']:
         data['error_message'] = 'This otp is not valid.',
     print(data)
-    print(request.session['token'])
     return JsonResponse(data)
 
 
 def set_password(request):
-    token = request.session.get('token', None)
-    phone = request.session.get('phone', None)
-    if phone and token:
+    phone = request.session.get('phone', '6666')
+    otp_given_ = OTP.objects.filter(phone = phone)
+    if otp_given_.exists():
+            otp_given = otp_given_.first()
+            token     = otp_given.match 
+    print(token)
+    if token == 1:
         if request.method == 'POST':
             form = SetPasswordForm(request.POST or None)
             if form.is_valid():
@@ -163,6 +193,12 @@ def set_password(request):
                     return redirect('account:set-password')
                 else:
                     User.objects.create_user(phone, password)
+                    
+                    otp_given_ = OTP.objects.filter(phone = phone)
+                    if otp_given_.exists():
+                        otp_given = otp_given_.first().delete()
+            
+
                     user = authenticate(
                         request, username=phone, password=password)
                     if user is not None:
