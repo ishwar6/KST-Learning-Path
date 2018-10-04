@@ -11,13 +11,15 @@ logout_view,
     validate_otp_reset,
     validate_phone_reset,
     reset_password,
+    register_new,
     # TempRegisterView
 )
 
 app_name = 'account'
 urlpatterns = [
 
-    url(r'^register/$', send_otp, name='register'),
+    url(r'^register/$', register_new, name='register'),
+    url(r'^register/ajax/$', send_otp, name='check-otp'),
     url(r'^logout/$', logout_view, name='logout'),
     url(r'^password-reset/$', send_otp_password_reset, name='password-reset'),
     url(r'^profile/$', profile, name='profile'),

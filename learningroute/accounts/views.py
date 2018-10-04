@@ -82,17 +82,32 @@ def send_otp(request):
     if request.user.is_authenticated:
         return redirect('account:profile')
     if request.method == 'POST':
+        print('in post send')
         form = TempRegisterForm(request.POST or None)
         if form.is_valid():
-            token = request.session.get('token', None)
+            print('This is some')
+            token = request.session.get('token', False)
             if token:
-                messages.error(request, 'Please set password for this account')
-                return redirect('account:set-password')
+                print('here in this case')
+                return redirect('account:set-password') 
+            else:
+                print('sdf sdf id fjfd dfjd')
+              
+                return redirect('account:register')
         else:
+            if token:
+                del request.session['token']
             return redirect('account:register')
     else:
         form = TempRegisterForm()
     return render(request, 'account/phone.html', {'form': form})
+
+def register_new(request):
+    if request.user.is_authenticated:
+        return redirect('account:profile')
+    form = TempRegisterForm()
+    return render(request, 'account/phone.html', {'form': form})
+
 
 
 
@@ -111,13 +126,14 @@ def validate_phone(request):
     else:
         request.session['phone'] = phone
         send_activation(request, phone)
-    return JsonResponse(data)
+    return redirect('account:check-otp')
 
 @csrf_exempt
 def send_activation(request, phone):
     phone = request.session.get('phone', '6666')
     key = random.randint(1, 999999)
     request.session['key'] = key
+    
     phone = str(phone)
     key = str(key)
     link = 'https://2factor.in/API/R1/?module=TRANS_SMS&apikey=26183928-e9fe-11e7-a328-0200cd936042&to=' + \
@@ -131,10 +147,11 @@ def send_activation(request, phone):
 def validate_otp(request):
     otp = int(request.GET.get('otp', None))
     otp_given = int(request.session.get('key', '6666'))
+    print(otp, otp_given)
     data = {
         'matches': False
     }
-    request.session['token'] = False
+    
     if otp == otp_given:
         request.session['token'] = True
         data = {
@@ -143,7 +160,7 @@ def validate_otp(request):
     if not data['matches']:
         data['error_message'] = 'This otp is not valid.',
     print(data)
-    print(request.session['token'])
+    print('here token value is', request.session['token'])
     return JsonResponse(data)
 
 
