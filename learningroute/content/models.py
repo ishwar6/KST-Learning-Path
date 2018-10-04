@@ -170,3 +170,14 @@ class PreviousActiveNode(models.Model):
 
 
 
+class CompletedChapter(models.Model):
+    user        = models.ForeignKey(User, on_delete=models.CASCADE)
+    chapter     = models.ForeignKey(Chapter, on_delete = models.CASCADE)
+    node        = models.ForeignKey(Node, on_delete = models.CASCADE, default = None, blank=True, null = True)
+    timedate    = models.DateTimeField(auto_now_add = True, blank = True, null = True)
+    done        = models.IntegerField(default = 0, help_text = 'it is 1 if chapter is done, else 0')
+
+
+    def __str__(self):
+        return str(self.user) + ' has completed ' + str(self.chapter)
+

@@ -24,6 +24,24 @@ def outer_fringe(node):  # gives outer fringe in consumable format
     return fringe_outer
 
 
+def first_state_and_node(chapter):
+    ''' returns first node and first state of given chapter. The very first node for student to learn if he don't
+    know anything'''
+    
+    fav_state = None
+    fav_node  = None
+    ch_nodes  = Node.objects.filter(state_node__topic__chapter = chapter).distinct()
+    for nd in ch_nodes:
+        if nd.state_node.all().count() == 1:
+            fav_node  =  nd
+            break
+    for state in fav_node.state_node.all():
+        fav_state     =  state
+        break
+    return fav_state, fav_node
+        
+
+
 
 def outer_fringe_id(node):  # gives outer fringe in consumable format
     

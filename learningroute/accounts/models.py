@@ -94,3 +94,19 @@ class User(AbstractBaseUser):
     @property
     def is_active(self):
         return self.active
+
+
+
+
+class OTP(models.Model):
+    phone = models.IntegerField(unique=True, null = False, blank = False)
+    otp   = models.IntegerField(blank = True, null = True)
+    match = models.IntegerField(default=0, help_text='IF otp matched it is one else zero')
+    count = models.IntegerField(default=0, help_text='It is number of times a user have requested for otp. MAX 4 ALLOWED')
+
+    def __str__(self):
+        return str(self.phone) + '  have an otp  ' + str(self.otp) + '  with  ' + str(self.count)
+
+
+    
+

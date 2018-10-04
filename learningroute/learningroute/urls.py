@@ -2,10 +2,11 @@ from django.urls import re_path as url, include
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import  static
-
+from accounts.views import LoginView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^$', LoginView.as_view()),
     url(r'^myaccount/', include('accounts.urls', namespace='account')),
     url(r'^states/', include('states.urls',namespace='states')),
 

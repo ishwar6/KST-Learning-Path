@@ -21,7 +21,7 @@ class TempActiveNode(models.Model):
    
 
     def __str__(self):
-        return str(self.user) + ' for the chapter ' + str(self.chapter)
+        return str(self.user) + ' for the node >> '+ str(self.node)  +' << for the chapter ' + str(self.chapter)
 
 class PracticeChapter(models.Model):
     user            = models.ForeignKey(User, on_delete=models.CASCADE, blank = True, null = True)

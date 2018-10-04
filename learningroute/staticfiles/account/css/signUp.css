@@ -113,8 +113,36 @@
   .inputNum-a input:focus {
     outline: none;
   }
+  .inputOtp {
+    font-size: 22.3px;
+    font-family: 'roboto', sans-serif;
+    margin-bottom: 5px;
+    border: none;
+    background-image: linear-gradient(
+      to left,
+      black 50%,
+      rgba(255, 255, 255, 0) 0%
+    );
+    background-position: bottom;
+    background-size: 30px 3px;
+    background-repeat: repeat-x;
+    width: 180px;
+    margin-right: auto;
+    letter-spacing: 17.7px;
+    font-weight: bold;
+  }
   .inputNum-msg {
-    display: none;
+    display: flex;
+    justify-content: center;
+  }
+  .inputNum-msg p {
+    padding: 10px;
+    border-radius: 4px;
+    background-color: rgb(170, 51, 30);
+    color: #ffffff;
+    font-size: 0.9em;
+    margin: 0px 5px;
+    font-family: 'roboto', sans-serif;
   }
   .sendOtp {
     border: none;
@@ -134,6 +162,40 @@
     color: white;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     margin: 20px 0px;
+    cursor: pointer;
+  }
+  .otpSendedPhone {
+    display: none;
+  }
+  .otpSendedPhone h4 {
+    background-color: rgb(255, 255, 235);
+    width: 300px;
+    padding: 5px;
+    border-radius: 4px;
+
+    font-size: 0.8em;
+    text-align: center;
+    color: rgb(49, 49, 49);
+    font-weight: lighter;
+    margin: 5px 0px;
+  }
+  .otpSendedPhone-a {
+    background-color: rgb(191, 214, 255);
+    width: 300px;
+    padding: 10px;
+    border-radius: 4px;
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+  .otpSendedPhone-a button {
+    border: 1px solid tomato;
+    border-radius: 100%;
+    padding: 5px;
+    background: white;
+    width: 30px;
+    height: 30px;
+    color: tomato;
     cursor: pointer;
   }
 }
@@ -184,6 +246,7 @@
   .inputNum-a {
     display: flex;
     flex-direction: column;
+    width: 300px;
   }
   .inputNum-a label {
     font-size: 1.1em;
@@ -207,7 +270,25 @@
     background-position: bottom;
     background-size: 30px 3px;
     background-repeat: repeat-x;
-    width: 300px;
+
+    letter-spacing: 17.7px;
+    font-weight: bold;
+  }
+  .inputOtp {
+    font-size: 22.3px;
+    font-family: 'roboto', sans-serif;
+    margin-bottom: 5px;
+    border: none;
+    background-image: linear-gradient(
+      to left,
+      black 50%,
+      rgba(255, 255, 255, 0) 0%
+    );
+    background-position: bottom;
+    background-size: 30px 3px;
+    background-repeat: repeat-x;
+    width: 180px;
+    margin-right: auto;
     letter-spacing: 17.7px;
     font-weight: bold;
   }
@@ -254,7 +335,17 @@
     outline: none;
   }
   .inputNum-msg {
-    display: none;
+    display: flex;
+    justify-content: center;
+  }
+  .inputNum-msg p {
+    padding: 10px;
+    border-radius: 4px;
+    background-color: rgb(170, 51, 30);
+    color: #ffffff;
+    font-size: 0.9em;
+    margin: 0px 5px;
+    font-family: 'roboto', sans-serif;
   }
   .sendOtp {
     border: none;
@@ -275,5 +366,51 @@
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     margin: 20px 0px;
     cursor: pointer;
+  }
+  .otpSendedPhone {
+    display: none;
+  }
+  .otpSendedPhone h4 {
+    background-color: rgb(255, 255, 235);
+    width: 300px;
+    padding: 5px;
+    border-radius: 4px;
+
+    font-size: 0.8em;
+    text-align: center;
+    color: rgb(49, 49, 49);
+    font-weight: lighter;
+    margin: 5px 0px;
+  }
+  .otpSendedPhone-a {
+    background-color: rgb(191, 214, 255);
+    width: 300px;
+    padding: 10px;
+    border-radius: 4px;
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+  .otpSendedPhone-a button {
+    border: 1px solid tomato;
+    border-radius: 100%;
+    padding: 5px;
+    background: white;
+    width: 30px;
+    height: 30px;
+    color: tomato;
+    cursor: pointer;
+  }
+  .forgotPasswordBtn {
+    width: 300px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .forgotPasswordBtn a {
+    text-decoration: none;
+    font-size: 0.9em;
+  }
+  .forgotPasswordBtn a:hover {
+    color: #4c70aa;
   }
 }

@@ -1,0 +1,154 @@
+
+{{d}}
+
+<h1>Switch Your Chapters</h1>
+
+
+
+
+            All Chapters:        {{left_chapters}}<br><br>
+            Incomplete:    {{incomplete_chapters}}<br><br><br>
+
+            To practice:     {{practice_chapters}}<br><br>
+            Completed:    {{completed_chapters}} <br><br><br>
+
+
+       
+            Current Active Chapter:                {{current_chapter}}<br>
+
+
+<hr>
+<br>
+
+<h3>Begin with a brand new chapter</h3>
+
+
+
+            {%  for comp in left_chapters %}
+
+                <form method="post" action="{% url 'content:switch-chapter' comp.id 0 %}"> 
+                    {% csrf_token %}
+                    
+                        {{comp}}  
+                        <input type='submit' value = 'start learning' >
+
+                </form>
+
+                <br>
+            
+             {% endfor %}
+
+
+
+
+
+
+
+<h3>Start again your incomplete chapters</h3>
+
+
+
+            {%  for comp in incomplete_chapters %}
+
+            <form method="post" action="{% url 'content:switch-chapter' comp.id 1 %}"> 
+                    {% csrf_token %}
+                    {{comp}}  
+                 <input type='submit' value = 'start learning' >
+
+            </form>
+
+            <br>
+          
+         {% endfor %}
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
+
+                <h1>Merchant Check Out Page</h1></br>
+                <form method="post" action="https://securegw.paytm.in/theia/processTransaction" name="f1">
+             
+       {% csrf_token %}
+       
+                  {% for key, value in data.items %}
+       
+       {{key}}:
+       <input type="text" name="{{key}}"value="{{value}}"><br><br>
+       
+       
+       
+       {% endfor %}
+       
+       
+       <input type = 'submit'>
+       
+                </form>
+       
+ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- {{data}}
+
+
+<h1>Merchant Check Out Page</h1></br>
+         <form method="post" action="https://securegw.paytm.in/theia/processTransaction" name="f1">
+      
+
+
+           {% for key, value in data.items %}
+
+{{key}}:
+<input type="text" name="{{key}}"value="{{value}}"><br><br>
+
+
+
+{% endfor %}
+
+
+<input type = 'submit'>
+
+         </form>
+
+
+
+         
+
+
+
+         #for key in param_dict:
+         #   print(key.strip()+param_dict[key].strip())
+
+         print('<h1>Merchant Check Out Page</h1></br>')
+         print('<form method="post" action="https://pguat.paytm.com/oltp-web/processTransaction" name="f1">')
+         for key in param_dict:
+             print('<input type="hidden" name="'+key.strip()+'"value="'+param_dict[key].strip()+'">')
+         print('<script type="text/javascript">')
+         print('document.f1.submit();')
+         print('</script>')
+         print('</form>')
+
+         context = {
+             'data' : data_dict,
+         } -->
