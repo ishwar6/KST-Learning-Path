@@ -1,6 +1,6 @@
 ﻿# Learning-route
 
-# Do not share.
+# Implementing KST Package
 Learning route implementation using knowledge space theory in Python and R.
 
 First creating states, content + illustration and question app.
