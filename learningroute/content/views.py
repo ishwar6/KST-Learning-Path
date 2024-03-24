@@ -23,15 +23,6 @@ from content.models import (    Content,
 
 
 
-
-
-
-
-
-
-
-
-
 def change_chapter(request):
     '''It returns chapter report of a student'''
     user = request.user
