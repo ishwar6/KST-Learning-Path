@@ -4,6 +4,7 @@
 .DS_Store
 .AppleDouble
 .LSOverride
+
 *.sqlite3
 # Icon must end with two \r
 Icon
